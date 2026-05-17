@@ -1,0 +1,15 @@
+{
+  "name": "file-management-system",
+  "version": "1.0.0",
+  "description": "文件管理系统 - 本地文件浏览、预览与批量操作",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "jszip": "^3.10.1",
+    "mammoth": "^1.6.0",
+    "xlsx": "^0.18.5"
+  }
+}

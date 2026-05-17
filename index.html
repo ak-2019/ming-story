@@ -1,0 +1,2823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大明帝国 · 文件管理</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c0392b' stroke-width='2'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.3/dist/docx-preview.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #c0392b;
+      --on-primary: #ffffff;
+      --primary-hover: #a93226;
+      --primary-muted: #f5d6d0;
+      --ink: #2c1810;
+      --ink-muted: #5c4033;
+      --ink-subtle: #8b7355;
+      --ink-tertiary: #b0a08a;
+      --canvas: #f7f3eb;
+      --surface-1: #ede8dd;
+      --surface-2: #e3dccf;
+      --surface-3: #d6cebf;
+      --hairline: #d4c9b5;
+      --hairline-strong: #bfb49e;
+      --danger: #c0392b;
+      --danger-hover: #a93226;
+      --warning: #d4a017;
+      --warning-hover: #b8860b;
+      --success: #27713a;
+      --success-hover: #1e5c2e;
+      --word-badge: #7b4a2e;
+      --excel-badge: #3a6b35;
+      --image-badge: #6b4c8a;
+      --text-badge: #8b7355;
+      --folder-icon: #c49a3c;
+      --folder-open: #a67c2e;
+      --overlay: rgba(44,24,16,0.5);
+    }
+
+    body {
+      font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+      background: var(--canvas);
+      color: var(--ink);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header — 卷首 */
+    .header {
+      background: var(--surface-1);
+      color: var(--ink);
+      padding: 0 24px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      border-bottom: 2px solid var(--primary);
+      z-index: 10;
+    }
+
+    .header h1 {
+      font-family: 'Noto Serif SC', 'SimSun', serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+    }
+
+    .header h1 svg { width: 22px; height: 22px; stroke: var(--primary); }
+
+    .header-motto {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      font-family: 'Noto Serif SC', 'SimSun', serif;
+      user-select: none;
+      padding: 6px 32px;
+      border: 2px solid var(--primary);
+      border-radius: 2px;
+      position: relative;
+      background: linear-gradient(135deg, var(--surface-1), var(--canvas), var(--surface-1));
+      box-shadow: inset 0 0 0 1px var(--primary-muted), 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .header-motto::before,
+    .header-motto::after {
+      content: '';
+      position: absolute;
+      border: 1.5px solid var(--primary);
+      opacity: 0.35;
+      border-radius: 1px;
+      pointer-events: none;
+    }
+    .header-motto::before {
+      top: 3px; left: 3px; right: 3px; bottom: 3px;
+    }
+    .header-motto::after {
+      top: -6px; left: -6px; right: -6px; bottom: -6px;
+      border-width: 3px;
+      opacity: 0.15;
+      border-radius: 2px;
+    }
+    .header-motto span {
+      padding: 0 12px;
+      position: relative;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 6px;
+      cursor: pointer;
+      transition: color 0.2s, text-shadow 0.2s, transform 0.15s;
+    }
+    .header-motto span:hover {
+      color: #a93226;
+      text-shadow: 0 0 10px rgba(192,57,43,0.6), 0 0 24px rgba(192,57,43,0.35), 0 0 40px rgba(243,156,18,0.2);
+      transform: scale(1.08);
+    }
+    .header-motto span:active {
+      transform: scale(0.95);
+    }
+    .header-motto span::before,
+    .header-motto span::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 20px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary-muted), transparent);
+    }
+    .header-motto span::before { right: 100%; }
+    .header-motto span::after { left: 100%; }
+    .header-motto .motto-dot {
+      width: 5px;
+      height: 5px;
+      background: var(--primary);
+      border-radius: 50%;
+      opacity: 0.4;
+      flex-shrink: 0;
+    }
+    .motto-seal {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 22px;
+      height: 22px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(192,57,43,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 2;
+    }
+    .motto-seal:hover {
+      transform: scale(1.2);
+      box-shadow: 0 2px 8px rgba(192,57,43,0.6);
+    }
+    .motto-seal svg { width: 12px; height: 12px; stroke: #fff; }
+    .motto-reveal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44,24,16,0.85);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .motto-reveal.show { display: flex; }
+    .motto-reveal-text {
+      font-family: 'Noto Serif SC', 'SimSun', serif;
+      font-size: 72px;
+      font-weight: 700;
+      letter-spacing: 24px;
+      color: #c0392b;
+      text-shadow: 0 0 30px rgba(192,57,43,0.5), 0 0 60px rgba(192,57,43,0.25), 0 4px 12px rgba(0,0,0,0.4);
+      animation: motto-reveal-in 0.6s ease-out;
+      user-select: none;
+    }
+    @keyframes motto-reveal-in {
+      0% { opacity: 0; transform: scale(0.6); letter-spacing: 60px; }
+      100% { opacity: 1; transform: scale(1); letter-spacing: 24px; }
+    }
+
+    @keyframes motto-spark {
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0); }
+    }
+    .motto-spark {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: motto-spark 0.5s ease-out forwards;
+      z-index: 10;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .root-path {
+      background: var(--canvas);
+      border: 1px solid var(--hairline-strong);
+      color: var(--ink);
+      padding: 7px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: 'Noto Sans SC', sans-serif;
+      width: 340px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .root-path:focus { border-color: var(--primary); }
+    .root-path::placeholder { color: var(--ink-tertiary); }
+
+    .btn {
+      padding: 7px 18px;
+      background: transparent;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: 'Noto Sans SC', sans-serif;
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(44,24,16,0.1); }
+    .btn:active { transform: translateY(0); box-shadow: none; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary-hover);
+    }
+    .btn-primary:hover { background: var(--primary-hover); box-shadow: 0 2px 8px rgba(192,57,43,0.25); }
+    .btn-primary:active { background: #8b2820; }
+
+    .btn-danger {
+      background: transparent;
+      border: 1.5px solid #2d6a6a;
+      color: #2d6a6a;
+    }
+    .btn-danger:hover { background: #2d6a6a; color: #fff; box-shadow: 0 2px 8px rgba(45,106,106,0.2); }
+    .btn-danger:active { background: #245858; color: #fff; }
+
+    .btn-warning {
+      background: transparent;
+      border: 1.5px solid #b8860b;
+      color: #9a7209;
+    }
+    .btn-warning:hover { background: #b8860b; color: #fff; box-shadow: 0 2px 8px rgba(184,134,11,0.2); }
+    .btn-warning:active { background: #9a7209; color: #fff; }
+
+    .btn-success {
+      background: transparent;
+      border: 1.5px solid #6b3a5c;
+      color: #6b3a5c;
+    }
+    .btn-success:hover { background: #6b3a5c; color: #fff; box-shadow: 0 2px 8px rgba(107,58,92,0.2); }
+    .btn-success:active { background: #572e4b; color: #fff; }
+
+    .btn-outline {
+      border: 1px solid var(--hairline-strong);
+      color: var(--ink-muted);
+    }
+    .btn-outline:hover { background: var(--surface-1); color: var(--ink); border-color: var(--ink-subtle); }
+    .btn-outline:active { background: var(--surface-2); }
+
+    .btn svg { width: 15px; height: 15px; }
+
+    .btn-tip {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 2px;
+      cursor: help;
+    }
+    .btn-tip svg { width: 14px; height: 14px; opacity: 0.7; }
+    .btn-tip:hover svg { opacity: 1; }
+
+    .tip-bubble {
+      position: fixed;
+      background: linear-gradient(135deg, #2c1810, #3d2b1f);
+      color: #f7f3eb;
+      font-size: 12px;
+      font-weight: 400;
+      font-family: 'Noto Sans SC', sans-serif;
+      line-height: 1.6;
+      padding: 8px 14px;
+      border-radius: 4px;
+      max-width: 300px;
+      white-space: normal;
+      letter-spacing: 0.2px;
+      pointer-events: none;
+      z-index: 9999;
+      box-shadow: 0 4px 16px rgba(44,24,16,0.25), 0 1px 4px rgba(44,24,16,0.15);
+      border: 1px solid rgba(196,154,60,0.15);
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    .tip-bubble.show { opacity: 1; transform: scale(1); }
+    .tip-bubble::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+    }
+    .tip-bubble.tip-up::after {
+      top: 100%;
+      border-top-color: #3d2b1f;
+    }
+    .tip-bubble.tip-down::after {
+      bottom: 100%;
+      border-bottom-color: #2c1810;
+    }
+
+    /* Main Layout */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar — 目录卷 */
+    .sidebar {
+      width: 280px;
+      min-width: 200px;
+      background: var(--surface-1);
+      border-right: 1px solid var(--hairline);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--hairline);
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-2);
+      color: var(--ink-muted);
+    }
+
+    .tree-container {
+      flex: 1;
+      overflow: auto;
+      padding: 4px 0;
+    }
+
+    /* Tree — 典籍目录 */
+    .tree-item { user-select: none; }
+
+    .tree-label {
+      display: flex;
+      align-items: center;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--ink-muted);
+      transition: all 0.12s ease;
+      gap: 4px;
+      border-left: 2px solid transparent;
+    }
+
+    .tree-label:hover {
+      background: var(--surface-2);
+      color: var(--ink);
+      padding-left: 14px;
+    }
+
+    .tree-label:active {
+      background: var(--surface-3);
+      padding-left: 12px;
+    }
+
+    .tree-label.active {
+      background: var(--primary-muted);
+      color: var(--primary);
+      border-left-color: var(--primary);
+      font-weight: 500;
+    }
+
+    .tree-toggle {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--ink-tertiary);
+      transition: transform 0.15s;
+    }
+
+    .tree-toggle.expanded { transform: rotate(90deg); }
+    .tree-toggle.hidden { visibility: hidden; }
+
+    .tree-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-right: 4px;
+    }
+
+    .tree-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tree-children {
+      display: none;
+      padding-left: 14px;
+    }
+
+    .tree-children.open { display: block; }
+
+    /* Content — 正文 */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      gap: 8px;
+      background: var(--surface-1);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .preview-area {
+      flex: 1;
+      overflow: auto;
+      padding: 24px 32px;
+      background: var(--canvas);
+      position: relative;
+    }
+
+    .preview-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--ink-tertiary);
+      gap: 12px;
+    }
+
+    .preview-placeholder svg { width: 48px; height: 48px; opacity: 0.25; stroke: var(--ink-subtle); }
+
+    .preview-title {
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      color: var(--ink);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    /* Excel Table — 表格 */
+    .preview-area table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+    }
+
+    .preview-area table td {
+      border: 1px solid var(--hairline);
+      padding: 7px 12px;
+      text-align: left;
+      vertical-align: middle;
+      background: var(--canvas);
+      color: var(--ink-muted);
+    }
+
+    .preview-area table tr:nth-child(even) td { background: var(--surface-1); }
+    .preview-area table tr:hover td { background: var(--surface-2); color: var(--ink); }
+    .preview-area table tr.filter-hidden { display: none; }
+    .preview-area table tr.kw-hidden { display: none; }
+
+    /* Filter header row — user selected */
+    .preview-area table tr.filter-row td {
+      background: var(--surface-2);
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 12px;
+      position: relative;
+      cursor: default;
+    }
+
+    /* Right-click hint on hover */
+    .preview-area table tr:not(.filter-row) td { cursor: context-menu; }
+
+    /* Filter row selector bar */
+    .filter-row-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      background: var(--surface-1);
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--ink-muted);
+    }
+
+    .filter-row-bar span { font-weight: 500; }
+
+    .filter-row-bar select {
+      padding: 4px 8px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 3px;
+      background: var(--canvas);
+      color: var(--ink);
+      font-size: 12px;
+      font-family: 'Noto Sans SC', sans-serif;
+      outline: none;
+    }
+
+    .filter-row-bar select:focus { border-color: var(--primary); }
+
+    .filter-row-bar button {
+      padding: 4px 12px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 3px;
+      background: var(--surface-2);
+      color: var(--ink-muted);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+
+    .filter-row-bar button:hover { background: var(--surface-3); color: var(--ink); }
+    .filter-row-bar button.active-filter { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+
+    /* Column filter */
+    .col-filter-wrap {
+      display: inline-block;
+      position: relative;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .col-filter-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      color: var(--ink-subtle);
+      font-size: 11px;
+      line-height: 1;
+      vertical-align: middle;
+    }
+
+    .col-filter-btn:hover { color: var(--primary); }
+    .col-filter-btn.active { color: var(--primary); }
+
+    .col-filter-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 50;
+      background: var(--canvas);
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(44,24,16,0.15);
+      padding: 8px;
+      min-width: 160px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .col-filter-dropdown.show { display: block; }
+
+    .col-filter-dropdown label {
+      display: block;
+      padding: 3px 4px;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .col-filter-dropdown label:hover { background: var(--surface-1); color: var(--ink); }
+
+    .col-filter-dropdown input[type="checkbox"] { margin-right: 6px; accent-color: var(--primary); }
+
+    .col-filter-actions {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .col-filter-actions button {
+      font-size: 11px;
+      padding: 2px 8px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 3px;
+      background: var(--surface-1);
+      color: var(--ink-muted);
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+
+    .col-filter-actions button:hover { background: var(--surface-2); color: var(--ink); }
+
+    .col-filter-search {
+      width: 100%;
+      padding: 4px 8px;
+      margin-bottom: 6px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 3px;
+      font-size: 12px;
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--canvas);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .col-filter-search:focus { border-color: var(--primary); }
+    .col-filter-search::placeholder { color: var(--ink-tertiary); }
+
+    /* Global keyword filter bar */
+    .keyword-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      background: var(--surface-1);
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+    }
+
+    .keyword-filter-bar span {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      white-space: nowrap;
+    }
+
+    .keyword-filter-bar input {
+      flex: 1;
+      padding: 5px 10px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 3px;
+      font-size: 13px;
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--canvas);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .keyword-filter-bar input:focus { border-color: var(--primary); }
+    .keyword-filter-bar input::placeholder { color: var(--ink-tertiary); }
+
+    .keyword-filter-bar button {
+      padding: 5px 14px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 3px;
+      background: var(--surface-2);
+      color: var(--ink-muted);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      white-space: nowrap;
+    }
+
+    .keyword-filter-bar button:hover { background: var(--surface-3); color: var(--ink); }
+    .keyword-filter-bar button.active-kw { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+
+    .preview-area table td.kw-highlight { background: var(--primary-muted) !important; color: var(--primary) !important; font-weight: 500; }
+
+    /* Text Preview — 古文风 */
+    .text-preview {
+      background: var(--surface-1);
+      color: var(--ink);
+      padding: 24px;
+      border-radius: 4px;
+      font-family: 'Noto Serif SC', 'SimSun', serif;
+      font-size: 14px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow: auto;
+      border: 1px solid var(--hairline);
+    }
+
+    /* Word Preview — docx-preview + TOC */
+    .word-wrap { display: flex; gap: 0; max-width: 1200px; margin: 0 auto; }
+
+    .word-toc {
+      width: 220px;
+      min-width: 180px;
+      flex-shrink: 0;
+      background: var(--surface-1);
+      border: 1px solid var(--hairline);
+      border-right: none;
+      border-top: 3px solid var(--primary);
+      border-radius: 4px 0 0 4px;
+      padding: 16px 0;
+      overflow-y: auto;
+      max-height: 80vh;
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+    }
+
+    .word-toc-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      padding: 0 16px 10px;
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .word-toc a {
+      display: block;
+      padding: 4px 16px;
+      font-size: 13px;
+      color: var(--ink-muted);
+      text-decoration: none;
+      line-height: 1.6;
+      border-left: 2px solid transparent;
+      transition: all 0.12s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .word-toc a:hover { color: var(--ink); background: var(--surface-2); }
+    .word-toc a.active { color: var(--primary); border-left-color: var(--primary); font-weight: 500; }
+
+    .word-toc a[data-level="2"] { padding-left: 28px; }
+    .word-toc a[data-level="3"] { padding-left: 40px; font-size: 12px; }
+    .word-toc a[data-level="4"] { padding-left: 52px; font-size: 12px; }
+    .word-toc a[data-level="5"] { padding-left: 60px; font-size: 11px; }
+    .word-toc a[data-level="6"] { padding-left: 68px; font-size: 11px; }
+
+    .word-toc-empty {
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--ink-tertiary);
+    }
+
+    .word-preview-container {
+      flex: 1;
+      min-width: 0;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-top: 3px solid var(--primary);
+      border-radius: 0 4px 4px 0;
+      overflow: hidden;
+    }
+
+    .word-preview-container.no-toc {
+      border-radius: 4px;
+    }
+
+    .word-preview-container .docx-wrapper {
+      background: white !important;
+      padding: 20px !important;
+    }
+
+    /* Word view switcher — inside TOC */
+    .word-view-bar {
+      display: flex;
+      gap: 4px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: 4px;
+    }
+
+    .word-view-btn {
+      flex: 1;
+      padding: 4px 0;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 3px;
+      background: var(--surface-1);
+      color: var(--ink-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Noto Sans SC', sans-serif;
+      text-align: center;
+    }
+
+    .word-view-btn:hover { background: var(--surface-2); color: var(--ink); transform: translateY(-1px); }
+    .word-view-btn:active { background: var(--surface-3); transform: translateY(0); }
+    .word-view-btn.active { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+    .word-view-btn.active:hover { background: var(--primary-hover); }
+
+    /* Reading view (mammoth) */
+    .word-reading-view {
+      flex: 1;
+      min-width: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      padding: 32px 40px;
+      border: 1px solid var(--hairline);
+      border-top: 3px solid var(--primary);
+      border-radius: 0 4px 4px 0;
+      line-height: 1.9;
+      font-size: 15px;
+    }
+
+    .word-reading-view h1, .word-reading-view h2, .word-reading-view h3,
+    .word-reading-view h4, .word-reading-view h5, .word-reading-view h6 {
+      font-family: 'Noto Serif SC', serif;
+      color: var(--ink);
+      margin: 20px 0 10px;
+    }
+
+    .word-reading-view h1 { font-size: 22px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
+    .word-reading-view h2 { font-size: 19px; border-bottom: 1px solid var(--hairline); padding-bottom: 6px; }
+    .word-reading-view h3 { font-size: 16px; }
+
+    .word-reading-view p { margin-bottom: 10px; text-indent: 2em; }
+    .word-reading-view table { margin: 12px 0; border-collapse: collapse; width: 100%; }
+    .word-reading-view table td, .word-reading-view table th { border: 1px solid var(--hairline); padding: 6px 10px; }
+    .word-reading-view img { max-width: 100%; height: auto; }
+
+    /* Scroll float buttons — 悬浮导航 */
+    .scroll-float {
+      position: fixed;
+      right: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .scroll-float.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .scroll-float-top { top: 80px; }
+    .scroll-float-bottom { bottom: 24px; }
+
+    .scroll-float button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--hairline-strong);
+      background: var(--surface-1);
+      color: var(--ink-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(44,24,16,0.12);
+      transition: all 0.15s;
+    }
+
+    .scroll-float button:hover {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    .scroll-float button:active {
+      transform: scale(0.95);
+      background: var(--primary-hover);
+    }
+
+    .scroll-float button svg { width: 16px; height: 16px; }
+
+    /* Sheet Tabs — 卷册切换 */
+    .sheet-tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .sheet-tab {
+      padding: 6px 16px;
+      border: 1px solid var(--hairline);
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--surface-2);
+      color: var(--ink-subtle);
+      transition: all 0.15s;
+    }
+
+    .sheet-tab:hover { background: var(--surface-1); color: var(--ink); transform: translateY(-1px); }
+    .sheet-tab:active { background: var(--surface-3); transform: translateY(0); }
+    .sheet-tab.active { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+    .sheet-tab.active:hover { background: var(--primary-hover); }
+
+    /* Excel view switcher */
+    .excel-view-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .excel-view-btn {
+      padding: 5px 14px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      background: var(--surface-1);
+      color: var(--ink-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+
+    .excel-view-btn:hover { background: var(--surface-2); color: var(--ink); transform: translateY(-1px); }
+    .excel-view-btn:active { background: var(--surface-3); transform: translateY(0); }
+    .excel-view-btn.active { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+    .excel-view-btn.active:hover { background: var(--primary-hover); }
+
+    .excel-original-view {
+      width: 100%;
+      max-height: 70vh;
+      overflow: auto;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      background: var(--canvas);
+      position: relative;
+    }
+
+    .excel-original-view table { border-collapse: collapse; table-layout: auto; }
+    .excel-original-view td, .excel-original-view th {
+      white-space: nowrap;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .excel-original-view thead th {
+      background: var(--surface-2);
+      border: 1px solid var(--hairline);
+      padding: 3px 8px;
+      font-weight: 500;
+      font-size: 11px;
+      color: var(--ink-muted);
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .excel-original-view tbody th {
+      background: var(--surface-2);
+      border: 1px solid var(--hairline);
+      padding: 3px 6px;
+      font-weight: 400;
+      font-size: 11px;
+      color: var(--ink-muted);
+      text-align: center;
+      min-width: 36px;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+    }
+
+    .excel-original-view thead th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+    }
+
+    /* Modal — 告示牌 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--overlay);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--canvas);
+      border: 1px solid var(--hairline-strong);
+      border-top: 3px solid var(--primary);
+      border-radius: 4px;
+      padding: 24px;
+      max-width: 700px;
+      width: 90%;
+      max-height: 80vh;
+      overflow: auto;
+      box-shadow: 0 8px 32px rgba(44,24,16,0.2);
+    }
+
+    .modal h3 {
+      font-family: 'Noto Serif SC', serif;
+      margin-bottom: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--ink);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .result-item {
+      padding: 10px 14px;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      background: var(--surface-1);
+    }
+
+    .result-item.success { border-left: 3px solid var(--success); }
+    .result-item.error { border-left: 3px solid var(--danger); }
+    .result-item.info { border-left: 3px solid var(--warning); }
+
+    .result-file { font-weight: 600; word-break: break-all; color: var(--ink); }
+    .result-detail { color: var(--ink-subtle); margin-top: 6px; font-size: 12px; }
+
+    /* Loading */
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--hairline);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast — 飞鸽传书 */
+    .toast-container {
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      padding: 10px 20px;
+      border-radius: 4px;
+      color: var(--on-primary);
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 16px rgba(44,24,16,0.15);
+      animation: slideIn 0.3s ease;
+      max-width: 400px;
+    }
+
+    .toast.success { background: #2d6a6a; }
+    .toast.error { background: var(--danger); }
+    .toast.info { background: #9a7209; color: #fff; }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Resize handle */
+    .resize-handle {
+      width: 3px;
+      cursor: col-resize;
+      background: transparent;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .resize-handle:hover { background: var(--primary); }
+
+    /* File count badge — 册数 */
+    .badge {
+      background: var(--primary-muted);
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface-1); }
+    ::-webkit-scrollbar-thumb { background: var(--hairline-strong); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--ink-tertiary); }
+
+    /* Image Preview */
+    .image-preview { max-width: 100%; max-height: 600px; border-radius: 4px; border: 1px solid var(--hairline); box-shadow: 0 2px 8px rgba(44,24,16,0.1); }
+
+    /* Modal strong/code in results */
+    .modal strong { color: var(--ink); }
+    .modal code { background: var(--surface-2); padding: 2px 6px; border-radius: 2px; font-size: 12px; color: var(--primary); font-family: 'Noto Sans SC', monospace; }
+    .modal p { color: var(--ink-muted); line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      大明帝国 · 文件管理
+    </h1>
+    <div class="header-motto">
+      <div class="motto-dot"></div>
+      <span>性格</span>
+      <div class="motto-dot"></div>
+      <span>格局</span>
+      <div class="motto-dot"></div>
+      <span>人心</span>
+      <div class="motto-dot"></div>
+      <div class="motto-seal" onclick="document.getElementById('mottoReveal').classList.add('show')" title="印">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+    </div>
+    <div class="motto-reveal" id="mottoReveal" onclick="this.classList.remove('show')">
+      <div class="motto-reveal-text">知行合一</div>
+    </div>
+    <div class="header-actions">
+      <input type="text" class="root-path" id="rootPath" placeholder="输入根目录路径（默认上级目录）">
+      <button class="btn btn-primary" onclick="loadTree()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        刷新
+      </button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span>卷 目</span>
+        <span class="badge" id="fileCount">0 册</span>
+      </div>
+      <div class="tree-container" id="treeContainer">
+        <div class="preview-placeholder">
+          <div class="loading" style="width:24px;height:24px;border-width:2px;"></div>
+          <span style="font-size:13px;">正在翻阅目录...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="resize-handle" id="resizeHandle"></div>
+
+    <div class="content">
+      <div class="toolbar">
+        <button class="btn btn-danger" id="btnMoveRevoked" onclick="moveRevokedFiles()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          移动撤回的返场故事音频文件
+          <span class="btn-tip" data-tip="将所有文件名包含'撤回'的音频文件移动到撤回文件夹中">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+          </span>
+        </button>
+        <button class="btn btn-warning" id="btnFindKeywords" onclick="findKeywordFiles()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          查找包含撤回返场故事的文档
+          <span class="btn-tip" data-tip="搜索Word文档中同时包含返场故事和撤回关键词的文件">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+          </span>
+        </button>
+        <button class="btn btn-success" id="btnRemoveContent" onclick="removeContent()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          删除需要撤回的返场故事
+          <span class="btn-tip" data-tip="删除匹配文档中返场故事+撤回所在行及后续内容，原文件自动备份">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+          </span>
+        </button>
+        <button class="btn btn-outline" onclick="viewLogs()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          操作日志
+        </button>
+        <button class="btn btn-primary" style="margin-left:auto;" onclick="showGuide()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          操作说明
+        </button>
+      </div>
+      <div class="preview-area" id="previewArea">
+        <div class="preview-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span style="font-size:15px; font-family:'Noto Serif SC',serif;">点击左侧卷目，翻阅典籍</span>
+          <span style="font-size:12px;">支持 Word · Excel · 文本 · 图片</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+      <h3 id="modalTitle"></h3>
+      <div id="modalContent"></div>
+      <div style="margin-top: 20px; text-align: right;">
+        <button class="btn btn-primary" onclick="document.getElementById('modalOverlay').classList.remove('show')">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div class="modal-overlay" id="confirmOverlay">
+    <div class="modal" style="max-width:440px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+        <div id="confirmIcon" style="flex-shrink:0;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;"></div>
+        <div>
+          <h3 id="confirmTitle" style="margin-bottom:6px;font-size:15px;"></h3>
+          <div id="confirmMessage" style="font-size:13px;color:var(--ink);line-height:1.7;white-space:pre-wrap;"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid var(--hairline);">
+        <button class="btn" id="confirmCancel" style="background:var(--surface-2);color:var(--ink-muted);border:1px solid var(--hairline);min-width:72px;" onmouseenter="this.style.background='var(--surface-3)'" onmouseleave="this.style.background='var(--surface-2)'" >取消</button>
+        <button class="btn" id="confirmOk" style="min-width:72px;"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooltip Bubble -->
+  <div class="tip-bubble" id="tipBubble"></div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scroll Float Buttons -->
+  <div class="scroll-float scroll-float-top" id="scrollFloatTop">
+    <button onclick="document.getElementById('previewArea').scrollTo({top:0,behavior:'smooth'})" title="回到顶部">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+    </button>
+  </div>
+  <div class="scroll-float scroll-float-bottom" id="scrollFloatBottom">
+    <button onclick="var el=document.getElementById('previewArea');el.scrollTo({top:el.scrollHeight,behavior:'smooth'})" title="到底部">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </div>
+
+  <!-- 引导层：双击打开index.html时显示 -->
+  <div id="guideOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:var(--canvas); z-index:9999; font-family:'Noto Serif SC','SimSun',serif;">
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:40px;">
+      <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="var(--primary)" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <h1 style="font-size:28px; font-weight:700; letter-spacing:3px; color:var(--ink); margin:20px 0 8px;">大明帝国 · 文件管理</h1>
+      <p id="guideStatus" style="font-size:14px; color:var(--ink-subtle); margin-bottom:30px; font-family:'Noto Sans SC',sans-serif;">正在检测服务状态...</p>
+      <div id="guideActions" style="display:none;">
+        <p style="font-size:14px; color:var(--ink-muted); margin-bottom:16px; line-height:1.8; font-family:'Noto Sans SC',sans-serif;">
+          服务未启动，请先双击以下文件启动服务：
+        </p>
+        <div style="background:var(--surface-1); border:1px solid var(--hairline); border-radius:4px; padding:20px 32px; margin-bottom:20px;">
+          <code style="font-size:16px; color:var(--primary); font-family:'Noto Sans SC',monospace;">start.bat</code>
+          <p style="font-size:12px; color:var(--ink-tertiary); margin-top:8px; font-family:'Noto Sans SC',sans-serif;">或双击 启动文件管理系统.vbs（无黑窗口）</p>
+        </div>
+        <button onclick="checkAndRedirect()" style="padding:10px 24px; background:var(--primary); color:var(--on-primary); border:none; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer; font-family:'Noto Sans SC',sans-serif;">服务已启动，点击进入</button>
+      </div>
+      <div id="guideRedirect" style="display:none;">
+        <p style="font-size:14px; color:var(--success); font-family:'Noto Sans SC',sans-serif;">服务运行中，正在跳转...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== 检测是否通过 file:// 协议直接打开 =====
+    if (location.protocol === 'file:') {
+      document.getElementById('guideOverlay').style.display = 'block';
+      checkAndRedirect();
+    }
+
+    function checkAndRedirect() {
+      fetch('http://localhost:3000/api/tree', { signal: AbortSignal.timeout(2000) })
+        .then(r => r.json())
+        .then(() => {
+          document.getElementById('guideStatus').style.display = 'none';
+          document.getElementById('guideActions').style.display = 'none';
+          document.getElementById('guideRedirect').style.display = 'block';
+          setTimeout(() => { location.href = 'http://localhost:3000'; }, 800);
+        })
+        .catch(() => {
+          document.getElementById('guideStatus').style.display = 'none';
+          document.getElementById('guideActions').style.display = 'block';
+        });
+    }
+
+    let currentRoot = '';
+    let totalFiles = 0;
+    let activeLabel = null;
+    let foundKeywordFiles = [];
+
+    // ===== Tooltip =====
+    (function() {
+      const bubble = document.getElementById('tipBubble');
+      document.addEventListener('mouseover', (e) => {
+        if (!e.target || !e.target.closest) return;
+        const tip = e.target.closest('.btn-tip');
+        if (!tip) return;
+        const text = tip.getAttribute('data-tip');
+        if (!text) return;
+        bubble.textContent = text;
+        bubble.className = 'tip-bubble';
+        const rect = tip.getBoundingClientRect();
+        bubble.style.visibility = 'hidden';
+        bubble.style.display = 'block';
+        const bw = bubble.offsetWidth;
+        const bh = bubble.offsetHeight;
+        bubble.style.visibility = '';
+        let left = rect.left + rect.width / 2 - bw / 2;
+        if (left < 4) left = 4;
+        if (left + bw > window.innerWidth - 4) left = window.innerWidth - 4 - bw;
+        if (rect.top - bh - 10 > 0) {
+          bubble.style.top = (rect.top - bh - 8) + 'px';
+          bubble.classList.add('tip-up');
+        } else {
+          bubble.style.top = (rect.bottom + 8) + 'px';
+          bubble.classList.add('tip-down');
+        }
+        bubble.style.left = left + 'px';
+        bubble.classList.add('show');
+      });
+      document.addEventListener('mouseout', (e) => {
+        if (!e.target || !e.target.closest) return;
+        const tip = e.target.closest('.btn-tip');
+        if (!tip) return;
+        if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.btn-tip') === tip) return;
+        bubble.classList.remove('show');
+      });
+    })();
+
+    // ===== Toast =====
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // ===== Guide =====
+    function showGuide() {
+      const content = `
+        <div style="line-height:1.8;font-size:13px;color:var(--ink);">
+          <h3 style="font-family:'Noto Serif SC',serif;font-size:16px;margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">一、系统介绍</h3>
+          <p style="margin:0 0 12px;color:var(--ink-muted);">
+            本系统是一个本地文件管理工具，用于浏览、预览和批量处理"大明帝国"项目中的文件。<br>
+            主要针对<strong>返场故事撤回</strong>相关的文件操作场景，提供一站式的查找、移动、删除和备份功能。<br>
+            系统基于 Node.js 运行在本地，所有操作均在本机完成，不涉及网络传输。
+          </p>
+
+          <h3 style="font-family:'Noto Serif SC',serif;font-size:16px;margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">二、使用方法</h3>
+          <p style="margin:0 0 4px;color:var(--ink-muted);">
+            <strong>1. 启动</strong> — 双击 <code>启动文件管理系统.vbs</code> 或 <code>start.bat</code>，浏览器自动打开。<br>
+            <strong>2. 选择目录</strong> — 顶部输入框可指定管理目录，留空则默认管理上级目录。系统会自动记忆上次的目录。<br>
+            <strong>3. 浏览文件</strong> — 左侧目录树点击文件夹展开，点击文件在右侧预览。<br>
+            <strong>4. 执行操作</strong> — 使用顶部工具栏按钮进行批量操作，操作前会弹出确认提示。<br>
+            <strong>5. 查看日志</strong> — 每次操作自动记录日志，可通过"操作日志"按钮查看。
+          </p>
+
+          <h3 style="font-family:'Noto Serif SC',serif;font-size:16px;margin:16px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">三、功能详细说明</h3>
+
+          <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #2563eb;">
+            <strong style="color:#2563eb;">🔀 移动撤回的返场故事音频文件</strong><br>
+            <span style="color:var(--ink-muted);">
+              扫描当前目录下所有文件，将文件名包含"撤回"的音频文件自动移动到"撤回文件夹"中。<br>
+              重名文件会自动添加编号后缀。操作完成后目录树自动刷新。
+            </span>
+          </div>
+
+          <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #d4a017;">
+            <strong style="color:#d4a017;">🔍 查找包含撤回返场故事的文档</strong><br>
+            <span style="color:var(--ink-muted);">
+              扫描所有 Word 文档（.docx），查找内容中同时包含"返场故事"和"撤回"关键词在同一行的文件。<br>
+              搜索结果中的文件名可点击直接预览。找到的文件会被记录，供"删除"操作使用。
+            </span>
+          </div>
+
+          <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #7c3aed;">
+            <strong style="color:#7c3aed;">🗑️ 删除需要撤回的返场故事</strong><br>
+            <span style="color:var(--ink-muted);">
+              对匹配的 Word 文档，删除从"返场故事+撤回"所在段落开始的所有后续内容。<br>
+              操作前原文件会自动备份到"备份文件夹"，可随时恢复。<br>
+              如果已执行过"查找"操作，将直接处理已找到的文件；否则会先搜索再删除。
+            </span>
+          </div>
+
+          <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #27713a;">
+            <strong style="color:#27713a;">📋 操作日志</strong><br>
+            <span style="color:var(--ink-muted);">
+              所有批量操作（移动、查找、删除）的执行结果会自动记录到"操作日志"文件夹中，按日期分文件存储。<br>
+              点击日志按钮可查看历史操作记录。
+            </span>
+          </div>
+
+          <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid var(--ink-subtle);">
+            <strong>📄 文件预览</strong><br>
+            <span style="color:var(--ink-muted);">
+              支持 Word（原样+阅读双视图）、Excel（多Sheet切换）、文本/日志、图片的在线预览。<br>
+              Word 预览支持目录导航和 <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Ctrl+F</kbd> 内容搜索定位。
+            </span>
+          </div>
+
+          <div style="padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid var(--ink-subtle);">
+            <strong>⌨️ 快捷键</strong><br>
+            <span style="color:var(--ink-muted);">
+              <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Esc</kbd> 关闭弹窗 / 取消确认 &nbsp;&nbsp;
+              <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Ctrl+F</kbd> 聚焦 Word 搜索框 &nbsp;&nbsp;
+              <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Enter</kbd> 执行搜索
+            </span>
+          </div>
+        </div>
+      `;
+      showModal('📖 操作说明', content);
+    }
+
+    // ===== Modal =====
+    function showModal(title, content) {
+      document.getElementById('modalTitle').innerHTML = title;
+      document.getElementById('modalContent').innerHTML = content;
+      document.getElementById('modalOverlay').classList.add('show');
+    }
+
+    function closeModal(e) {
+      if (!e || e.target === document.getElementById('modalOverlay')) {
+        document.getElementById('modalOverlay').classList.remove('show');
+      }
+    }
+
+    function showConfirm({ title, message, type, okText }) {
+      return new Promise(resolve => {
+        const colors = {
+          danger:  { bg: '#fef2f2', icon: '⚠️', iconBg: '#fee2e2', btnBg: 'var(--danger, #dc2626)', btnColor: '#fff' },
+          warning: { bg: '#fffbeb', icon: '⚠️', iconBg: '#fef3c7', btnBg: '#d97706', btnColor: '#fff' },
+          info:    { bg: '#eff6ff', icon: 'ℹ️', iconBg: '#dbeafe', btnBg: 'var(--primary)', btnColor: 'var(--on-primary)' },
+        };
+        const c = colors[type] || colors.info;
+        const overlay = document.getElementById('confirmOverlay');
+        const iconEl = document.getElementById('confirmIcon');
+        const titleEl = document.getElementById('confirmTitle');
+        const msgEl = document.getElementById('confirmMessage');
+        const okBtn = document.getElementById('confirmOk');
+        const cancelBtn = document.getElementById('confirmCancel');
+
+        iconEl.textContent = c.icon;
+        iconEl.style.background = c.iconBg;
+        titleEl.textContent = title || '确认操作';
+        msgEl.textContent = message || '';
+        okBtn.textContent = okText || '确认';
+        okBtn.style.background = c.btnBg;
+        okBtn.style.color = c.btnColor;
+        okBtn.style.border = 'none';
+
+        overlay.classList.add('show');
+
+        function cleanup() {
+          overlay.classList.remove('show');
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          overlay.removeEventListener('click', onOverlay);
+        }
+        function onOk() { cleanup(); resolve(true); }
+        function onCancel() { cleanup(); resolve(false); }
+        function onOverlay(e) { if (e.target === overlay) { cleanup(); resolve(false); } }
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        overlay.addEventListener('click', onOverlay);
+      });
+    }
+
+    // ===== Tree =====
+    function getFileIcon(ext) {
+      const icons = {
+        '.docx': '<svg viewBox="0 0 24 24" fill="var(--word-badge)" stroke="none"><rect x="3" y="3" width="18" height="18" rx="3"/><text x="12" y="15" font-size="8" fill="white" text-anchor="middle" font-weight="bold">W</text></svg>',
+        '.doc': '<svg viewBox="0 0 24 24" fill="var(--word-badge)" stroke="none"><rect x="3" y="3" width="18" height="18" rx="3"/><text x="12" y="15" font-size="8" fill="white" text-anchor="middle" font-weight="bold">W</text></svg>',
+        '.xlsx': '<svg viewBox="0 0 24 24" fill="var(--excel-badge)" stroke="none"><rect x="3" y="3" width="18" height="18" rx="3"/><text x="12" y="15" font-size="8" fill="white" text-anchor="middle" font-weight="bold">X</text></svg>',
+        '.xls': '<svg viewBox="0 0 24 24" fill="var(--excel-badge)" stroke="none"><rect x="3" y="3" width="18" height="18" rx="3"/><text x="12" y="15" font-size="8" fill="white" text-anchor="middle" font-weight="bold">X</text></svg>',
+        '.pdf': '<svg viewBox="0 0 24 24" fill="var(--danger)" stroke="none"><rect x="3" y="3" width="18" height="18" rx="3"/><text x="12" y="15" font-size="7" fill="white" text-anchor="middle" font-weight="bold">PDF</text></svg>',
+        '.txt': '<svg viewBox="0 0 24 24" fill="none" stroke="var(--text-badge)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>',
+        '.png': '<svg viewBox="0 0 24 24" fill="none" stroke="var(--image-badge)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+        '.jpg': '<svg viewBox="0 0 24 24" fill="none" stroke="var(--image-badge)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+        '.jpeg': '<svg viewBox="0 0 24 24" fill="none" stroke="var(--image-badge)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+      };
+      return icons[ext] || '<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink-tertiary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    }
+
+    const folderIcon = '<svg viewBox="0 0 24 24" fill="var(--folder-icon)" stroke="var(--folder-open)" stroke-width="0.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>';
+    const folderOpenIcon = '<svg viewBox="0 0 24 24" fill="var(--folder-open)" stroke="var(--folder-icon)" stroke-width="0.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>';
+
+    const SPECIAL_FOLDERS = {
+      '撤回文件夹': {
+        color: '#2563eb',
+        icon: '<svg viewBox="0 0 24 24" fill="#2563eb" stroke="#1d4ed8" stroke-width="0.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>',
+        openIcon: '<svg viewBox="0 0 24 24" fill="#1d4ed8" stroke="#2563eb" stroke-width="0.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>',
+        badge: '撤回'
+      },
+      '备份文件夹': {
+        color: '#7c3aed',
+        icon: '<svg viewBox="0 0 24 24" fill="#7c3aed" stroke="#6d28d9" stroke-width="0.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>',
+        openIcon: '<svg viewBox="0 0 24 24" fill="#6d28d9" stroke="#7c3aed" stroke-width="0.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>',
+        badge: '备份'
+      },
+      '操作日志': {
+        color: '#27713a',
+        icon: '<svg viewBox="0 0 24 24" fill="#27713a" stroke="#1e5c2e" stroke-width="0.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>',
+        openIcon: '<svg viewBox="0 0 24 24" fill="#1e5c2e" stroke="#27713a" stroke-width="0.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>',
+        badge: '日志'
+      }
+    };
+
+    function countFiles(node) {
+      if (node.type === 'file') return 1;
+      let count = 0;
+      if (node.children) node.children.forEach(c => count += countFiles(c));
+      return count;
+    }
+
+    function renderTree(node, depth = 0) {
+      const item = document.createElement('div');
+      item.className = 'tree-item';
+
+      const label = document.createElement('div');
+      label.className = 'tree-label';
+      label.style.paddingLeft = (12 + depth * 16) + 'px';
+
+      if (node.type === 'directory') {
+        const toggle = document.createElement('span');
+        toggle.className = 'tree-toggle';
+        toggle.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5l8 7-8 7z"/></svg>';
+
+        const special = SPECIAL_FOLDERS[node.name];
+        const fIcon = special ? special.icon : folderIcon;
+        const fOpenIcon = special ? special.openIcon : folderOpenIcon;
+
+        const icon = document.createElement('span');
+        icon.className = 'tree-icon';
+        icon.innerHTML = fIcon;
+
+        const name = document.createElement('span');
+        name.className = 'tree-name';
+        name.textContent = node.name;
+        if (special) name.style.color = special.color;
+
+        label.appendChild(toggle);
+        label.appendChild(icon);
+        label.appendChild(name);
+
+        if (special) {
+          const badge = document.createElement('span');
+          badge.style.cssText = `font-size:10px;padding:1px 5px;border-radius:3px;margin-left:4px;background:${special.color}18;color:${special.color};border:1px solid ${special.color}30;font-weight:500;`;
+          badge.textContent = special.badge;
+          label.appendChild(badge);
+        }
+
+        const children = document.createElement('div');
+        children.className = 'tree-children';
+        if (node.children) {
+          node.children.forEach(child => {
+            children.appendChild(renderTree(child, depth + 1));
+          });
+        }
+
+        label.addEventListener('click', () => {
+          const isOpen = children.classList.toggle('open');
+          toggle.classList.toggle('expanded', isOpen);
+          icon.innerHTML = isOpen ? fOpenIcon : fIcon;
+        });
+
+        // 默认展开第一层
+        if (depth === 0) {
+          children.classList.add('open');
+          toggle.classList.add('expanded');
+          icon.innerHTML = fOpenIcon;
+        }
+
+        item.appendChild(label);
+        item.appendChild(children);
+      } else {
+        const toggle = document.createElement('span');
+        toggle.className = 'tree-toggle hidden';
+        toggle.innerHTML = '&nbsp;';
+
+        const icon = document.createElement('span');
+        icon.className = 'tree-icon';
+        icon.innerHTML = getFileIcon(node.ext);
+
+        const name = document.createElement('span');
+        name.className = 'tree-name';
+        name.textContent = node.name;
+
+        label.appendChild(toggle);
+        label.appendChild(icon);
+        label.appendChild(name);
+
+        label.addEventListener('click', () => {
+          if (activeLabel) activeLabel.classList.remove('active');
+          label.classList.add('active');
+          activeLabel = label;
+          previewFile(node.fullPath, node.name);
+        });
+
+        item.appendChild(label);
+        totalFiles++;
+      }
+
+      return item;
+    }
+
+    async function loadTree() {
+      const root = document.getElementById('rootPath').value.trim();
+      const container = document.getElementById('treeContainer');
+      container.innerHTML = '<div class="preview-placeholder"><div class="loading" style="width:24px;height:24px;border-width:2px;"></div><span style="font-size:13px;">正在翻阅目录...</span></div>';
+
+      try {
+        const url = root ? `/api/tree?root=${encodeURIComponent(root)}` : '/api/tree';
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        if (!data.success) {
+          container.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">错误: ${data.error}</span></div>`;
+          return;
+        }
+
+        currentRoot = data.root;
+        localStorage.setItem('fileManager_root', currentRoot);
+        totalFiles = 0;
+        container.innerHTML = '';
+        container.appendChild(renderTree(data.data));
+        document.getElementById('fileCount').textContent = `${totalFiles} 册`;
+        showToast(`已加载目录: ${data.root}`, 'success');
+      } catch (e) {
+        container.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">连接失败，请确保服务已启动</span></div>`;
+      }
+    }
+
+    // ===== Preview =====
+    async function previewFile(fullPath, fileName) {
+      const area = document.getElementById('previewArea');
+      area.innerHTML = '<div class="preview-placeholder"><div class="loading" style="width:24px;height:24px;border-width:2px;"></div><span style="font-size:13px;">正在展卷...</span></div>';
+
+      try {
+        const resp = await fetch(`/api/preview?path=${encodeURIComponent(fullPath)}`);
+        const data = await resp.json();
+
+        if (!data.success) {
+          area.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">${data.error}</span></div>`;
+          return;
+        }
+
+        let html = `<div class="preview-title">${data.fileName}</div>`;
+
+        if (data.type === 'excel') {
+          html += `<div class="excel-view-bar">
+            <button class="excel-view-btn" id="btnExcelOriginal" onclick="switchExcelView('original')">📊 原样视图</button>
+            <button class="excel-view-btn active" id="btnExcelReading" onclick="switchExcelView('reading')">📖 阅读视图</button>
+          </div>`;
+          const sheetNames = Object.keys(data.data);
+          const styledData = data.styled || {};
+          // Original view (styled tables)
+          html += `<div id="excelOriginalView" style="display:none">`;
+          if (sheetNames.length > 1) {
+            html += '<div class="sheet-tabs">';
+            sheetNames.forEach((name, i) => {
+              html += `<div class="sheet-tab ${i === 0 ? 'active' : ''}" onclick="switchSheet(this, '${name}', 'excelOriginalView')">${name}</div>`;
+            });
+            html += '</div>';
+          }
+          sheetNames.forEach((name, i) => {
+            html += `<div class="sheet-content excel-original-view" data-sheet="${name}" style="${i > 0 ? 'display:none' : ''}">${styledData[name] || data.data[name]}</div>`;
+          });
+          html += `</div>`;
+          // Reading view (plain tables)
+          html += `<div id="excelReadingView">`;
+          if (sheetNames.length > 1) {
+            html += '<div class="sheet-tabs">';
+            sheetNames.forEach((name, i) => {
+              html += `<div class="sheet-tab ${i === 0 ? 'active' : ''}" onclick="switchSheet(this, '${name}', 'excelReadingView')">${name}</div>`;
+            });
+            html += '</div>';
+          }
+          sheetNames.forEach((name, i) => {
+            html += `<div class="sheet-content" data-sheet="${name}" style="${i > 0 ? 'display:none' : ''}">${data.data[name]}</div>`;
+          });
+          html += `</div>`;
+        } else if (data.type === 'word') {
+          html += `<div class="word-wrap"><div class="word-toc" id="wordToc"><div class="word-view-bar"><button class="word-view-btn active" id="btnViewOriginal" onclick="switchWordView('original')">📄 原样</button><button class="word-view-btn" id="btnViewReading" onclick="switchWordView('reading')">📖 阅读</button></div><div style="padding:8px 10px;border-bottom:1px solid var(--hairline);"><div style="display:flex;align-items:center;gap:4px;"><input type="text" id="wordSearchInput" placeholder="搜索内容..." onkeydown="if(event.key==='Enter'){searchWord(this.value)}" style="flex:1;padding:4px 8px;border:1px solid var(--hairline-strong);border-radius:3px;font-size:11px;outline:none;font-family:'Noto Sans SC',sans-serif;min-width:0;"><button onclick="searchWord(document.getElementById('wordSearchInput').value)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:3px 6px;cursor:pointer;font-size:11px;">🔍</button></div><div style="display:flex;align-items:center;gap:4px;margin-top:4px;"><span id="wordSearchCount" style="flex:1;font-size:10px;color:var(--ink-subtle);"></span><button onclick="wordSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▲</button><button onclick="wordSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▼</button><button onclick="clearWordSearch(true)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">✕</button></div></div><div class="word-toc-title">目 录</div><div id="wordTocLinks"></div></div><div id="wordOriginalView"><div class="word-preview-container" id="wordContainer"></div></div><div id="wordReadingView" style="display:none"><div class="word-reading-view" id="wordReadingBody">${data.html || ''}</div></div></div>`;
+        } else if (data.type === 'text') {
+          if (data.fileName && data.fileName.endsWith('.log')) {
+            html += `<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+              <input type="text" id="logSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value)" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:'Noto Sans SC',sans-serif;">
+              <span id="logSearchCount" style="font-size:11px;color:var(--ink-subtle);white-space:nowrap;"></span>
+              <button onclick="logSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▲</button>
+              <button onclick="logSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▼</button>
+            </div>`;
+            html += `<div class="text-preview" id="logPreviewContent" style="white-space:normal;padding:16px;">${formatLogContent(data.data)}</div>`;
+          } else {
+            html += `<div class="text-preview">${escapeHtml(data.data)}</div>`;
+          }
+        } else if (data.type === 'image') {
+          html += `<img class="image-preview" src="${data.data}" alt="${data.fileName}">`;
+        }
+
+        area.innerHTML = html;
+        if (data.type === 'excel') {
+          initExcelFilterUI();
+        } else if (data.type === 'word') {
+          renderDocx(data.data, data.headings || []);
+        }
+      } catch (e) {
+        area.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">预览失败: ${e.message}</span></div>`;
+      }
+    }
+
+    function switchSheet(tab, sheetName, parentId) {
+      const parent = parentId ? document.getElementById(parentId) : document;
+      parent.querySelectorAll('.sheet-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      parent.querySelectorAll('.sheet-content').forEach(c => c.style.display = 'none');
+      parent.querySelector(`.sheet-content[data-sheet="${sheetName}"]`).style.display = '';
+    }
+
+    function switchExcelView(view) {
+      const original = document.getElementById('excelOriginalView');
+      const reading = document.getElementById('excelReadingView');
+      const btnO = document.getElementById('btnExcelOriginal');
+      const btnR = document.getElementById('btnExcelReading');
+      if (!original || !reading) return;
+
+      if (view === 'original') {
+        original.style.display = '';
+        reading.style.display = 'none';
+        btnO.classList.add('active');
+        btnR.classList.remove('active');
+      } else {
+        original.style.display = 'none';
+        reading.style.display = '';
+        btnO.classList.remove('active');
+        btnR.classList.add('active');
+      }
+    }
+
+    // ===== Excel Column Filter (user-selectable filter row) =====
+    function initExcelFilterUI() {
+      const readingView = document.getElementById('excelReadingView');
+      if (!readingView) return;
+      readingView.querySelectorAll('.sheet-content').forEach(container => {
+        if (container.querySelector('.filter-row-bar')) return;
+        const table = container.querySelector('table');
+        if (!table) return;
+        const rows = table.querySelectorAll('tbody tr');
+        if (rows.length === 0) return;
+
+        // Build row selector bar
+        const bar = document.createElement('div');
+        bar.className = 'filter-row-bar';
+
+        const label = document.createElement('span');
+        label.textContent = '筛选行：';
+        bar.appendChild(label);
+
+        const sel = document.createElement('select');
+        const noneOpt = document.createElement('option');
+        noneOpt.value = '-1';
+        noneOpt.textContent = '— 不筛选 —';
+        sel.appendChild(noneOpt);
+
+        const maxPreview = Math.min(rows.length, 30);
+        for (let i = 0; i < maxPreview; i++) {
+          const tr = rows[i];
+          const rowNum = tr.getAttribute('data-row') || i;
+          const cells = tr.querySelectorAll('td');
+          let preview = '';
+          for (let j = 0; j < Math.min(cells.length, 4); j++) {
+            const t = (cells[j].textContent || '').trim().slice(0, 12);
+            if (t) preview += (preview ? ' | ' : '') + t;
+          }
+          const opt = document.createElement('option');
+          opt.value = String(i);
+          opt.textContent = `第 ${parseInt(rowNum) + 1} 行: ${preview || '(空)'}`;
+          sel.appendChild(opt);
+        }
+
+        bar.appendChild(sel);
+
+        const applyBtn = document.createElement('button');
+        applyBtn.textContent = '设为筛选行';
+        bar.appendChild(applyBtn);
+
+        const clearBtn = document.createElement('button');
+        clearBtn.textContent = '清除筛选';
+        bar.appendChild(clearBtn);
+
+        container.insertBefore(bar, table);
+
+        applyBtn.addEventListener('click', () => {
+          const idx = parseInt(sel.value);
+          setFilterRow(container, table, idx);
+        });
+
+        clearBtn.addEventListener('click', () => {
+          sel.value = '-1';
+          setFilterRow(container, table, -1);
+        });
+
+        // Global keyword filter bar
+        const kwBar = document.createElement('div');
+        kwBar.className = 'keyword-filter-bar';
+
+        const kwLabel = document.createElement('span');
+        kwLabel.textContent = '关键词：';
+        kwBar.appendChild(kwLabel);
+
+        const kwInput = document.createElement('input');
+        kwInput.type = 'text';
+        kwInput.placeholder = '输入关键词过滤行（多个用空格分隔，支持模糊匹配）';
+        kwBar.appendChild(kwInput);
+
+        const kwBtn = document.createElement('button');
+        kwBtn.textContent = '过滤';
+        kwBar.appendChild(kwBtn);
+
+        const kwClearBtn = document.createElement('button');
+        kwClearBtn.textContent = '清除';
+        kwBar.appendChild(kwClearBtn);
+
+        container.insertBefore(kwBar, table);
+
+        const doKwFilter = () => applyKeywordFilter(table, kwInput.value, kwBtn);
+
+        kwBtn.addEventListener('click', doKwFilter);
+        kwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doKwFilter(); });
+        kwClearBtn.addEventListener('click', () => {
+          kwInput.value = '';
+          applyKeywordFilter(table, '', kwBtn);
+        });
+      });
+
+      // Close dropdowns on outside click
+      document.removeEventListener('click', closeAllFilterDropdowns);
+      document.addEventListener('click', closeAllFilterDropdowns);
+    }
+
+    function closeAllFilterDropdowns() {
+      document.querySelectorAll('.col-filter-dropdown.show').forEach(d => d.classList.remove('show'));
+    }
+
+    function setFilterRow(container, table, rowIdx) {
+      const rows = table.querySelectorAll('tbody tr');
+
+      // Clear previous filter state
+      rows.forEach(tr => {
+        tr.classList.remove('filter-row', 'filter-hidden');
+        tr.querySelectorAll('.col-filter-wrap').forEach(w => w.remove());
+      });
+
+      if (rowIdx < 0 || rowIdx >= rows.length) return;
+
+      const filterRow = rows[rowIdx];
+      filterRow.classList.add('filter-row');
+
+      const filterCells = filterRow.querySelectorAll('td');
+      const dataRows = [...rows].filter((_, i) => i !== rowIdx);
+
+      filterCells.forEach((td, colIdx) => {
+        // Collect unique values from data rows at this column
+        const values = new Set();
+        dataRows.forEach(tr => {
+          const cells = tr.querySelectorAll('td');
+          if (cells[colIdx]) {
+            const txt = (cells[colIdx].textContent || '').trim();
+            if (txt) values.add(txt);
+          }
+        });
+
+        if (values.size === 0) return;
+
+        const wrap = document.createElement('span');
+        wrap.className = 'col-filter-wrap';
+
+        const btn = document.createElement('button');
+        btn.className = 'col-filter-btn';
+        btn.innerHTML = '&#9662;';
+        btn.title = '筛选';
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'col-filter-dropdown';
+
+        const actions = document.createElement('div');
+        actions.className = 'col-filter-actions';
+        const selAllBtn = document.createElement('button');
+        selAllBtn.textContent = '全选';
+        const clrBtn = document.createElement('button');
+        clrBtn.textContent = '清除';
+        actions.appendChild(selAllBtn);
+        actions.appendChild(clrBtn);
+        dropdown.appendChild(actions);
+
+        // Search input inside dropdown
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.className = 'col-filter-search';
+        searchInput.placeholder = '搜索...';
+        dropdown.appendChild(searchInput);
+
+        const sortedVals = [...values].sort();
+        const checkboxes = [];
+        const labels = [];
+        sortedVals.forEach(val => {
+          const lbl = document.createElement('label');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = true;
+          cb.value = val;
+          lbl.appendChild(cb);
+          lbl.appendChild(document.createTextNode(val.length > 28 ? val.slice(0, 28) + '...' : val));
+          dropdown.appendChild(lbl);
+          checkboxes.push(cb);
+          labels.push(lbl);
+        });
+
+        // Filter checkbox list by search keyword
+        searchInput.addEventListener('input', () => {
+          const kw = searchInput.value.trim().toLowerCase();
+          labels.forEach((lbl, i) => {
+            const match = !kw || sortedVals[i].toLowerCase().includes(kw);
+            lbl.style.display = match ? '' : 'none';
+          });
+        });
+        searchInput.addEventListener('click', (e) => e.stopPropagation());
+
+        const doFilter = () => applyColumnFilters(table, rowIdx);
+
+        selAllBtn.addEventListener('click', () => { checkboxes.forEach(cb => cb.checked = true); doFilter(); });
+        clrBtn.addEventListener('click', () => { checkboxes.forEach(cb => cb.checked = false); doFilter(); });
+        checkboxes.forEach(cb => cb.addEventListener('change', doFilter));
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.querySelectorAll('.col-filter-dropdown.show').forEach(d => { if (d !== dropdown) d.classList.remove('show'); });
+          dropdown.classList.toggle('show');
+        });
+
+        wrap.appendChild(btn);
+        wrap.appendChild(dropdown);
+        td.appendChild(wrap);
+      });
+    }
+
+    function applyColumnFilters(table, filterRowIdx) {
+      const rows = table.querySelectorAll('tbody tr');
+      const filterRow = rows[filterRowIdx];
+      if (!filterRow) return;
+
+      const filterCells = filterRow.querySelectorAll('td');
+      const filters = {};
+      filterCells.forEach((td, ci) => {
+        const wrap = td.querySelector('.col-filter-wrap');
+        if (!wrap) return;
+        const cbs = wrap.querySelectorAll('input[type="checkbox"]');
+        if (cbs.length === 0) return;
+        const allChecked = [...cbs].every(cb => cb.checked);
+        if (allChecked) {
+          wrap.querySelector('.col-filter-btn').classList.remove('active');
+          return;
+        }
+        wrap.querySelector('.col-filter-btn').classList.add('active');
+        const allowed = new Set();
+        cbs.forEach(cb => { if (cb.checked) allowed.add(cb.value); });
+        filters[ci] = allowed;
+      });
+
+      rows.forEach((tr, i) => {
+        if (i === filterRowIdx) return;
+        const cells = tr.querySelectorAll('td');
+        let visible = true;
+        for (const [ci, allowed] of Object.entries(filters)) {
+          const cell = cells[parseInt(ci)];
+          if (!cell) { visible = false; break; }
+          const txt = (cell.textContent || '').trim();
+          if (!allowed.has(txt)) { visible = false; break; }
+        }
+        tr.classList.toggle('filter-hidden', !visible);
+      });
+    }
+
+    function applyKeywordFilter(table, keyword, kwBtn) {
+      const rows = table.querySelectorAll('tbody tr');
+      const kw = keyword.trim();
+
+      // Clear highlights
+      table.querySelectorAll('td.kw-highlight').forEach(td => td.classList.remove('kw-highlight'));
+
+      if (!kw) {
+        // Remove keyword filter, restore all rows (respect column filter)
+        rows.forEach(tr => tr.classList.remove('kw-hidden'));
+        if (kwBtn) kwBtn.classList.remove('active-kw');
+        return;
+      }
+
+      if (kwBtn) kwBtn.classList.add('active-kw');
+
+      // Split by space for multiple keywords (AND logic)
+      const keywords = kw.toLowerCase().split(/\s+/).filter(k => k);
+
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        const rowText = [...cells].map(c => (c.textContent || '').trim().toLowerCase()).join(' ');
+        const match = keywords.every(k => rowText.includes(k));
+        tr.classList.toggle('kw-hidden', !match);
+
+        // Highlight matched cells
+        if (match) {
+          cells.forEach(cell => {
+            const txt = (cell.textContent || '').toLowerCase();
+            if (keywords.some(k => txt.includes(k))) {
+              cell.classList.add('kw-highlight');
+            }
+          });
+        }
+      });
+    }
+
+    // ===== Word Search =====
+    let _wordSearchMatches = [];
+    let _wordSearchIdx = -1;
+
+    function searchWord(keyword) {
+      clearWordSearch();
+      if (!keyword || !keyword.trim()) return;
+      const original = document.getElementById('wordOriginalView');
+      const reading = document.getElementById('wordReadingView');
+      const container = (reading && reading.style.display !== 'none') ? document.getElementById('wordReadingBody') : document.getElementById('wordContainer');
+      if (!container) return;
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      const kw = keyword.toLowerCase();
+      nodes.forEach(node => {
+        const text = node.textContent;
+        const lower = text.toLowerCase();
+        if (!lower.includes(kw)) return;
+        const frag = document.createDocumentFragment();
+        let lastIdx = 0;
+        let idx = lower.indexOf(kw, 0);
+        while (idx !== -1) {
+          if (idx > lastIdx) frag.appendChild(document.createTextNode(text.substring(lastIdx, idx)));
+          const mark = document.createElement('mark');
+          mark.className = 'word-search-hl';
+          mark.style.cssText = 'background:#fbbf24;color:#111;border-radius:2px;padding:0 1px;';
+          mark.textContent = text.substring(idx, idx + keyword.length);
+          frag.appendChild(mark);
+          lastIdx = idx + keyword.length;
+          idx = lower.indexOf(kw, lastIdx);
+        }
+        if (lastIdx < text.length) frag.appendChild(document.createTextNode(text.substring(lastIdx)));
+        node.parentNode.replaceChild(frag, node);
+      });
+      _wordSearchMatches = Array.from(container.querySelectorAll('.word-search-hl'));
+      const countEl = document.getElementById('wordSearchCount');
+      if (_wordSearchMatches.length > 0) {
+        _wordSearchIdx = 0;
+        scrollToWordMatch(0);
+      } else if (countEl) {
+        countEl.textContent = '无匹配';
+      }
+    }
+
+    function wordSearchNav(dir) {
+      if (_wordSearchMatches.length === 0) return;
+      _wordSearchIdx = (_wordSearchIdx + dir + _wordSearchMatches.length) % _wordSearchMatches.length;
+      scrollToWordMatch(_wordSearchIdx);
+    }
+
+    function scrollToWordMatch(idx) {
+      _wordSearchMatches.forEach((el, i) => {
+        el.style.background = i === idx ? '#f97316' : '#fbbf24';
+        el.style.fontWeight = i === idx ? '700' : '';
+      });
+      _wordSearchMatches[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const countEl = document.getElementById('wordSearchCount');
+      if (countEl) countEl.textContent = `共 ${_wordSearchMatches.length} 处 | ${idx + 1} / ${_wordSearchMatches.length}`;
+    }
+
+    function clearWordSearch(clearInput) {
+      const containers = [document.getElementById('wordContainer'), document.getElementById('wordReadingBody')];
+      containers.forEach(c => {
+        if (!c) return;
+        c.querySelectorAll('.word-search-hl').forEach(el => {
+          const text = document.createTextNode(el.textContent);
+          el.parentNode.replaceChild(text, el);
+        });
+        c.normalize();
+      });
+      _wordSearchMatches = [];
+      _wordSearchIdx = -1;
+      const countEl = document.getElementById('wordSearchCount');
+      if (countEl) countEl.textContent = '';
+      if (clearInput) {
+        const input = document.getElementById('wordSearchInput');
+        if (input) input.value = '';
+      }
+    }
+
+    // ===== Word Render (docx-preview) =====
+    async function renderDocx(base64Data, serverHeadings) {
+      const container = document.getElementById('wordContainer');
+      if (!container) return;
+
+      try {
+        // Convert base64 to ArrayBuffer
+        const binaryStr = atob(base64Data);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+          bytes[i] = binaryStr.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+        await docx.renderAsync(blob, container, null, {
+          className: 'docx-preview',
+          inWrapper: true,
+          ignoreWidth: false,
+          ignoreHeight: true,
+          ignoreFonts: false,
+          breakPages: true,
+          renderHeaders: true,
+          renderFooters: true,
+          renderFootnotes: true,
+          renderEndnotes: true,
+        });
+
+        // Build TOC using server-provided headings matched to rendered DOM
+        buildWordToc(container, serverHeadings);
+      } catch(e) {
+        container.innerHTML = '<div style="padding:24px;color:var(--danger);">Word渲染失败: ' + e.message + '</div>';
+      }
+    }
+
+    // Cache TOC links HTML for each view
+    let _tocOriginalHtml = '';
+    let _tocReadingHtml = '';
+    let _tocReadingBuilt = false;
+
+    function switchWordView(view) {
+      clearWordSearch(true);
+      const original = document.getElementById('wordOriginalView');
+      const reading = document.getElementById('wordReadingView');
+      const btnO = document.getElementById('btnViewOriginal');
+      const btnR = document.getElementById('btnViewReading');
+      const linksDiv = document.getElementById('wordTocLinks');
+      if (!original || !reading) return;
+
+      if (view === 'original') {
+        original.style.display = '';
+        reading.style.display = 'none';
+        btnO.classList.add('active');
+        btnR.classList.remove('active');
+        if (linksDiv) { linksDiv.innerHTML = _tocOriginalHtml; bindTocClicks(linksDiv); }
+      } else {
+        original.style.display = 'none';
+        reading.style.display = '';
+        btnO.classList.remove('active');
+        btnR.classList.add('active');
+        if (!_tocReadingBuilt) { _tocReadingBuilt = true; buildReadingToc(); }
+        if (linksDiv) { linksDiv.innerHTML = _tocReadingHtml; bindTocClicks(linksDiv); }
+      }
+    }
+
+    function bindTocClicks(container) {
+      container.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = document.getElementById(a.getAttribute('href').slice(1));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            container.querySelectorAll('a').forEach(x => x.classList.remove('active'));
+            a.classList.add('active');
+          }
+        });
+      });
+    }
+
+    function buildReadingToc() {
+      const body = document.getElementById('wordReadingBody');
+      if (!body) return;
+
+      const headings = body.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      if (headings.length === 0) {
+        _tocReadingHtml = '<div class="word-toc-empty">此文档无标题结构</div>';
+        return;
+      }
+
+      let html = '';
+      headings.forEach((h, i) => {
+        const id = 'reading-toc-' + i;
+        h.id = id;
+        const level = parseInt(h.tagName.charAt(1));
+        const text = (h.textContent || '').trim();
+        html += `<a href="#${id}" data-level="${level}" title="${text}">${text}</a>`;
+      });
+      _tocReadingHtml = html;
+
+      // Scroll spy for reading view
+      const previewArea = document.getElementById('previewArea');
+      if (previewArea) {
+        const targets = [...headings];
+        previewArea.addEventListener('scroll', () => {
+          if (document.getElementById('wordReadingView').style.display === 'none') return;
+          const linksDiv = document.getElementById('wordTocLinks');
+          if (!linksDiv) return;
+          let current = null;
+          targets.forEach(el => { if (el.getBoundingClientRect().top <= 120) current = el; });
+          linksDiv.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+          if (current) {
+            const link = linksDiv.querySelector(`a[href="#${current.id}"]`);
+            if (link) link.classList.add('active');
+          }
+        });
+      }
+    }
+
+    function buildWordToc(body, serverHeadings) {
+      const linksDiv = document.getElementById('wordTocLinks');
+      if (!linksDiv) return;
+
+      let items = [];
+
+      if (serverHeadings && serverHeadings.length > 0) {
+        const allParas = body.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, div');
+        const paraList = [...allParas].filter(el => {
+          const t = (el.textContent || '').trim();
+          return t && el.children.length <= 10;
+        });
+
+        let searchFrom = 0;
+        serverHeadings.forEach((sh, i) => {
+          const id = 'word-toc-' + i;
+          for (let j = searchFrom; j < paraList.length; j++) {
+            const elText = (paraList[j].textContent || '').trim();
+            if (elText === sh.text || elText.startsWith(sh.text) || sh.text.startsWith(elText.slice(0, 10))) {
+              paraList[j].id = id;
+              items.push({ id, level: sh.level, text: sh.text });
+              searchFrom = j + 1;
+              break;
+            }
+          }
+        });
+      }
+
+      if (items.length === 0) {
+        const headings = body.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        headings.forEach((h, i) => {
+          const id = 'word-toc-' + i;
+          h.id = id;
+          items.push({ id, level: parseInt(h.tagName.charAt(1)), text: (h.textContent || '').trim() });
+        });
+      }
+
+      if (items.length === 0) {
+        const allEls = body.querySelectorAll('[class*="Heading"], [class*="heading"]');
+        allEls.forEach((el, i) => {
+          const id = 'word-toc-' + i;
+          el.id = id;
+          const cls = el.className || '';
+          const levelMatch = cls.match(/(\d)/);
+          const level = levelMatch ? parseInt(levelMatch[1]) : 1;
+          const text = (el.textContent || '').trim();
+          if (text) items.push({ id, level: Math.min(level, 6), text });
+        });
+      }
+
+      if (items.length === 0) {
+        _tocOriginalHtml = '<div class="word-toc-empty">此文档无标题结构</div>';
+        linksDiv.innerHTML = _tocOriginalHtml;
+        return;
+      }
+
+      let html = '';
+      items.forEach(item => {
+        html += `<a href="#${item.id}" data-level="${item.level}" title="${item.text}">${item.text}</a>`;
+      });
+      _tocOriginalHtml = html;
+      linksDiv.innerHTML = html;
+      bindTocClicks(linksDiv);
+
+      // Scroll spy for original view
+      const previewArea = document.getElementById('previewArea');
+      if (previewArea) {
+        const allTargets = items.map(item => document.getElementById(item.id)).filter(Boolean);
+        previewArea.addEventListener('scroll', () => {
+          if (document.getElementById('wordOriginalView').style.display === 'none') return;
+          const ld = document.getElementById('wordTocLinks');
+          if (!ld) return;
+          let current = null;
+          allTargets.forEach(el => { if (el.getBoundingClientRect().top <= 120) current = el; });
+          ld.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+          if (current) {
+            const link = ld.querySelector(`a[href="#${current.id}"]`);
+            if (link) link.classList.add('active');
+          }
+        });
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ===== SSE Helper =====
+    function ssePost(url, body, { onProgress, onDone, onError }) {
+      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(resp => {
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        function read() {
+          reader.read().then(({ done, value }) => {
+            if (done) return;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              try {
+                const msg = JSON.parse(line.slice(6));
+                if (msg.type === 'progress' && onProgress) onProgress(msg);
+                else if (msg.type === 'done') onDone(msg);
+              } catch(e) {}
+            }
+            read();
+          }).catch(e => onError(e));
+        }
+        read();
+      }).catch(e => onError(e));
+    }
+
+    // ===== Button 1: Move "撤回" files =====
+    async function moveRevokedFiles() {
+      const ok = await showConfirm({
+        title: '移动"撤回"文件',
+        message: '将所有文件名包含"撤回"的文件移动到"撤回文件夹"中。\n\n此操作会改变文件位置，确认继续？',
+        type: 'warning',
+        okText: '确认移动'
+      });
+      if (!ok) return;
+
+      const btn = document.getElementById('btnMoveRevoked');
+      const btnRestore = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 移动撤回的返场故事音频文件 <span class="btn-tip" data-tip="将所有文件名包含\'撤回\'的音频文件移动到撤回文件夹中"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg></span>';
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading"></div> 处理中...';
+
+      ssePost('/api/move-revoked', { root: currentRoot }, {
+        onProgress(msg) {
+          const pct = Math.round(msg.current / msg.total * 100);
+          btn.innerHTML = `<div class="loading"></div> 移动中 ${msg.current}/${msg.total} (${pct}%) ${msg.file}`;
+        },
+        onDone(data) {
+          btn.disabled = false;
+          btn.innerHTML = btnRestore;
+          if (data.success) {
+            let content = '';
+            if (data.moved.length === 0) {
+              content = '<div class="result-item info"><div class="result-file">未找到文件名包含"撤回"的文件</div></div>';
+            } else {
+              content = `<p style="margin-bottom:12px;">成功移动 <strong>${data.moved.length}</strong> 个文件到: <code>${data.targetDir}</code></p>`;
+              data.moved.forEach(m => {
+                content += `<div class="result-item success"><div class="result-file">${m.from.split('/').pop()}</div><div class="result-detail">从: ${m.from}<br>到: ${m.to}</div></div>`;
+              });
+            }
+            if (data.errors.length > 0) {
+              data.errors.forEach(e => {
+                content += `<div class="result-item error"><div class="result-file">${e.file}</div><div class="result-detail">错误: ${e.error}</div></div>`;
+              });
+            }
+            showModal('移动"撤回"文件结果', content);
+            loadTree();
+          } else {
+            showToast('操作失败: ' + data.error, 'error');
+          }
+        },
+        onError(e) {
+          btn.disabled = false;
+          btn.innerHTML = btnRestore;
+          showToast('请求失败: ' + e.message, 'error');
+        }
+      });
+    }
+
+    // ===== Button 2: Find keyword files =====
+    function findKeywordFiles() {
+      const btn = document.getElementById('btnFindKeywords');
+      const btnRestore = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 查找包含撤回返场故事的文档 <span class="btn-tip" data-tip="搜索Word文档中同时包含返场故事和撤回关键词的文件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg></span>';
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading"></div> 搜索中...';
+
+      ssePost('/api/find-keywords', { root: currentRoot }, {
+        onProgress(msg) {
+          const pct = Math.round(msg.current / msg.total * 100);
+          btn.innerHTML = `<div class="loading"></div> 搜索中 ${msg.current}/${msg.total} (${pct}%) ${msg.file}`;
+        },
+        onDone(data) {
+          btn.disabled = false;
+          btn.innerHTML = btnRestore;
+          if (data.success) {
+            foundKeywordFiles = data.data.map(d => d.file);
+            let content = `<p style="margin-bottom:12px;">共扫描 <strong>${data.totalScanned}</strong> 个Word文件，找到 <strong>${data.data.length}</strong> 个匹配文件</p>`;
+            if (data.data.length === 0) {
+              content += '<div class="result-item info"><div class="result-file">未找到同时包含"返场故事"和"撤回"在同一行的Word文件</div></div>';
+            } else {
+              data.data.forEach(item => {
+                const fileName = item.file.split('/').pop();
+                content += `<div class="result-item success"><div class="result-file" style="cursor:pointer;color:var(--primary);text-decoration:underline;" onclick="closeModal();previewFile('${item.file.replace(/'/g, "\\'")}','${fileName.replace(/'/g, "\\'")}')" title="点击预览此文件">${item.file}</div>`;
+                item.matchedLines.forEach(line => {
+                  content += `<div class="result-detail">第 ${line.lineNumber} 行: ${escapeHtml(line.content)}</div>`;
+                });
+                content += '</div>';
+              });
+            }
+            showModal('查找"返场故事+撤回"结果', content);
+            showToast(`找到 ${data.data.length} 个匹配文件`, data.data.length > 0 ? 'success' : 'info');
+          } else {
+            showToast('搜索失败: ' + data.error, 'error');
+          }
+        },
+        onError(e) {
+          btn.disabled = false;
+          btn.innerHTML = btnRestore;
+          showToast('请求失败: ' + e.message, 'error');
+        }
+      });
+    }
+
+    // ===== Button 3: Remove content =====
+    async function removeContent() {
+      let message = '将删除匹配Word文件中同时包含"返场故事"和"撤回"的行及后续所有内容。\n\n原文件会自动备份到"备份文件夹"。';
+      if (foundKeywordFiles.length > 0) {
+        message += `\n\n已找到 ${foundKeywordFiles.length} 个文件待处理。`;
+      } else {
+        message += '\n\n将先搜索匹配文件再执行删除。';
+      }
+      const ok = await showConfirm({
+        title: '删除"返场故事"后续内容',
+        message: message,
+        type: 'danger',
+        okText: '确认删除'
+      });
+      if (!ok) return;
+
+      const btn = document.getElementById('btnRemoveContent');
+      const btnRestore = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> 删除需要撤回的返场故事 <span class="btn-tip" data-tip="删除匹配文档中返场故事+撤回所在行及后续内容，原文件自动备份"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg></span>';
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading"></div> 处理中...';
+
+      const body = { root: currentRoot };
+      if (foundKeywordFiles.length > 0) {
+        body.files = foundKeywordFiles;
+      }
+
+      ssePost('/api/remove-content', body, {
+        onProgress(msg) {
+          const pct = Math.round(msg.current / msg.total * 100);
+          const label = msg.phase === 'scan' ? '扫描中' : '删除中';
+          btn.innerHTML = `<div class="loading"></div> ${label} ${msg.current}/${msg.total} (${pct}%) ${msg.file}`;
+        },
+        onDone(data) {
+          btn.disabled = false;
+          btn.innerHTML = btnRestore;
+          if (data.success) {
+            let content = '';
+            if (data.data.length === 0) {
+              content = '<div class="result-item info"><div class="result-file">没有需要处理的文件</div></div>';
+            } else {
+              data.data.forEach(item => {
+                if (item.modified) {
+                  content += `<div class="result-item success"><div class="result-file">${item.file}</div><div class="result-detail">已删除 ${item.removedParagraphs} 个段落<br>备份: ${item.backupPath}</div></div>`;
+                } else {
+                  content += `<div class="result-item error"><div class="result-file">${item.file}</div><div class="result-detail">${item.error || item.reason}</div></div>`;
+                }
+              });
+            }
+            showModal('删除"返场故事"后续内容结果', content);
+            const modCount = data.data.filter(d => d.modified).length;
+            showToast(`处理完成: ${modCount} 个文件已修改`, modCount > 0 ? 'success' : 'info');
+          } else {
+            showToast('操作失败: ' + data.error, 'error');
+          }
+        },
+        onError(e) {
+          btn.disabled = false;
+          btn.innerHTML = btnRestore;
+          showToast('请求失败: ' + e.message, 'error');
+        }
+      });
+    }
+
+    // ===== 查看操作日志 =====
+    async function viewLogs() {
+      try {
+        const root = currentRoot || document.getElementById('rootPath').value.trim();
+        const resp = await fetch(`/api/logs?root=${encodeURIComponent(root)}`);
+        const data = await resp.json();
+        if (!data.success) { showToast('获取日志列表失败: ' + data.error, 'error'); return; }
+        if (data.files.length === 0) {
+          showModal('操作日志', '<div class="result-item info"><div class="result-file">暂无操作日志</div></div>');
+          return;
+        }
+        let content = '<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
+        content += '<input type="text" id="logSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value)" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:\'Noto Sans SC\',sans-serif;">';
+        content += '<span id="logSearchCount" style="font-size:11px;color:var(--ink-subtle);white-space:nowrap;"></span>';
+        content += '<button onclick="logSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▲</button>';
+        content += '<button onclick="logSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▼</button>';
+        content += '</div>';
+        content += '<div style="display:flex;gap:12px;max-height:55vh;">';
+        content += '<div style="min-width:140px;border-right:1px solid var(--hairline);padding-right:12px;overflow-y:auto;">';
+        data.files.forEach((f, i) => {
+          const label = f.replace('.log', '');
+          content += `<div class="log-date-item${i === 0 ? ' active' : ''}" onclick="viewLogFile('${f}', this)" style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:13px;margin-bottom:4px;${i === 0 ? 'background:var(--primary);color:var(--on-primary);' : 'color:var(--ink-muted);'}">${label}</div>`;
+        });
+        content += '</div>';
+        content += '<div id="logContent" style="flex:1;overflow:auto;font-size:12px;line-height:1.8;color:var(--ink);padding:4px 8px;background:var(--surface-1);border-radius:4px;">加载中...</div>';
+        content += '</div>';
+        showModal('操作日志', content);
+        viewLogFile(data.files[0]);
+      } catch (e) {
+        showToast('请求失败: ' + e.message, 'error');
+      }
+    }
+
+    const LOG_STYLES = {
+      '移动撤回文件':       { color: '#2563eb', bg: '#eff6ff', icon: '📁', label: '移动' },
+      '移动撤回文件-失败':  { color: '#2563eb', bg: '#eff6ff', icon: '❌', label: '移动失败' },
+      '删除返场故事内容':   { color: '#7c3aed', bg: '#f5f3ff', icon: '🗑️', label: '删除' },
+      '删除返场故事内容-失败': { color: '#7c3aed', bg: '#f5f3ff', icon: '❌', label: '删除失败' },
+    };
+    const LOG_DEFAULT_STYLE = { color: '#6b7280', bg: '#f9fafb', icon: '📋', label: '操作' };
+
+    function formatLogContent(raw) {
+      const lines = raw.split('\n');
+      const entries = [];
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const m = line.match(/^\[(\d{2}:\d{2}:\d{2})\]\s*\[([^\]]+)\]\s*([\s\S]*)$/);
+        if (m) {
+          entries.push({ time: m[1], action: m[2], details: [m[3]] });
+        } else if (entries.length > 0) {
+          entries[entries.length - 1].details.push(line);
+        } else {
+          entries.push({ time: '', action: '', details: [line] });
+        }
+      }
+      return entries.map(e => {
+        if (!e.time) return `<div class="log-line" style="padding:4px 8px;font-size:12px;color:var(--ink-muted);">${e.details.join('\n').replace(/</g,'&lt;')}</div>`;
+        const s = LOG_STYLES[e.action] || LOG_DEFAULT_STYLE;
+        const detailHtml = e.details.filter(d => d.trim()).map(d => {
+          const trimmed = d.replace(/^\s+/, '');
+          const arrow = trimmed.includes('→');
+          if (arrow) {
+            const parts = trimmed.split('→');
+            return `<div style="display:flex;align-items:flex-start;gap:4px;padding:3px 0;"><span style="color:#9ca3af;">•</span><span style="word-break:break-all;">${parts[0].trim().replace(/</g,'&lt;')} <span style="color:${s.color};font-weight:600;">→</span> ${parts.slice(1).join('→').trim().replace(/</g,'&lt;')}</span></div>`;
+          }
+          return `<div style="padding:2px 0;"><span style="color:#9ca3af;">•</span> ${trimmed.replace(/</g,'&lt;')}</div>`;
+        }).join('');
+        const summaryLine = e.details[0] ? e.details[0].replace(/</g,'&lt;') : '';
+        const fileList = e.details.length > 1 ? `<div style="margin-top:4px;padding:6px 8px;background:rgba(0,0,0,0.03);border-radius:4px;font-size:11px;line-height:1.6;">${detailHtml}</div>` : (summaryLine ? `<div style="margin-top:2px;font-size:12px;color:#374151;">${summaryLine}</div>` : '');
+        return `<div class="log-line" style="margin-bottom:8px;border-left:3px solid ${s.color};background:${s.bg};border-radius:0 4px 4px 0;padding:8px 12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <span style="font-weight:700;color:#111;font-size:12px;font-family:monospace;">${e.time}</span>
+            <span>${s.icon}</span>
+            <span style="font-weight:600;color:${s.color};font-size:12px;">${e.action}</span>
+          </div>
+          ${fileList}
+        </div>`;
+      }).join('');
+    }
+
+    async function viewLogFile(filename, el) {
+      if (el) {
+        el.parentElement.querySelectorAll('.log-date-item').forEach(d => {
+          d.classList.remove('active');
+          d.style.background = '';
+          d.style.color = 'var(--ink-muted)';
+        });
+        el.classList.add('active');
+        el.style.background = 'var(--primary)';
+        el.style.color = 'var(--on-primary)';
+      }
+      const logDiv = document.getElementById('logContent');
+      if (!logDiv) return;
+      logDiv.innerHTML = '<span style="color:var(--ink-subtle);">加载中...</span>';
+      try {
+        const root = currentRoot || document.getElementById('rootPath').value.trim();
+        const resp = await fetch(`/api/logs/${encodeURIComponent(filename)}?root=${encodeURIComponent(root)}`);
+        const data = await resp.json();
+        if (data.success) {
+          if (!data.content) { logDiv.innerHTML = '<span style="color:var(--ink-subtle);">（空日志）</span>'; return; }
+          logDiv.innerHTML = formatLogContent(data.content);
+        } else {
+          logDiv.innerHTML = '<span style="color:var(--danger);">读取失败: ' + data.error + '</span>';
+        }
+      } catch (e) {
+        logDiv.innerHTML = '<span style="color:var(--danger);">请求失败: ' + e.message + '</span>';
+      }
+    }
+
+    // ===== 日志搜索 =====
+    let _logSearchMatches = [];
+    let _logSearchIdx = -1;
+
+    function searchLog(keyword) {
+      const container = document.getElementById('logContent') || document.getElementById('logPreviewContent');
+      const countEl = document.getElementById('logSearchCount');
+      if (!container) return;
+      // Clear previous highlights
+      container.querySelectorAll('.log-highlight').forEach(el => {
+        el.outerHTML = el.textContent;
+      });
+      _logSearchMatches = [];
+      _logSearchIdx = -1;
+      if (countEl) countEl.textContent = '';
+      if (!keyword || !keyword.trim()) return;
+      // Walk text nodes and highlight
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      const kw = keyword.toLowerCase();
+      nodes.forEach(node => {
+        const text = node.textContent;
+        const lower = text.toLowerCase();
+        if (!lower.includes(kw)) return;
+        const frag = document.createDocumentFragment();
+        let lastIdx = 0;
+        let idx = lower.indexOf(kw, 0);
+        while (idx !== -1) {
+          if (idx > lastIdx) frag.appendChild(document.createTextNode(text.substring(lastIdx, idx)));
+          const mark = document.createElement('span');
+          mark.className = 'log-highlight';
+          mark.style.cssText = 'background:#fbbf24;color:#111;border-radius:2px;padding:0 1px;';
+          mark.textContent = text.substring(idx, idx + keyword.length);
+          frag.appendChild(mark);
+          lastIdx = idx + keyword.length;
+          idx = lower.indexOf(kw, lastIdx);
+        }
+        if (lastIdx < text.length) frag.appendChild(document.createTextNode(text.substring(lastIdx)));
+        node.parentNode.replaceChild(frag, node);
+      });
+      _logSearchMatches = Array.from(container.querySelectorAll('.log-highlight'));
+      if (countEl) countEl.textContent = _logSearchMatches.length > 0 ? `共 ${_logSearchMatches.length} 次出现 | 1 / ${_logSearchMatches.length}` : '无匹配';
+      if (_logSearchMatches.length > 0) { _logSearchIdx = 0; scrollToLogMatch(0); }
+    }
+
+    function logSearchNav(dir) {
+      if (_logSearchMatches.length === 0) return;
+      _logSearchIdx = (_logSearchIdx + dir + _logSearchMatches.length) % _logSearchMatches.length;
+      scrollToLogMatch(_logSearchIdx);
+    }
+
+    function scrollToLogMatch(idx) {
+      _logSearchMatches.forEach((el, i) => {
+        el.style.background = i === idx ? '#f97316' : '#fbbf24';
+        el.style.fontWeight = i === idx ? '700' : '';
+      });
+      _logSearchMatches[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const countEl = document.getElementById('logSearchCount');
+      if (countEl) countEl.textContent = `共 ${_logSearchMatches.length} 次出现 | ${idx + 1} / ${_logSearchMatches.length}`;
+    }
+
+    // ===== Resize Handle =====
+    (function() {
+      const handle = document.getElementById('resizeHandle');
+      const sidebar = document.querySelector('.sidebar');
+      let isResizing = false;
+
+      handle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const newWidth = Math.max(200, Math.min(600, e.clientX));
+        sidebar.style.width = newWidth + 'px';
+      });
+
+      document.addEventListener('mouseup', () => {
+        isResizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      });
+    })();
+
+    // ===== Scroll Float Buttons =====
+    (function() {
+      const area = document.getElementById('previewArea');
+      const topBtn = document.getElementById('scrollFloatTop');
+      const bottomBtn = document.getElementById('scrollFloatBottom');
+
+      area.addEventListener('scroll', () => {
+        const st = area.scrollTop;
+        const sh = area.scrollHeight;
+        const ch = area.clientHeight;
+        const canScroll = sh > ch + 50;
+
+        topBtn.classList.toggle('visible', canScroll && st > 150);
+        bottomBtn.classList.toggle('visible', canScroll && (sh - st - ch) > 150);
+      });
+    })();
+
+    // ===== Keyboard Shortcuts =====
+    document.addEventListener('keydown', (e) => {
+      // Esc: close modal / confirm dialog
+      if (e.key === 'Escape') {
+        const confirmOverlay = document.getElementById('confirmOverlay');
+        if (confirmOverlay && confirmOverlay.classList.contains('show')) {
+          document.getElementById('confirmCancel').click();
+          return;
+        }
+        const modalOverlay = document.getElementById('modalOverlay');
+        if (modalOverlay && modalOverlay.classList.contains('show')) {
+          closeModal();
+          return;
+        }
+      }
+      // Ctrl+F: focus Word search input if Word preview is visible
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        const wordSearch = document.getElementById('wordSearchInput');
+        if (wordSearch && wordSearch.offsetParent !== null) {
+          e.preventDefault();
+          wordSearch.focus();
+          wordSearch.select();
+        }
+      }
+    });
+
+    // ===== Motto Spark Effect =====
+    document.querySelectorAll('.header-motto span').forEach(el => {
+      el.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const colors = ['#c0392b', '#e74c3c', '#f39c12', '#f1c40f', '#ff6b35', '#d4a017'];
+        for (let i = 0; i < 24; i++) {
+          const spark = document.createElement('div');
+          spark.className = 'motto-spark';
+          const angle = (Math.PI * 2 / 24) * i + (Math.random() - 0.5) * 0.5;
+          const dist = 20 + Math.random() * 30;
+          spark.style.cssText = `
+            left:${cx}px; top:${cy}px;
+            --sx:${Math.cos(angle) * dist}px;
+            --sy:${Math.sin(angle) * dist}px;
+            background:${colors[Math.floor(Math.random() * colors.length)]};
+            width:${3 + Math.random() * 3}px;
+            height:${3 + Math.random() * 3}px;
+            box-shadow: 0 0 4px ${colors[Math.floor(Math.random() * colors.length)]};
+          `;
+          document.body.appendChild(spark);
+          setTimeout(() => spark.remove(), 500);
+        }
+      });
+    });
+
+    // ===== Init =====
+    (function() {
+      const savedRoot = localStorage.getItem('fileManager_root');
+      if (savedRoot) document.getElementById('rootPath').value = savedRoot;
+    })();
+    loadTree();
+  </script>
+</body>
+</html>
