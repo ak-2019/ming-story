@@ -2,20 +2,6 @@
 
 本地文件浏览、预览与批量操作工具，基于 Node.js + Express。
 
-## 快速开始
-
-```bash
-# 安装依赖
-npm install
-
-# 启动服务
-npm start
-```
-
-启动后自动打开浏览器访问 `http://localhost:3000`，默认管理上级目录。
-
-也可双击 `启动文件管理系统.vbs` 或 `start.bat` 启动。
-
 ## 功能
 
 ### 文件浏览
@@ -57,13 +43,76 @@ npm start
 - **前端** — 原生 HTML/CSS/JS，单文件
 - **依赖** — mammoth (Word解析), xlsx (Excel解析), jszip (docx操作)
 
-## 目录结构
+## 项目结构
 
 ```text
-文件操作系统/
-├── server.js          # 后端服务
-├── index.html         # 前端页面（单文件）
-├── package.json       # 依赖配置
-├── start.bat          # 启动脚本
-└── 启动文件管理系统.vbs  # VBS 启动脚本
+ming-story/
+├── server.js              # 后端服务（Express）
+├── index.html             # 前端页面（单文件，原生 HTML/CSS/JS）
+├── package.json           # 依赖配置
+├── start.bat              # 启动脚本（带命令行窗口）
+├── 启动文件管理系统.vbs     # 静默启动脚本（无黑窗）
+└── build/                 # 打包工具
+    ├── build-portable.js  # 打包脚本（Node.js）
+    └── build.cmd          # 打包快捷入口（双击运行）
 ```
+
+## 启动（开发环境）
+
+需要本机已安装 Node.js。
+
+```bash
+# 1. 安装依赖
+npm install
+
+# 2. 启动服务（三选一）
+npm start                  # 命令行启动
+start.bat                  # 双击启动（带命令行窗口）
+启动文件管理系统.vbs         # 双击启动（无黑窗）
+```
+
+启动后自动打开浏览器访问 `http://localhost:3000`，默认管理上级目录的文件。
+
+## 打包发布（免安装便携版）
+
+打包后生成一个完全独立的文件夹，包含内置的 Node.js 运行时，用户无需安装任何软件。
+
+### 打包步骤
+
+```bash
+# 在 build 目录下运行（或双击 build.cmd）
+node build/build-portable.js
+```
+
+打包过程会**自动处理**以下步骤：
+
+1. 下载便携版 Node.js（约 30MB，需联网，仅首次）
+2. 解压 Node.js 到 `runtime/` 目录
+3. 复制项目文件（server.js、index.html 等）
+4. 用 npm 安装生产依赖
+5. 生成启动脚本和使用说明
+
+打包输出在 `dist/file-manager/` 目录。
+
+### 打包产物结构
+
+```text
+dist/file-manager/
+├── runtime/           # 内置 Node.js 运行时（免安装）
+├── node_modules/      # 生产依赖
+├── server.js          # 后端服务
+├── index.html         # 前端页面
+├── package.json       # 依赖配置
+├── start.bat          # 用户启动入口（带命令行窗口）
+├── start-silent.vbs   # 用户启动入口（无黑窗）
+└── README.txt         # 使用说明
+```
+
+## 用户使用（免安装便携版）
+
+1. 收到压缩包后解压
+2. 将 `file-manager` 文件夹放到要管理的目录中（系统会自动管理其**上级目录**的文件）
+3. 双击 `start.bat` 启动，浏览器自动打开
+4. 关闭命令行窗口即停止服务
+
+> **无需安装 Node.js，无需联网，解压即用。**
