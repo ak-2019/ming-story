@@ -82,9 +82,12 @@ function buildTree(dirPath, rootPath) {
     const entries = fs.readdirSync(dirPath);
     children = entries
       .filter(entry => {
-        // 跳过隐藏文件、node_modules、临时文件
+        // 跳过隐藏文件、临时文件
         if (entry.startsWith('.') || entry.startsWith('~$')) return false;
-        if (entry === 'node_modules' || entry === '文件操作系统') return false;
+        if (entry === 'node_modules') return false;
+        // 跳过项目自身所在目录
+        const fullPath = path.join(dirPath, entry);
+        if (path.resolve(fullPath) === path.resolve(__dirname)) return false;
         return true;
       })
       .map(entry => {
@@ -399,7 +402,8 @@ function findFilesWithKeyword(dirPath, keyword) {
     for (const entry of entries) {
       const fullPath = path.join(dirPath, entry.name);
       if (entry.isDirectory()) {
-        if (entry.name === 'node_modules' || entry.name === '文件操作系统' || entry.name === '撤回文件夹') continue;
+        if (entry.name === 'node_modules' || entry.name === '撤回文件夹') continue;
+        if (path.resolve(fullPath) === path.resolve(__dirname)) continue;
         results.push(...findFilesWithKeyword(fullPath, keyword));
       } else if (entry.isFile() && entry.name.includes(keyword) && !entry.name.startsWith('~$')) {
         results.push(fullPath);
@@ -471,7 +475,8 @@ function findWordFiles(dirPath) {
     for (const entry of entries) {
       const fullPath = path.join(dirPath, entry.name);
       if (entry.isDirectory()) {
-        if (entry.name === 'node_modules' || entry.name === '文件操作系统' || entry.name === '撤回文件夹' || entry.name === '备份文件夹') continue;
+        if (entry.name === 'node_modules' || entry.name === '撤回文件夹' || entry.name === '备份文件夹') continue;
+        if (path.resolve(fullPath) === path.resolve(__dirname)) continue;
         results.push(...findWordFiles(fullPath));
       } else if (entry.isFile() && (entry.name.endsWith('.docx') || entry.name.endsWith('.doc')) && !entry.name.startsWith('~$')) {
         results.push(fullPath);
@@ -651,11 +656,29 @@ app.post('/api/remove-content', async (req, res) => {
 });
 
 // ========== 启动服务器 ==========
-app.listen(PORT, () => {
-  console.log(`文件管理系统已启动: http://localhost:${PORT}`);
-  console.log(`管理目录: ${DEFAULT_ROOT}`);
+const { exec } = require('child_process');
+const net = require('net');
 
-  // 自动打开浏览器
-  const { exec } = require('child_process');
-  exec(`start http://localhost:${PORT}`);
+function checkPort(port) {
+  return new Promise((resolve) => {
+    const tester = net.createServer()
+      .once('error', () => resolve(true))
+      .once('listening', () => tester.close(() => resolve(false)))
+      .listen(port);
+  });
+}
+
+checkPort(PORT).then((inUse) => {
+  if (inUse) {
+    console.log(`端口 ${PORT} 已被占用，服务可能已在运行`);
+    console.log(`正在打开浏览器: http://localhost:${PORT}`);
+    exec(`start http://localhost:${PORT}`);
+    setTimeout(() => process.exit(0), 1000);
+    return;
+  }
+  app.listen(PORT, () => {
+    console.log(`文件管理系统已启动: http://localhost:${PORT}`);
+    console.log(`管理目录: ${DEFAULT_ROOT}`);
+    exec(`start http://localhost:${PORT}`);
+  });
 });
