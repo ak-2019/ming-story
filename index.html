@@ -4,12 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>大明帝国 · 文件管理</title>
+  <script>
+    if (location.protocol === 'file:') {
+      document.write('<style>body{margin:0;font-family:"Microsoft YaHei",sans-serif;background:#f5f1e8;display:flex;align-items:center;justify-content:center;height:100vh;}</style></head><body><div style="text-align:center;background:#fff;border:2px solid #c0392b;border-radius:8px;padding:40px 50px;box-shadow:0 4px 20px rgba(0,0,0,0.1);"><h2 style="color:#c0392b;margin-bottom:16px;">请通过 start.bat 启动</h2><p style="margin-bottom:12px;line-height:1.8;">直接打开 index.html 无法使用。</p><p style="margin-bottom:20px;">请双击 <b>start.bat</b> 启动服务。</p><a href="http://localhost:3000" style="display:inline-block;padding:10px 24px;background:#c0392b;color:#fff;border-radius:4px;text-decoration:none;">如已启动，点击进入</a></div></body></html>');
+      document.close();
+    }
+  </script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c0392b' stroke-width='2'><path d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/><path d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.3/dist/docx-preview.min.js"></script>
+  <script defer src="libs/jszip.min.js"></script>
+  <script defer src="libs/docx-preview.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -44,7 +47,7 @@
     }
 
     body {
-      font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
       background: var(--canvas);
       color: var(--ink);
       height: 100vh;
@@ -68,7 +71,7 @@
     }
 
     .header h1 {
-      font-family: 'Noto Serif SC', 'SimSun', serif;
+      font-family: 'SimSun', serif;
       font-size: 20px;
       font-weight: 700;
       letter-spacing: 2px;
@@ -84,7 +87,7 @@
       display: flex;
       align-items: center;
       gap: 0;
-      font-family: 'Noto Serif SC', 'SimSun', serif;
+      font-family: 'SimSun', serif;
       user-select: none;
       padding: 6px 32px;
       border: 2px solid var(--primary);
@@ -181,7 +184,7 @@
     }
     .motto-reveal.show { display: flex; }
     .motto-reveal-text {
-      font-family: 'Noto Serif SC', 'SimSun', serif;
+      font-family: 'SimSun', serif;
       font-size: 72px;
       font-weight: 700;
       letter-spacing: 24px;
@@ -222,7 +225,7 @@
       padding: 7px 14px;
       border-radius: 4px;
       font-size: 13px;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
       width: 340px;
       outline: none;
       transition: border-color 0.2s;
@@ -238,7 +241,7 @@
       border-radius: 4px;
       font-size: 13px;
       font-weight: 500;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
       color: var(--ink-muted);
       cursor: pointer;
       transition: all 0.15s ease;
@@ -309,7 +312,7 @@
       color: #f7f3eb;
       font-size: 12px;
       font-weight: 400;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
       line-height: 1.6;
       padding: 8px 14px;
       border-radius: 4px;
@@ -363,7 +366,7 @@
     .sidebar-header {
       padding: 10px 16px;
       border-bottom: 1px solid var(--hairline);
-      font-family: 'Noto Serif SC', serif;
+      font-family: 'SimSun', serif;
       font-weight: 600;
       font-size: 14px;
       letter-spacing: 1px;
@@ -486,7 +489,7 @@
     .preview-placeholder svg { width: 48px; height: 48px; opacity: 0.25; stroke: var(--ink-subtle); }
 
     .preview-title {
-      font-family: 'Noto Serif SC', serif;
+      font-family: 'SimSun', serif;
       font-weight: 600;
       font-size: 17px;
       letter-spacing: 0.5px;
@@ -553,7 +556,7 @@
       background: var(--canvas);
       color: var(--ink);
       font-size: 12px;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
       outline: none;
     }
 
@@ -567,7 +570,7 @@
       color: var(--ink-muted);
       font-size: 12px;
       cursor: pointer;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
     }
 
     .filter-row-bar button:hover { background: var(--surface-3); color: var(--ink); }
@@ -645,7 +648,7 @@
       background: var(--surface-1);
       color: var(--ink-muted);
       cursor: pointer;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
     }
 
     .col-filter-actions button:hover { background: var(--surface-2); color: var(--ink); }
@@ -657,7 +660,7 @@
       border: 1px solid var(--hairline-strong);
       border-radius: 3px;
       font-size: 12px;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
       background: var(--canvas);
       color: var(--ink);
       outline: none;
@@ -691,7 +694,7 @@
       border: 1px solid var(--hairline-strong);
       border-radius: 3px;
       font-size: 13px;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
       background: var(--canvas);
       color: var(--ink);
       outline: none;
@@ -708,7 +711,7 @@
       color: var(--ink-muted);
       font-size: 12px;
       cursor: pointer;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
       white-space: nowrap;
     }
 
@@ -723,7 +726,7 @@
       color: var(--ink);
       padding: 24px;
       border-radius: 4px;
-      font-family: 'Noto Serif SC', 'SimSun', serif;
+      font-family: 'SimSun', serif;
       font-size: 14px;
       line-height: 1.8;
       white-space: pre-wrap;
@@ -753,7 +756,7 @@
     }
 
     .word-toc-title {
-      font-family: 'Noto Serif SC', serif;
+      font-family: 'SimSun', serif;
       font-size: 14px;
       font-weight: 600;
       color: var(--ink);
@@ -830,7 +833,7 @@
       font-size: 11px;
       cursor: pointer;
       transition: all 0.15s;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
       text-align: center;
     }
 
@@ -855,7 +858,7 @@
 
     .word-reading-view h1, .word-reading-view h2, .word-reading-view h3,
     .word-reading-view h4, .word-reading-view h5, .word-reading-view h6 {
-      font-family: 'Noto Serif SC', serif;
+      font-family: 'SimSun', serif;
       color: var(--ink);
       margin: 20px 0 10px;
     }
@@ -962,7 +965,7 @@
       font-size: 12px;
       cursor: pointer;
       transition: all 0.15s;
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Microsoft YaHei', sans-serif;
     }
 
     .excel-view-btn:hover { background: var(--surface-2); color: var(--ink); transform: translateY(-1px); }
@@ -1048,7 +1051,7 @@
     }
 
     .modal h3 {
-      font-family: 'Noto Serif SC', serif;
+      font-family: 'SimSun', serif;
       margin-bottom: 16px;
       font-size: 18px;
       font-weight: 700;
@@ -1150,7 +1153,7 @@
 
     /* Modal strong/code in results */
     .modal strong { color: var(--ink); }
-    .modal code { background: var(--surface-2); padding: 2px 6px; border-radius: 2px; font-size: 12px; color: var(--primary); font-family: 'Noto Sans SC', monospace; }
+    .modal code { background: var(--surface-2); padding: 2px 6px; border-radius: 2px; font-size: 12px; color: var(--primary); font-family: 'Microsoft YaHei', monospace; }
     .modal p { color: var(--ink-muted); line-height: 1.6; }
   </style>
 </head>
@@ -1235,7 +1238,7 @@
       <div class="preview-area" id="previewArea">
         <div class="preview-placeholder">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          <span style="font-size:15px; font-family:'Noto Serif SC',serif;">点击左侧卷目，翻阅典籍</span>
+          <span style="font-size:15px; font-family:'SimSun',serif;">点击左侧卷目，翻阅典籍</span>
           <span style="font-size:12px;">支持 Word · Excel · 文本 · 图片</span>
         </div>
       </div>
@@ -1289,23 +1292,23 @@
   </div>
 
   <!-- 引导层：双击打开index.html时显示 -->
-  <div id="guideOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:var(--canvas); z-index:9999; font-family:'Noto Serif SC','SimSun',serif;">
+  <div id="guideOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:var(--canvas); z-index:9999; font-family:'SimSun','SimSun',serif;">
     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:40px;">
       <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="var(--primary)" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       <h1 style="font-size:28px; font-weight:700; letter-spacing:3px; color:var(--ink); margin:20px 0 8px;">大明帝国 · 文件管理</h1>
-      <p id="guideStatus" style="font-size:14px; color:var(--ink-subtle); margin-bottom:30px; font-family:'Noto Sans SC',sans-serif;">正在检测服务状态...</p>
+      <p id="guideStatus" style="font-size:14px; color:var(--ink-subtle); margin-bottom:30px; font-family:'Microsoft YaHei',sans-serif;">正在检测服务状态...</p>
       <div id="guideActions" style="display:none;">
-        <p style="font-size:14px; color:var(--ink-muted); margin-bottom:16px; line-height:1.8; font-family:'Noto Sans SC',sans-serif;">
+        <p style="font-size:14px; color:var(--ink-muted); margin-bottom:16px; line-height:1.8; font-family:'Microsoft YaHei',sans-serif;">
           服务未启动，请先双击以下文件启动服务：
         </p>
         <div style="background:var(--surface-1); border:1px solid var(--hairline); border-radius:4px; padding:20px 32px; margin-bottom:20px;">
-          <code style="font-size:16px; color:var(--primary); font-family:'Noto Sans SC',monospace;">start.bat</code>
-          <p style="font-size:12px; color:var(--ink-tertiary); margin-top:8px; font-family:'Noto Sans SC',sans-serif;">或双击 启动文件管理系统.vbs（无黑窗口）</p>
+          <code style="font-size:16px; color:var(--primary); font-family:'Microsoft YaHei',monospace;">start.bat</code>
+          <p style="font-size:12px; color:var(--ink-tertiary); margin-top:8px; font-family:'Microsoft YaHei',sans-serif;">或双击 启动文件管理系统.vbs（无黑窗口）</p>
         </div>
-        <a href="http://localhost:3000" style="display:inline-block; padding:10px 24px; background:var(--primary); color:var(--on-primary); border:none; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer; font-family:'Noto Sans SC',sans-serif; text-decoration:none;">服务已启动，点击进入</a>
+        <a href="http://localhost:3000" style="display:inline-block; padding:10px 24px; background:var(--primary); color:var(--on-primary); border:none; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer; font-family:'Microsoft YaHei',sans-serif; text-decoration:none;">服务已启动，点击进入</a>
       </div>
       <div id="guideRedirect" style="display:none;">
-        <p style="font-size:14px; color:var(--success); font-family:'Noto Sans SC',sans-serif;">服务运行中，正在跳转...</p>
+        <p style="font-size:14px; color:var(--success); font-family:'Microsoft YaHei',sans-serif;">服务运行中，正在跳转...</p>
       </div>
     </div>
   </div>
@@ -1316,6 +1319,7 @@
       document.getElementById('guideOverlay').style.display = 'block';
       document.getElementById('guideStatus').style.display = 'none';
       document.getElementById('guideActions').style.display = 'block';
+      throw new Error('stop');
     }
 
     let currentRoot = '';
@@ -1380,14 +1384,14 @@
     function showGuide() {
       const content = `
         <div style="line-height:1.8;font-size:13px;color:var(--ink);">
-          <h3 style="font-family:'Noto Serif SC',serif;font-size:16px;margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">一、系统介绍</h3>
+          <h3 style="font-family:'SimSun',serif;font-size:16px;margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">一、系统介绍</h3>
           <p style="margin:0 0 12px;color:var(--ink-muted);">
             本系统是一个本地文件管理工具，用于浏览、预览和批量处理"大明帝国"项目中的文件。<br>
             主要针对<strong>返场故事撤回</strong>相关的文件操作场景，提供一站式的查找、移动、删除和备份功能。<br>
             系统基于 Node.js 运行在本地，所有操作均在本机完成，不涉及网络传输。
           </p>
 
-          <h3 style="font-family:'Noto Serif SC',serif;font-size:16px;margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">二、使用方法</h3>
+          <h3 style="font-family:'SimSun',serif;font-size:16px;margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">二、使用方法</h3>
           <p style="margin:0 0 4px;color:var(--ink-muted);">
             <strong>1. 启动</strong> — 双击 <code>启动文件管理系统.vbs</code> 或 <code>start.bat</code>，浏览器自动打开。<br>
             <strong>2. 选择目录</strong> — 顶部输入框可指定管理目录，留空则默认管理上级目录。系统会自动记忆上次的目录。<br>
@@ -1396,7 +1400,7 @@
             <strong>5. 查看日志</strong> — 每次操作自动记录日志，可通过"操作日志"按钮查看。
           </p>
 
-          <h3 style="font-family:'Noto Serif SC',serif;font-size:16px;margin:16px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">三、功能详细说明</h3>
+          <h3 style="font-family:'SimSun',serif;font-size:16px;margin:16px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">三、功能详细说明</h3>
 
           <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #2563eb;">
             <strong style="color:#2563eb;">🔀 移动撤回的返场故事音频文件</strong><br>
@@ -1676,6 +1680,9 @@
     async function previewFile(fullPath, fileName) {
       const area = document.getElementById('previewArea');
       area.innerHTML = '<div class="preview-placeholder"><div class="loading" style="width:24px;height:24px;border-width:2px;"></div><span style="font-size:13px;">正在展卷...</span></div>';
+      _tocOriginalHtml = '';
+      _tocReadingHtml = '';
+      _tocReadingBuilt = false;
 
       try {
         const resp = await fetch(`/api/preview?path=${encodeURIComponent(fullPath)}`);
@@ -1722,11 +1729,11 @@
           });
           html += `</div>`;
         } else if (data.type === 'word') {
-          html += `<div class="word-wrap"><div class="word-toc" id="wordToc"><div class="word-view-bar"><button class="word-view-btn active" id="btnViewOriginal" onclick="switchWordView('original')">📄 原样</button><button class="word-view-btn" id="btnViewReading" onclick="switchWordView('reading')">📖 阅读</button></div><div style="padding:8px 10px;border-bottom:1px solid var(--hairline);"><div style="display:flex;align-items:center;gap:4px;"><input type="text" id="wordSearchInput" placeholder="搜索内容..." onkeydown="if(event.key==='Enter'){searchWord(this.value)}" style="flex:1;padding:4px 8px;border:1px solid var(--hairline-strong);border-radius:3px;font-size:11px;outline:none;font-family:'Noto Sans SC',sans-serif;min-width:0;"><button onclick="searchWord(document.getElementById('wordSearchInput').value)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:3px 6px;cursor:pointer;font-size:11px;">🔍</button></div><div style="display:flex;align-items:center;gap:4px;margin-top:4px;"><span id="wordSearchCount" style="flex:1;font-size:10px;color:var(--ink-subtle);"></span><button onclick="wordSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▲</button><button onclick="wordSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▼</button><button onclick="clearWordSearch(true)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">✕</button></div></div><div class="word-toc-title">目 录</div><div id="wordTocLinks"></div></div><div id="wordOriginalView"><div class="word-preview-container" id="wordContainer"></div></div><div id="wordReadingView" style="display:none"><div class="word-reading-view" id="wordReadingBody">${data.html || ''}</div></div></div>`;
+          html += `<div class="word-wrap"><div class="word-toc" id="wordToc"><div class="word-view-bar"><button class="word-view-btn active" id="btnViewOriginal" onclick="switchWordView('original')">📄 原样</button><button class="word-view-btn" id="btnViewReading" onclick="switchWordView('reading')">📖 阅读</button></div><div style="padding:8px 10px;border-bottom:1px solid var(--hairline);"><div style="display:flex;align-items:center;gap:4px;"><input type="text" id="wordSearchInput" placeholder="搜索内容..." onkeydown="if(event.key==='Enter'){searchWord(this.value)}" style="flex:1;padding:4px 8px;border:1px solid var(--hairline-strong);border-radius:3px;font-size:11px;outline:none;font-family:'Microsoft YaHei',sans-serif;min-width:0;"><button onclick="searchWord(document.getElementById('wordSearchInput').value)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:3px 6px;cursor:pointer;font-size:11px;">🔍</button></div><div style="display:flex;align-items:center;gap:4px;margin-top:4px;"><span id="wordSearchCount" style="flex:1;font-size:10px;color:var(--ink-subtle);"></span><button onclick="wordSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▲</button><button onclick="wordSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▼</button><button onclick="clearWordSearch(true)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">✕</button></div></div><div class="word-toc-title">目 录</div><div id="wordTocLinks"></div></div><div id="wordOriginalView"><div class="word-preview-container" id="wordContainer"></div></div><div id="wordReadingView" style="display:none"><div class="word-reading-view" id="wordReadingBody">${data.html || ''}</div></div></div>`;
         } else if (data.type === 'text') {
           if (data.fileName && data.fileName.endsWith('.log')) {
             html += `<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">
-              <input type="text" id="logSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value)" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:'Noto Sans SC',sans-serif;">
+              <input type="text" id="logSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value)" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:'Microsoft YaHei',sans-serif;">
               <span id="logSearchCount" style="font-size:11px;color:var(--ink-subtle);white-space:nowrap;"></span>
               <button onclick="logSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▲</button>
               <button onclick="logSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▼</button>

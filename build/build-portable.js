@@ -124,6 +124,12 @@ async function main() {
     }
   }
 
+  // 复制 libs 目录（前端离线依赖）
+  const libsSrc = path.join(PROJECT_DIR, 'libs');
+  if (fs.existsSync(libsSrc)) {
+    copyDirSync(libsSrc, path.join(APP_DIR, 'libs'));
+  }
+
   // 始终用打包自带的 npm 重新安装依赖（避免 pnpm 符号链接复制问题）
   log('       安装依赖（使用 npm install）...');
   const npmCmd = path.join(NODE_DIR, 'npm.cmd');
