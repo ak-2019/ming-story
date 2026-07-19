@@ -1649,7 +1649,7 @@
       return item;
     }
 
-    async function loadTree() {
+    async function loadTree(isFallback) {
       const root = document.getElementById('rootPath').value.trim();
       const container = document.getElementById('treeContainer');
       container.innerHTML = '<div class="preview-placeholder"><div class="loading" style="width:24px;height:24px;border-width:2px;"></div><span style="font-size:13px;">正在翻阅目录...</span></div>';
@@ -1660,6 +1660,12 @@
         const data = await resp.json();
 
         if (!data.success) {
+          if (root && !isFallback) {
+            localStorage.removeItem('fileManager_root');
+            document.getElementById('rootPath').value = '';
+            showToast('保存的路径已失效，已切换到默认目录', 'info');
+            return loadTree(true);
+          }
           container.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">错误: ${data.error}</span></div>`;
           return;
         }
