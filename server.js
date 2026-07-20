@@ -3,15 +3,94 @@ const path = require('path');
 const fs = require('fs');
 const mammoth = require('mammoth');
 const XLSX = require('xlsx');
+const JSZip = require('jszip');
+const crypto = require('crypto');
 
 const app = express();
-const PORT = 3000;
+const HOST = process.env.HOST || '127.0.0.1';
+const parsedStartPort = Number.parseInt(process.env.PORT || '3000', 10);
+const START_PORT = Number.isInteger(parsedStartPort) && parsedStartPort > 0 && parsedStartPort < 65536 ? parsedStartPort : 3000;
+const parsedMaxPort = Number.parseInt(process.env.MAX_PORT || String(START_PORT + 10), 10);
+const MAX_PORT = Number.isInteger(parsedMaxPort) && parsedMaxPort >= START_PORT && parsedMaxPort < 65536 ? parsedMaxPort : START_PORT + 10;
+const STATE_FILE = process.env.FILE_MANAGER_STATE_FILE || path.join(__dirname, '.file-manager-state.json');
+const SHUTDOWN_TOKEN = crypto.randomBytes(24).toString('hex');
 
 // 默认根目录：当前文件夹的上级目录
 const DEFAULT_ROOT = path.resolve(__dirname, '..');
+const AUDIO_EXTENSIONS = new Set(['.mp3', '.wav', '.m4a', '.aac', '.flac', '.ogg', '.wma']);
+const SKIPPED_DIRECTORIES = new Set(['node_modules', '撤回文件夹', '备份文件夹', '操作日志']);
 
-app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.json({ limit: '1mb' }));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.use('/libs', express.static(path.join(__dirname, 'libs'), { dotfiles: 'deny' }));
+
+function toPosix(filePath) {
+  return filePath.replace(/\\/g, '/');
+}
+
+function resolveRoot(inputRoot) {
+  const requested = path.resolve(inputRoot || DEFAULT_ROOT);
+  if (!fs.existsSync(requested) || !fs.statSync(requested).isDirectory()) {
+    throw new Error('管理目录不存在或不是文件夹');
+  }
+  return fs.realpathSync(requested);
+}
+
+function assertWithinRoot(rootDir, targetPath, options = {}) {
+  const { mustExist = true, type } = options;
+  const realRoot = fs.realpathSync(rootDir);
+  const resolvedTarget = path.resolve(targetPath);
+  const targetExists = fs.existsSync(resolvedTarget);
+  if (mustExist && !targetExists) throw new Error('目标路径不存在');
+  const checkedTarget = targetExists ? fs.realpathSync(resolvedTarget) : resolvedTarget;
+  const relative = path.relative(realRoot, checkedTarget);
+
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error('目标路径超出当前管理目录');
+  }
+
+  if (mustExist && type) {
+    const stats = fs.statSync(checkedTarget);
+    if (type === 'file' && !stats.isFile()) throw new Error('目标不是文件');
+    if (type === 'directory' && !stats.isDirectory()) throw new Error('目标不是文件夹');
+  }
+
+  return checkedTarget;
+}
+
+function createTaskId(prefix) {
+  const stamp = new Date().toISOString().replace(/[-:TZ.]/g, '').slice(0, 14);
+  return `${prefix}-${stamp}-${crypto.randomBytes(3).toString('hex')}`;
+}
+
+function normalizeTaskId(taskId) {
+  if (!/^[a-zA-Z0-9_-]+$/.test(taskId || '')) throw new Error('任务编号无效');
+  return taskId;
+}
+
+app.get('/api/health', (req, res) => {
+  const address = req.socket.localPort;
+  res.json({
+    success: true,
+    version: require('./package.json').version,
+    host: HOST,
+    port: address,
+    defaultRoot: toPosix(DEFAULT_ROOT),
+    projectDir: toPosix(__dirname),
+    pid: process.pid,
+    uptime: Math.round(process.uptime())
+  });
+});
+
+app.post('/api/shutdown', (req, res) => {
+  const remoteAddress = req.socket.remoteAddress || '';
+  const isLocal = remoteAddress === '127.0.0.1' || remoteAddress === '::1' || remoteAddress === '::ffff:127.0.0.1';
+  if (!isLocal || req.body.token !== SHUTDOWN_TOKEN) {
+    return res.status(403).json({ success: false, error: '无权停止服务' });
+  }
+  res.json({ success: true });
+  setImmediate(shutdown);
+});
 
 // ========== 操作日志 ==========
 function writeLog(rootDir, action, details) {
@@ -27,9 +106,9 @@ function writeLog(rootDir, action, details) {
 
 // ========== API: 获取操作日志列表 ==========
 app.get('/api/logs', (req, res) => {
-  const rootDir = req.query.root || DEFAULT_ROOT;
-  const logDir = path.join(rootDir, '操作日志');
   try {
+    const rootDir = resolveRoot(req.query.root);
+    const logDir = assertWithinRoot(rootDir, path.join(rootDir, '操作日志'), { mustExist: false });
     if (!fs.existsSync(logDir)) {
       return res.json({ success: true, files: [] });
     }
@@ -45,11 +124,15 @@ app.get('/api/logs', (req, res) => {
 
 // ========== API: 读取指定日志文件 ==========
 app.get('/api/logs/:filename', (req, res) => {
-  const rootDir = req.query.root || DEFAULT_ROOT;
-  const logDir = path.join(rootDir, '操作日志');
-  const logFile = path.join(logDir, req.params.filename);
   try {
-    if (!logFile.startsWith(logDir) || !fs.existsSync(logFile)) {
+    const rootDir = resolveRoot(req.query.root);
+    const filename = req.params.filename;
+    if (path.basename(filename) !== filename || !filename.endsWith('.log')) {
+      return res.json({ success: false, error: '日志文件名无效' });
+    }
+    const logDir = assertWithinRoot(rootDir, path.join(rootDir, '操作日志'), { mustExist: false });
+    const logFile = assertWithinRoot(rootDir, path.join(logDir, filename), { mustExist: false });
+    if (!fs.existsSync(logFile)) {
       return res.json({ success: false, error: '日志文件不存在' });
     }
     const content = fs.readFileSync(logFile, 'utf8');
@@ -61,7 +144,8 @@ app.get('/api/logs/:filename', (req, res) => {
 
 // ========== API 1: 递归获取目录树 ==========
 function buildTree(dirPath, rootPath) {
-  const stats = fs.statSync(dirPath);
+  const stats = fs.lstatSync(dirPath);
+  if (stats.isSymbolicLink()) return null;
   const name = path.basename(dirPath);
   const relativePath = path.relative(rootPath, dirPath).replace(/\\/g, '/');
 
@@ -87,6 +171,11 @@ function buildTree(dirPath, rootPath) {
         if (entry === 'node_modules') return false;
         // 跳过项目自身所在目录
         const fullPath = path.join(dirPath, entry);
+        try {
+          if (fs.lstatSync(fullPath).isSymbolicLink()) return false;
+        } catch (e) {
+          return false;
+        }
         if (path.resolve(fullPath) === path.resolve(__dirname)) return false;
         return true;
       })
@@ -117,10 +206,10 @@ function buildTree(dirPath, rootPath) {
 }
 
 app.get('/api/tree', (req, res) => {
-  const rootDir = req.query.root || DEFAULT_ROOT;
   try {
+    const rootDir = resolveRoot(req.query.root);
     const tree = buildTree(rootDir, rootDir);
-    res.json({ success: true, data: tree, root: rootDir.replace(/\\/g, '/') });
+    res.json({ success: true, data: tree, root: toPosix(rootDir) });
   } catch (e) {
     res.json({ success: false, error: e.message });
   }
@@ -128,14 +217,13 @@ app.get('/api/tree', (req, res) => {
 
 // ========== API 2: 预览文件内容 ==========
 app.get('/api/preview', async (req, res) => {
-  const filePath = req.query.path;
-  if (!filePath || !fs.existsSync(filePath)) {
-    return res.json({ success: false, error: '文件不存在' });
-  }
-
-  const ext = path.extname(filePath).toLowerCase();
-
   try {
+    const rootDir = resolveRoot(req.query.root);
+    if (!req.query.path) return res.json({ success: false, error: '文件不存在' });
+    const filePath = assertWithinRoot(rootDir, req.query.path, { type: 'file' });
+    const ext = path.extname(filePath).toLowerCase();
+    const fileStats = fs.statSync(filePath);
+    const metadata = { size: fileStats.size, mtime: fileStats.mtime };
     if (ext === '.xlsx' || ext === '.xls') {
       const buf = fs.readFileSync(filePath);
       const workbook = XLSX.read(buf, { type: 'buffer', cellStyles: true, cellNF: true, cellDates: true });
@@ -311,7 +399,7 @@ app.get('/api/preview', async (req, res) => {
         styledSheets[sheetName] = styleHtml;
       });
 
-      res.json({ success: true, type: 'excel', data: sheets, styled: styledSheets, fileName: path.basename(filePath) });
+      res.json({ success: true, type: 'excel', data: sheets, styled: styledSheets, fileName: path.basename(filePath), ...metadata });
     } else if (ext === '.docx' || ext === '.doc') {
       const buf = fs.readFileSync(filePath);
       const base64 = buf.toString('base64');
@@ -378,14 +466,14 @@ app.get('/api/preview', async (req, res) => {
           }
         }
       } catch(e) { /* ignore heading extraction errors */ }
-      res.json({ success: true, type: 'word', data: base64, html: mammothResult.value, headings, fileName: path.basename(filePath) });
+      res.json({ success: true, type: 'word', data: base64, html: mammothResult.value, headings, fileName: path.basename(filePath), ...metadata });
     } else if (['.txt', '.md', '.json', '.csv', '.log', '.xml', '.html', '.css', '.js'].includes(ext)) {
       const content = fs.readFileSync(filePath, 'utf-8');
-      res.json({ success: true, type: 'text', data: content, fileName: path.basename(filePath) });
+      res.json({ success: true, type: 'text', data: content, fileName: path.basename(filePath), ...metadata });
     } else if (['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.svg'].includes(ext)) {
       const base64 = fs.readFileSync(filePath).toString('base64');
       const mime = ext === '.svg' ? 'image/svg+xml' : `image/${ext.slice(1)}`;
-      res.json({ success: true, type: 'image', data: `data:${mime};base64,${base64}`, fileName: path.basename(filePath) });
+      res.json({ success: true, type: 'image', data: `data:${mime};base64,${base64}`, fileName: path.basename(filePath), ...metadata });
     } else {
       res.json({ success: false, error: `不支持预览此文件类型: ${ext}` });
     }
@@ -394,47 +482,76 @@ app.get('/api/preview', async (req, res) => {
   }
 });
 
-// ========== API 3: 移动"撤回"文件 ==========
-function findFilesWithKeyword(dirPath, keyword) {
+function collectMatchingFiles(dirPath, matcher, skipped = []) {
   const results = [];
   try {
     const entries = fs.readdirSync(dirPath, { withFileTypes: true });
     for (const entry of entries) {
+      if (entry.name.startsWith('.') || entry.name.startsWith('~$')) continue;
       const fullPath = path.join(dirPath, entry.name);
+      if (entry.isSymbolicLink()) continue;
       if (entry.isDirectory()) {
-        if (entry.name === 'node_modules' || entry.name === '撤回文件夹') continue;
+        if (SKIPPED_DIRECTORIES.has(entry.name)) continue;
         if (path.resolve(fullPath) === path.resolve(__dirname)) continue;
-        results.push(...findFilesWithKeyword(fullPath, keyword));
-      } else if (entry.isFile() && entry.name.includes(keyword) && !entry.name.startsWith('~$')) {
+        results.push(...collectMatchingFiles(fullPath, matcher, skipped));
+      } else if (entry.isFile() && matcher(fullPath, entry.name)) {
         results.push(fullPath);
       }
     }
   } catch (e) {
-    // 跳过无权限目录
+    skipped.push({ path: toPosix(dirPath), error: e.message });
   }
   return results;
 }
 
-app.post('/api/move-revoked', (req, res) => {
-  const rootDir = req.body.root || DEFAULT_ROOT;
-  const targetDir = path.join(rootDir, '撤回文件夹');
+function findRevokedAudioFiles(rootDir) {
+  const skipped = [];
+  const files = collectMatchingFiles(rootDir, (fullPath, name) => {
+    return name.includes('撤回') && AUDIO_EXTENSIONS.has(path.extname(fullPath).toLowerCase());
+  }, skipped);
+  return { files, skipped };
+}
 
+app.post('/api/scan-revoked-audio', (req, res) => {
+  try {
+    const rootDir = resolveRoot(req.body.root);
+    const { files, skipped } = findRevokedAudioFiles(rootDir);
+    const data = files.map(file => {
+      const stats = fs.statSync(file);
+      return {
+        file: toPosix(file),
+        relativePath: toPosix(path.relative(rootDir, file)),
+        size: stats.size,
+        mtime: stats.mtime
+      };
+    });
+    res.json({ success: true, data, totalScanned: data.length, skipped });
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+app.post('/api/move-revoked', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });
 
   try {
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
-    }
+    const rootDir = resolveRoot(req.body.root);
+    const requestedFiles = Array.isArray(req.body.files) ? req.body.files : [];
+    if (requestedFiles.length === 0) throw new Error('没有选择需要移动的音频文件');
 
-    const files = findFilesWithKeyword(rootDir, '撤回');
+    const targetDir = assertWithinRoot(rootDir, path.join(rootDir, '撤回文件夹'), { mustExist: false });
+    fs.mkdirSync(targetDir, { recursive: true });
+
+    const files = [...new Set(requestedFiles.map(file => assertWithinRoot(rootDir, file, { type: 'file' })))]
+      .filter(file => path.basename(file).includes('撤回') && AUDIO_EXTENSIONS.has(path.extname(file).toLowerCase()))
+      .filter(file => !toPosix(path.relative(rootDir, file)).startsWith('撤回文件夹/'));
+
     const moved = [];
     const errors = [];
-    const total = files.length;
-
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const fileName = path.basename(file);
-      res.write(`data: ${JSON.stringify({ type: 'progress', current: i + 1, total, file: fileName })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'progress', current: i + 1, total: files.length, file: fileName })}\n\n`);
 
       let destPath = path.join(targetDir, fileName);
       let counter = 1;
@@ -447,101 +564,120 @@ app.post('/api/move-revoked', (req, res) => {
 
       try {
         fs.renameSync(file, destPath);
-        moved.push({ from: file.replace(/\\/g, '/'), to: destPath.replace(/\\/g, '/') });
+        moved.push({ from: toPosix(file), to: toPosix(destPath) });
       } catch (e) {
-        errors.push({ file: file.replace(/\\/g, '/'), error: e.message });
+        errors.push({ file: toPosix(file), error: e.message });
       }
     }
 
     if (moved.length > 0) {
-      writeLog(rootDir, '移动撤回文件', `移动 ${moved.length} 个文件到撤回文件夹` + moved.map(m => `\n  ${m.from} → ${m.to}`).join(''));
+      writeLog(rootDir, '移动撤回音频', `移动 ${moved.length} 个音频到撤回文件夹` + moved.map(item => `\n  ${item.from} → ${item.to}`).join(''));
     }
     if (errors.length > 0) {
-      writeLog(rootDir, '移动撤回文件-失败', errors.map(e => `${e.file}: ${e.error}`).join('; '));
+      writeLog(rootDir, '移动撤回音频-失败', errors.map(item => `${item.file}: ${item.error}`).join('; '));
     }
 
-    res.write(`data: ${JSON.stringify({ type: 'done', success: true, moved, errors, targetDir: targetDir.replace(/\\/g, '/') })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: 'done', success: true, moved, errors, targetDir: toPosix(targetDir) })}\n\n`);
   } catch (e) {
     res.write(`data: ${JSON.stringify({ type: 'done', success: false, error: e.message })}\n\n`);
   }
   res.end();
 });
 
-// ========== API 4: 查找包含"返场故事"和"撤回"在同一行的Word文件 ==========
-function findWordFiles(dirPath) {
-  const results = [];
-  try {
-    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = path.join(dirPath, entry.name);
-      if (entry.isDirectory()) {
-        if (entry.name === 'node_modules' || entry.name === '撤回文件夹' || entry.name === '备份文件夹') continue;
-        if (path.resolve(fullPath) === path.resolve(__dirname)) continue;
-        results.push(...findWordFiles(fullPath));
-      } else if (entry.isFile() && (entry.name.endsWith('.docx') || entry.name.endsWith('.doc')) && !entry.name.startsWith('~$')) {
-        results.push(fullPath);
-      }
-    }
-  } catch (e) {
-    // 跳过
-  }
-  return results;
+function findWordFiles(rootDir) {
+  const skipped = [];
+  const files = collectMatchingFiles(rootDir, (fullPath, name) => {
+    return path.extname(name).toLowerCase() === '.docx';
+  }, skipped);
+  return { files, skipped };
 }
 
 async function checkWordForKeywords(filePath) {
-  try {
-    const result = await mammoth.extractRawText({ path: filePath });
-    const lines = result.value.split('\n');
-    const matchedLines = [];
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.includes('返场故事') && line.includes('撤回')) {
-        matchedLines.push({ lineNumber: i + 1, content: line.trim() });
-      }
+  const result = await mammoth.extractRawText({ path: filePath });
+  const lines = result.value.split('\n');
+  const matchedLines = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.includes('返场故事') && line.includes('撤回')) {
+      matchedLines.push({ lineNumber: i + 1, content: line.trim() });
     }
-    return matchedLines.length > 0 ? { file: filePath, matchedLines } : null;
-  } catch (e) {
-    return null;
   }
+  return matchedLines.length > 0 ? { file: filePath, matchedLines } : null;
 }
 
 app.post('/api/find-keywords', async (req, res) => {
-  const rootDir = req.body.root || DEFAULT_ROOT;
-
   res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });
 
   try {
-    const wordFiles = findWordFiles(rootDir);
+    const rootDir = resolveRoot(req.body.root);
+    const { files: wordFiles, skipped } = findWordFiles(rootDir);
     const results = [];
-    const total = wordFiles.length;
+    const errors = [];
 
     for (let i = 0; i < wordFiles.length; i++) {
       const file = wordFiles[i];
-      res.write(`data: ${JSON.stringify({ type: 'progress', current: i + 1, total, file: path.basename(file) })}\n\n`);
-      const match = await checkWordForKeywords(file);
-      if (match) {
-        match.file = match.file.replace(/\\/g, '/');
-        results.push(match);
+      res.write(`data: ${JSON.stringify({ type: 'progress', current: i + 1, total: wordFiles.length, file: path.basename(file) })}\n\n`);
+      try {
+        const match = await checkWordForKeywords(file);
+        if (match) {
+          match.file = toPosix(match.file);
+          match.relativePath = toPosix(path.relative(rootDir, file));
+          results.push(match);
+        }
+      } catch (e) {
+        errors.push({ file: toPosix(file), error: e.message });
       }
     }
 
-    res.write(`data: ${JSON.stringify({ type: 'done', success: true, data: results, totalScanned: total })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: 'done', success: true, data: results, totalScanned: wordFiles.length, skipped, errors })}\n\n`);
   } catch (e) {
     res.write(`data: ${JSON.stringify({ type: 'done', success: false, error: e.message })}\n\n`);
   }
   res.end();
 });
 
-// ========== API 5: 删除"返场故事"行及后续内容 ==========
-// 使用 python-docx 风格：通过 mammoth 读取，通过直接操作 docx XML 来删除内容
-const JSZip = require('jszip');
+async function validateDocxBuffer(buffer) {
+  const zip = await JSZip.loadAsync(buffer);
+  if (!zip.file('word/document.xml')) throw new Error('Word 文档缺少 document.xml');
+  await mammoth.extractRawText({ buffer });
+}
 
-async function removeContentFromLine(filePath, rootDir) {
+async function replaceFileSafely(filePath, newData, token) {
+  const tempPath = `${filePath}.ming-story-${token}.tmp`;
+  const rollbackPath = `${filePath}.ming-story-${token}.original`;
+  fs.writeFileSync(tempPath, newData);
+
+  try {
+    await validateDocxBuffer(fs.readFileSync(tempPath));
+    if (fs.existsSync(filePath)) fs.renameSync(filePath, rollbackPath);
+    try {
+      fs.renameSync(tempPath, filePath);
+      if (fs.existsSync(rollbackPath)) fs.unlinkSync(rollbackPath);
+    } catch (e) {
+      if (fs.existsSync(rollbackPath) && !fs.existsSync(filePath)) fs.renameSync(rollbackPath, filePath);
+      throw e;
+    }
+  } finally {
+    if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+    if (fs.existsSync(rollbackPath) && fs.existsSync(filePath)) fs.unlinkSync(rollbackPath);
+  }
+}
+
+function writeTaskManifest(rootDir, taskId, type, items) {
+  const taskDir = assertWithinRoot(rootDir, path.join(rootDir, '备份文件夹', taskId), { mustExist: false });
+  fs.mkdirSync(taskDir, { recursive: true });
+  const manifest = { version: 1, taskId, type, createdAt: new Date().toISOString(), items };
+  fs.writeFileSync(path.join(taskDir, 'manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
+  return manifest;
+}
+
+async function removeContentFromLine(filePath, rootDir, taskId) {
   const data = fs.readFileSync(filePath);
   const zip = await JSZip.loadAsync(data);
-  const documentXml = await zip.file('word/document.xml').async('string');
+  const documentFile = zip.file('word/document.xml');
+  if (!documentFile) throw new Error('Word 文档结构不完整');
+  const documentXml = await documentFile.async('string');
 
-  // 解析段落，找到同时包含"返场故事"和"撤回"的段落
   const paragraphRegex = /<w:p[ >][\s\S]*?<\/w:p>/g;
   const paragraphs = [];
   let match;
@@ -549,136 +685,220 @@ async function removeContentFromLine(filePath, rootDir) {
     paragraphs.push({ text: match[0], index: match.index, length: match[0].length });
   }
 
-  // 从段落中提取文本
   function extractText(pXml) {
     const textRegex = /<w:t[^>]*>([^<]*)<\/w:t>/g;
     let text = '';
-    let m;
-    while ((m = textRegex.exec(pXml)) !== null) {
-      text += m[1];
-    }
+    let textMatch;
+    while ((textMatch = textRegex.exec(pXml)) !== null) text += textMatch[1];
     return text;
   }
 
-  // 找到第一个同时包含"返场故事"和"撤回"的段落索引
-  let targetIdx = -1;
-  for (let i = 0; i < paragraphs.length; i++) {
-    const text = extractText(paragraphs[i].text);
-    if (text.includes('返场故事') && text.includes('撤回')) {
-      targetIdx = i;
-      break;
-    }
-  }
+  const targetIdx = paragraphs.findIndex(paragraph => {
+    const text = extractText(paragraph.text);
+    return text.includes('返场故事') && text.includes('撤回');
+  });
+  if (targetIdx === -1) return { modified: false, reason: '文件内容已变化，未找到匹配段落' };
 
-  if (targetIdx === -1) {
-    return { modified: false, reason: '未找到同时包含"返场故事"和"撤回"的段落' };
-  }
-
-  // 删除从 targetIdx 开始的所有段落
-  // 找到第一个要删除的段落的开始位置和最后一个段落的结束位置
   const startPos = paragraphs[targetIdx].index;
   const lastParagraph = paragraphs[paragraphs.length - 1];
   const endPos = lastParagraph.index + lastParagraph.length;
-
-  const newDocumentXml = documentXml.substring(0, startPos) + documentXml.substring(endPos);
-
-  zip.file('word/document.xml', newDocumentXml);
+  zip.file('word/document.xml', documentXml.substring(0, startPos) + documentXml.substring(endPos));
   const newData = await zip.generateAsync({ type: 'nodebuffer' });
 
-  // 备份原文件到备份文件夹
-  const backupDir = path.join(rootDir, '备份文件夹');
-  if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
-  const relPath = path.relative(rootDir, filePath);
-  const backupPath = path.join(backupDir, relPath);
-  const backupSubDir = path.dirname(backupPath);
-  if (!fs.existsSync(backupSubDir)) fs.mkdirSync(backupSubDir, { recursive: true });
+  const relativePath = path.relative(rootDir, filePath);
+  const backupPath = assertWithinRoot(rootDir, path.join(rootDir, '备份文件夹', taskId, 'files', relativePath), { mustExist: false });
+  fs.mkdirSync(path.dirname(backupPath), { recursive: true });
   fs.copyFileSync(filePath, backupPath);
 
-  // 写入修改后的文件
-  fs.writeFileSync(filePath, newData);
-
+  await replaceFileSafely(filePath, newData, taskId);
   return {
     modified: true,
     removedParagraphs: paragraphs.length - targetIdx,
-    backupPath: backupPath.replace(/\\/g, '/')
+    backupPath: toPosix(backupPath),
+    manifestItem: {
+      originalRelativePath: toPosix(relativePath),
+      backupRelativePath: toPosix(path.relative(rootDir, backupPath)),
+      removedParagraphs: paragraphs.length - targetIdx
+    }
   };
 }
 
 app.post('/api/remove-content', async (req, res) => {
-  const rootDir = req.body.root || DEFAULT_ROOT;
-  const specificFiles = req.body.files;
-
   res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });
 
   try {
-    let targetFiles = [];
+    const rootDir = resolveRoot(req.body.root);
+    const requestedFiles = Array.isArray(req.body.files) ? req.body.files : [];
+    if (requestedFiles.length === 0) throw new Error('没有选择需要处理的 Word 文档');
 
-    if (specificFiles && specificFiles.length > 0) {
-      targetFiles = specificFiles;
-    } else {
-      const wordFiles = findWordFiles(rootDir);
-      for (let i = 0; i < wordFiles.length; i++) {
-        res.write(`data: ${JSON.stringify({ type: 'progress', phase: 'scan', current: i + 1, total: wordFiles.length, file: path.basename(wordFiles[i]) })}\n\n`);
-        const match = await checkWordForKeywords(wordFiles[i]);
-        if (match) {
-          targetFiles.push(wordFiles[i]);
-        }
-      }
-    }
-
+    const targetFiles = [...new Set(requestedFiles.map(file => assertWithinRoot(rootDir, file, { type: 'file' })))]
+      .filter(file => path.extname(file).toLowerCase() === '.docx');
+    const taskId = createTaskId('word-remove');
     const results = [];
-    const total = targetFiles.length;
+    const manifestItems = [];
+
     for (let i = 0; i < targetFiles.length; i++) {
       const file = targetFiles[i];
-      res.write(`data: ${JSON.stringify({ type: 'progress', phase: 'process', current: i + 1, total, file: path.basename(file) })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'progress', phase: 'process', current: i + 1, total: targetFiles.length, file: path.basename(file) })}\n\n`);
       try {
-        const result = await removeContentFromLine(file, rootDir);
-        results.push({ file: file.replace(/\\/g, '/'), ...result });
+        const result = await removeContentFromLine(file, rootDir, taskId);
+        if (result.manifestItem) manifestItems.push(result.manifestItem);
+        delete result.manifestItem;
+        results.push({ file: toPosix(file), ...result });
       } catch (e) {
-        results.push({ file: file.replace(/\\/g, '/'), modified: false, error: e.message });
+        results.push({ file: toPosix(file), modified: false, error: e.message });
       }
     }
 
-    const modified = results.filter(r => r.modified);
-    const failed = results.filter(r => !r.modified && r.error);
+    const modified = results.filter(item => item.modified);
+    const failed = results.filter(item => !item.modified && item.error);
+    if (manifestItems.length > 0) writeTaskManifest(rootDir, taskId, 'remove-content', manifestItems);
     if (modified.length > 0) {
-      writeLog(rootDir, '删除返场故事内容', `处理 ${modified.length} 个文件` + modified.map(m => `\n  ${m.file} - 删除${m.removedParagraphs}段, 备份:${m.backupPath}`).join(''));
+      writeLog(rootDir, '删除返场故事内容', `任务 ${taskId}，处理 ${modified.length} 个文件` + modified.map(item => `\n  ${item.file} - 删除${item.removedParagraphs}段, 备份:${item.backupPath}`).join(''));
     }
     if (failed.length > 0) {
-      writeLog(rootDir, '删除返场故事内容-失败', failed.map(f => `${f.file}: ${f.error}`).join('; '));
+      writeLog(rootDir, '删除返场故事内容-失败', failed.map(item => `${item.file}: ${item.error}`).join('; '));
     }
 
-    res.write(`data: ${JSON.stringify({ type: 'done', success: true, data: results })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: 'done', success: true, data: results, taskId, restorable: modified.length > 0 })}\n\n`);
   } catch (e) {
     res.write(`data: ${JSON.stringify({ type: 'done', success: false, error: e.message })}\n\n`);
   }
   res.end();
 });
 
-// ========== 启动服务器 ==========
-const { exec } = require('child_process');
-const net = require('net');
+app.post('/api/restore-task', async (req, res) => {
+  try {
+    const rootDir = resolveRoot(req.body.root);
+    const taskId = normalizeTaskId(req.body.taskId);
+    const manifestPath = assertWithinRoot(rootDir, path.join(rootDir, '备份文件夹', taskId, 'manifest.json'), { type: 'file' });
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    if (manifest.type !== 'remove-content' || !Array.isArray(manifest.items)) throw new Error('该备份任务不能恢复');
 
-function checkPort(port) {
-  return new Promise((resolve) => {
-    const tester = net.createServer()
-      .once('error', () => resolve(true))
-      .once('listening', () => tester.close(() => resolve(false)))
-      .listen(port);
+    const restoreTaskId = createTaskId('before-restore');
+    const restoreItems = [];
+    const results = [];
+    for (const item of manifest.items) {
+      try {
+        const originalPath = assertWithinRoot(rootDir, path.join(rootDir, item.originalRelativePath), { mustExist: false });
+        const backupPath = assertWithinRoot(rootDir, path.join(rootDir, item.backupRelativePath), { type: 'file' });
+        const backupData = fs.readFileSync(backupPath);
+        await validateDocxBuffer(backupData);
+
+        if (fs.existsSync(originalPath)) {
+          const currentBackup = assertWithinRoot(rootDir, path.join(rootDir, '备份文件夹', restoreTaskId, 'files', item.originalRelativePath), { mustExist: false });
+          fs.mkdirSync(path.dirname(currentBackup), { recursive: true });
+          fs.copyFileSync(originalPath, currentBackup);
+          restoreItems.push({
+            originalRelativePath: item.originalRelativePath,
+            backupRelativePath: toPosix(path.relative(rootDir, currentBackup))
+          });
+        } else {
+          fs.mkdirSync(path.dirname(originalPath), { recursive: true });
+        }
+
+        await replaceFileSafely(originalPath, backupData, restoreTaskId);
+        results.push({ file: toPosix(originalPath), restored: true });
+      } catch (e) {
+        results.push({ file: item.originalRelativePath, restored: false, error: e.message });
+      }
+    }
+
+    if (restoreItems.length > 0) writeTaskManifest(rootDir, restoreTaskId, 'before-restore', restoreItems);
+    const restoredCount = results.filter(item => item.restored).length;
+    writeLog(rootDir, '恢复文档备份', `恢复任务 ${taskId}，成功 ${restoredCount}/${results.length}，恢复前版本备份任务 ${restoreTaskId}`);
+    res.json({ success: true, data: results, restoredCount, restoreTaskId });
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+app.get('/api/backups', (req, res) => {
+  try {
+    const rootDir = resolveRoot(req.query.root);
+    const backupDir = assertWithinRoot(rootDir, path.join(rootDir, '备份文件夹'), { mustExist: false });
+    if (!fs.existsSync(backupDir)) return res.json({ success: true, data: [] });
+    const data = fs.readdirSync(backupDir, { withFileTypes: true })
+      .filter(entry => entry.isDirectory())
+      .map(entry => {
+        try {
+          const manifest = JSON.parse(fs.readFileSync(path.join(backupDir, entry.name, 'manifest.json'), 'utf8'));
+          return manifest.type === 'remove-content' ? { taskId: manifest.taskId, createdAt: manifest.createdAt, count: manifest.items.length } : null;
+        } catch (e) {
+          return null;
+        }
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    res.json({ success: true, data });
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+let serverInstance = null;
+
+function writeServerState(port) {
+  const state = {
+    pid: process.pid,
+    port,
+    host: HOST,
+    nodePath: process.execPath,
+    serverPath: __filename,
+    projectDir: __dirname,
+    shutdownToken: SHUTDOWN_TOKEN,
+    startedAt: new Date().toISOString()
+  };
+  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
+}
+
+function cleanupServerState() {
+  try {
+    if (!fs.existsSync(STATE_FILE)) return;
+    const state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    if (state.pid === process.pid) fs.unlinkSync(STATE_FILE);
+  } catch (e) {
+    // State cleanup must not prevent shutdown.
+  }
+}
+
+function listenOnAvailablePort(port = START_PORT) {
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, HOST);
+    server.once('listening', () => {
+      serverInstance = server;
+      writeServerState(port);
+      console.log(`文件管理系统已启动: http://${HOST}:${port}`);
+      console.log(`管理目录: ${DEFAULT_ROOT}`);
+      resolve({ server, port });
+    });
+    server.once('error', error => {
+      if (error.code === 'EADDRINUSE' && port < MAX_PORT) {
+        resolve(listenOnAvailablePort(port + 1));
+      } else {
+        reject(error);
+      }
+    });
   });
 }
 
-checkPort(PORT).then((inUse) => {
-  if (inUse) {
-    console.log(`端口 ${PORT} 已被占用，服务可能已在运行`);
-    console.log(`正在打开浏览器: http://localhost:${PORT}`);
-    exec(`start http://localhost:${PORT}`);
-    setTimeout(() => process.exit(0), 1000);
-    return;
-  }
-  app.listen(PORT, () => {
-    console.log(`文件管理系统已启动: http://localhost:${PORT}`);
-    console.log(`管理目录: ${DEFAULT_ROOT}`);
-    exec(`start http://localhost:${PORT}`);
+function shutdown() {
+  cleanupServerState();
+  if (!serverInstance) return process.exit(0);
+  serverInstance.close(() => process.exit(0));
+  setTimeout(() => process.exit(1), 3000).unref();
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+process.on('exit', cleanupServerState);
+
+if (require.main === module) {
+  listenOnAvailablePort().catch(error => {
+    cleanupServerState();
+    console.error(`服务启动失败: ${error.message}`);
+    process.exit(1);
   });
-});
+}
+
+module.exports = { app, listenOnAvailablePort, resolveRoot, assertWithinRoot };

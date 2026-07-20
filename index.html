@@ -6,7 +6,7 @@
   <title>大明帝国 · 文件管理</title>
   <script>
     if (location.protocol === 'file:') {
-      document.write('<style>body{margin:0;font-family:"Microsoft YaHei",sans-serif;background:#f5f1e8;display:flex;align-items:center;justify-content:center;height:100vh;}</style></head><body><div style="text-align:center;background:#fff;border:2px solid #c0392b;border-radius:8px;padding:40px 50px;box-shadow:0 4px 20px rgba(0,0,0,0.1);"><h2 style="color:#c0392b;margin-bottom:16px;">请通过 start.bat 启动</h2><p style="margin-bottom:12px;line-height:1.8;">直接打开 index.html 无法使用。</p><p style="margin-bottom:20px;">请双击 <b>start.bat</b> 启动服务。</p><a href="http://localhost:3000" style="display:inline-block;padding:10px 24px;background:#c0392b;color:#fff;border-radius:4px;text-decoration:none;">如已启动，点击进入</a></div></body></html>');
+      document.write('<style>body{margin:0;font-family:"Microsoft YaHei",sans-serif;background:#f5f1e8;display:flex;align-items:center;justify-content:center;height:100vh;}</style></head><body><div style="text-align:center;background:#fff;border:2px solid #c0392b;border-radius:8px;padding:40px 50px;box-shadow:0 4px 20px rgba(0,0,0,0.1);"><h2 style="color:#c0392b;margin-bottom:16px;">请通过启动脚本打开</h2><p style="margin-bottom:12px;line-height:1.8;">直接打开 index.html 无法使用。</p><p style="margin-bottom:20px;">请双击 <b>启动文件管理系统.vbs</b> 启动服务。</p><a href="http://127.0.0.1:3000" style="display:inline-block;padding:10px 24px;background:#c0392b;color:#fff;border-radius:4px;text-decoration:none;">如已启动，点击进入</a></div></body></html>');
       document.close();
     }
   </script>
@@ -214,9 +214,36 @@
 
     .header-actions {
       display: flex;
-      gap: 10px;
+      gap: 6px;
       align-items: center;
+      min-width: 0;
     }
+
+    .header-motto,
+    .motto-reveal { display: none !important; }
+
+    .current-root-label {
+      max-width: 320px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--ink-muted);
+      font-size: 12px;
+      padding-right: 10px;
+      border-right: 1px solid var(--hairline);
+    }
+
+    .btn-icon {
+      width: auto;
+      min-width: 58px;
+      height: 34px;
+      padding: 0 9px;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .btn-icon svg { display: block; width: 17px; height: 17px; min-width: 17px; stroke: currentColor; }
+    .header-action-text { display: inline-block; font-size: 12px; line-height: 1; }
 
     .root-path {
       background: var(--canvas);
@@ -266,11 +293,11 @@
 
     .btn-danger {
       background: transparent;
-      border: 1.5px solid #2d6a6a;
-      color: #2d6a6a;
+      border: 1.5px solid var(--danger);
+      color: var(--danger);
     }
-    .btn-danger:hover { background: #2d6a6a; color: #fff; box-shadow: 0 2px 8px rgba(45,106,106,0.2); }
-    .btn-danger:active { background: #245858; color: #fff; }
+    .btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 2px 8px rgba(192,57,43,0.2); }
+    .btn-danger:active { background: var(--danger-hover); color: #fff; }
 
     .btn-warning {
       background: transparent;
@@ -282,11 +309,11 @@
 
     .btn-success {
       background: transparent;
-      border: 1.5px solid #6b3a5c;
-      color: #6b3a5c;
+      border: 1.5px solid var(--success);
+      color: var(--success);
     }
-    .btn-success:hover { background: #6b3a5c; color: #fff; box-shadow: 0 2px 8px rgba(107,58,92,0.2); }
-    .btn-success:active { background: #572e4b; color: #fff; }
+    .btn-success:hover { background: var(--success); color: #fff; box-shadow: 0 2px 8px rgba(39,113,58,0.2); }
+    .btn-success:active { background: var(--success-hover); color: #fff; }
 
     .btn-outline {
       border: 1px solid var(--hairline-strong);
@@ -466,6 +493,82 @@
       background: var(--surface-1);
       flex-wrap: wrap;
       align-items: center;
+    }
+
+    .toolbar-note {
+      margin-left: auto;
+      color: var(--ink-subtle);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .selection-list {
+      max-height: 48vh;
+      overflow: auto;
+      border: 1px solid var(--hairline);
+      background: var(--surface-1);
+      margin: 12px 0;
+    }
+
+    .selection-row {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--hairline);
+      align-items: start;
+    }
+
+    .selection-row:last-child { border-bottom: 0; }
+    .selection-row:hover { background: var(--surface-2); }
+    .selection-row input { margin-top: 3px; }
+    .selection-file { color: var(--ink); font-weight: 600; word-break: break-all; }
+    .doc-preview-link { border: 0; padding: 0; background: none; color: var(--primary); text-align: left; text-decoration: underline; cursor: pointer; font: inherit; }
+    .selection-detail { margin-top: 4px; color: var(--ink-subtle); font-size: 12px; line-height: 1.6; }
+
+    .task-progress {
+      padding: 18px;
+      border: 1px solid var(--hairline);
+      background: var(--surface-1);
+    }
+
+    .task-progress-bar {
+      height: 8px;
+      background: var(--surface-3);
+      overflow: hidden;
+      margin: 12px 0 8px;
+    }
+
+    .task-progress-bar span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.2s ease;
+    }
+
+    .task-current-file {
+      color: var(--ink-subtle);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .danger-note {
+      padding: 10px 12px;
+      border-left: 3px solid var(--danger);
+      background: #f9e5e1;
+      color: var(--ink-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1100px) {
+      .header { padding: 0 14px; }
+      .header h1 { font-size: 17px; letter-spacing: 1px; }
+      .current-root-label { max-width: 180px; }
+      .toolbar-note { display: none; }
     }
 
     .preview-area {
@@ -1163,26 +1266,24 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       大明帝国 · 文件管理
     </h1>
-    <div class="header-motto">
-      <div class="motto-dot"></div>
-      <span>性格</span>
-      <div class="motto-dot"></div>
-      <span>格局</span>
-      <div class="motto-dot"></div>
-      <span>人心</span>
-      <div class="motto-dot"></div>
-      <div class="motto-seal" onclick="document.getElementById('mottoReveal').classList.add('show')" title="印">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      </div>
-    </div>
-    <div class="motto-reveal" id="mottoReveal" onclick="this.classList.remove('show')">
-      <div class="motto-reveal-text">知行合一</div>
-    </div>
     <div class="header-actions">
-      <input type="text" class="root-path" id="rootPath" placeholder="输入根目录路径（默认上级目录）">
-      <button class="btn btn-primary" onclick="loadTree()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        刷新
+      <span class="current-root-label" id="currentRootLabel" title="当前管理目录">正在读取目录...</span>
+      <input type="hidden" id="rootPath">
+      <button class="btn btn-outline btn-icon" onclick="loadTree()" title="刷新目录" aria-label="刷新目录">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span class="header-action-text">刷新</span>
+      </button>
+      <button class="btn btn-outline btn-icon" onclick="showRootSettings()" title="目录设置" aria-label="目录设置">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.17.38.38.72.6 1 .3.36.7.58 1.1.6h.1v4h-.1a1.7 1.7 0 0 0-1.7 1.4z"/></svg>
+        <span class="header-action-text">设置</span>
+      </button>
+      <button class="btn btn-outline btn-icon" onclick="viewLogs()" title="操作日志" aria-label="操作日志">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="header-action-text">日志</span>
+      </button>
+      <button class="btn btn-outline btn-icon" onclick="showGuide()" title="使用说明" aria-label="使用说明">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span class="header-action-text">帮助</span>
       </button>
     </div>
   </div>
@@ -1205,35 +1306,21 @@
 
     <div class="content">
       <div class="toolbar">
-        <button class="btn btn-danger" id="btnMoveRevoked" onclick="moveRevokedFiles()">
+        <button class="btn btn-primary" id="btnMoveRevoked" onclick="moveRevokedFiles()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          移动撤回的返场故事音频文件
-          <span class="btn-tip" data-tip="将所有文件名包含'撤回'的音频文件移动到撤回文件夹中">
+          整理撤回音频
+          <span class="btn-tip" data-tip="扫描文件名包含“撤回”的音频，确认后移动到撤回文件夹">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
           </span>
         </button>
-        <button class="btn btn-warning" id="btnFindKeywords" onclick="findKeywordFiles()">
+        <button class="btn btn-danger" id="btnProcessDocuments" onclick="processRevokedDocuments()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          查找包含撤回返场故事的文档
-          <span class="btn-tip" data-tip="搜索Word文档中同时包含返场故事和撤回关键词的文件">
+          处理撤回文档
+          <span class="btn-tip" data-tip="扫描 Word 文档，选择后删除命中段落及其后内容，并自动备份">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
           </span>
         </button>
-        <button class="btn btn-success" id="btnRemoveContent" onclick="removeContent()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          删除需要撤回的返场故事
-          <span class="btn-tip" data-tip="删除匹配文档中返场故事+撤回所在行及后续内容，原文件自动备份">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
-          </span>
-        </button>
-        <button class="btn btn-outline" onclick="viewLogs()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          操作日志
-        </button>
-        <button class="btn btn-primary" style="margin-left:auto;" onclick="showGuide()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          操作说明
-        </button>
+        <span class="toolbar-note">所有批量操作都会先扫描并让你确认</span>
       </div>
       <div class="preview-area" id="previewArea">
         <div class="preview-placeholder">
@@ -1302,8 +1389,8 @@
           服务未启动，请先双击以下文件启动服务：
         </p>
         <div style="background:var(--surface-1); border:1px solid var(--hairline); border-radius:4px; padding:20px 32px; margin-bottom:20px;">
-          <code style="font-size:16px; color:var(--primary); font-family:'Microsoft YaHei',monospace;">start.bat</code>
-          <p style="font-size:12px; color:var(--ink-tertiary); margin-top:8px; font-family:'Microsoft YaHei',sans-serif;">或双击 启动文件管理系统.vbs（无黑窗口）</p>
+          <code style="font-size:16px; color:var(--primary); font-family:'Microsoft YaHei',monospace;">启动文件管理系统.vbs</code>
+          <p style="font-size:12px; color:var(--ink-tertiary); margin-top:8px; font-family:'Microsoft YaHei',sans-serif;">启动后浏览器会自动打开</p>
         </div>
         <a href="http://localhost:3000" style="display:inline-block; padding:10px 24px; background:var(--primary); color:var(--on-primary); border:none; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer; font-family:'Microsoft YaHei',sans-serif; text-decoration:none;">服务已启动，点击进入</a>
       </div>
@@ -1325,7 +1412,8 @@
     let currentRoot = '';
     let totalFiles = 0;
     let activeLabel = null;
-    let foundKeywordFiles = [];
+    let audioCandidates = [];
+    let documentCandidates = [];
 
     // ===== Tooltip =====
     (function() {
@@ -1380,6 +1468,26 @@
       }, 3000);
     }
 
+    function showRootSettings() {
+      const saved = document.getElementById('rootPath').value.trim();
+      showModal('目录设置', `
+        <p style="margin-bottom:10px;">留空将使用程序所在文件夹的上级目录。</p>
+        <input id="rootSettingsInput" type="text" value="${escapeHtml(saved).replace(/"/g, '&quot;')}" placeholder="输入 Windows 文件夹路径"
+          style="width:100%;padding:9px 10px;border:1px solid var(--hairline-strong);border-radius:4px;background:var(--canvas);color:var(--ink);font-size:13px;outline:none;">
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+          <button class="btn btn-primary" onclick="applyRootSettings()">应用目录</button>
+        </div>
+      `);
+      setTimeout(() => document.getElementById('rootSettingsInput')?.focus(), 0);
+    }
+
+    function applyRootSettings() {
+      const input = document.getElementById('rootSettingsInput');
+      document.getElementById('rootPath').value = input ? input.value.trim() : '';
+      closeModal();
+      loadTree();
+    }
+
     // ===== Guide =====
     function showGuide() {
       const content = `
@@ -1393,17 +1501,17 @@
 
           <h3 style="font-family:'SimSun',serif;font-size:16px;margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">二、使用方法</h3>
           <p style="margin:0 0 4px;color:var(--ink-muted);">
-            <strong>1. 启动</strong> — 双击 <code>启动文件管理系统.vbs</code> 或 <code>start.bat</code>，浏览器自动打开。<br>
-            <strong>2. 选择目录</strong> — 顶部输入框可指定管理目录，留空则默认管理上级目录。系统会自动记忆上次的目录。<br>
+            <strong>1. 启动</strong> — 双击 <code>启动文件管理系统.vbs</code>，浏览器自动打开。开发环境也可以使用 <code>start.bat</code>。<br>
+            <strong>2. 选择目录</strong> — 默认管理程序所在文件夹的上级目录；需要切换范围时，从右上角目录设置修改。系统会自动记忆上次的目录。<br>
             <strong>3. 浏览文件</strong> — 左侧目录树点击文件夹展开，点击文件在右侧预览。<br>
-            <strong>4. 执行操作</strong> — 使用顶部工具栏按钮进行批量操作，操作前会弹出确认提示。<br>
-            <strong>5. 查看日志</strong> — 每次操作自动记录日志，可通过"操作日志"按钮查看。
+            <strong>4. 执行操作</strong> — 批量操作会先扫描并显示文件清单，确认后才会执行。<br>
+            <strong>5. 查看日志</strong> — 每次操作自动记录日志，可通过右上角日志按钮查看。
           </p>
 
           <h3 style="font-family:'SimSun',serif;font-size:16px;margin:16px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">三、功能详细说明</h3>
 
           <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #2563eb;">
-            <strong style="color:#2563eb;">🔀 移动撤回的返场故事音频文件</strong><br>
+            <strong style="color:#2563eb;">整理撤回音频</strong><br>
             <span style="color:var(--ink-muted);">
               扫描当前目录下所有文件，将文件名包含"撤回"的音频文件自动移动到"撤回文件夹"中。<br>
               重名文件会自动添加编号后缀。操作完成后目录树自动刷新。
@@ -1411,19 +1519,18 @@
           </div>
 
           <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #d4a017;">
-            <strong style="color:#d4a017;">🔍 查找包含撤回返场故事的文档</strong><br>
+            <strong style="color:#d4a017;">处理撤回文档</strong><br>
             <span style="color:var(--ink-muted);">
-              扫描所有 Word 文档（.docx），查找内容中同时包含"返场故事"和"撤回"关键词在同一行的文件。<br>
-              搜索结果中的文件名可点击直接预览。找到的文件会被记录，供"删除"操作使用。
+              扫描所有 Word 文档（.docx），查找内容中同时包含"返场故事"和"撤回"关键词的段落。<br>
+              用户可以先勾选文件，再删除命中段落及其后的全部内容，原文件会自动备份。
             </span>
           </div>
 
           <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #7c3aed;">
-            <strong style="color:#7c3aed;">🗑️ 删除需要撤回的返场故事</strong><br>
+            <strong style="color:#7c3aed;">安全修改与恢复</strong><br>
             <span style="color:var(--ink-muted);">
-              对匹配的 Word 文档，删除从"返场故事+撤回"所在段落开始的所有后续内容。<br>
-              操作前原文件会自动备份到"备份文件夹"，可随时恢复。<br>
-              如果已执行过"查找"操作，将直接处理已找到的文件；否则会先搜索再删除。
+              对用户勾选的 Word 文档，删除从"返场故事+撤回"所在段落开始的所有后续内容。<br>
+              操作前原文件会自动备份到"备份文件夹"，完成后可以一键恢复。
             </span>
           </div>
 
@@ -1672,6 +1779,10 @@
 
         currentRoot = data.root;
         localStorage.setItem('fileManager_root', currentRoot);
+        const rootLabel = currentRoot.split(/[\\/]/).filter(Boolean).pop() || currentRoot;
+        const rootLabelEl = document.getElementById('currentRootLabel');
+        rootLabelEl.textContent = rootLabel;
+        rootLabelEl.title = currentRoot;
         totalFiles = 0;
         container.innerHTML = '';
         container.appendChild(renderTree(data.data));
@@ -1691,7 +1802,7 @@
       _tocReadingBuilt = false;
 
       try {
-        const resp = await fetch(`/api/preview?path=${encodeURIComponent(fullPath)}`);
+        const resp = await fetch(`/api/preview?root=${encodeURIComponent(currentRoot)}&path=${encodeURIComponent(fullPath)}`);
         const data = await resp.json();
 
         if (!data.success) {
@@ -2362,6 +2473,7 @@
     // ===== SSE Helper =====
     function ssePost(url, body, { onProgress, onDone, onError }) {
       fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(resp => {
+        if (!resp.ok || !resp.body) throw new Error(`服务器返回 ${resp.status}`);
         const reader = resp.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
@@ -2386,177 +2498,221 @@
       }).catch(e => onError(e));
     }
 
-    // ===== Button 1: Move "撤回" files =====
+    function formatFileSize(size) {
+      if (!Number.isFinite(size)) return '';
+      if (size < 1024) return `${size} B`;
+      if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+      return `${(size / 1024 / 1024).toFixed(1)} MB`;
+    }
+
+    function showTaskProgress(title, message = '准备开始') {
+      showModal(title, `<div class="task-progress">
+        <div id="taskProgressText">${escapeHtml(message)}</div>
+        <div class="task-progress-bar"><span id="taskProgressBar"></span></div>
+        <div id="taskProgressFile" class="task-current-file"></div>
+      </div>`);
+    }
+
+    function updateTaskProgress(current, total, file, label) {
+      const text = document.getElementById('taskProgressText');
+      const bar = document.getElementById('taskProgressBar');
+      const currentFile = document.getElementById('taskProgressFile');
+      const pct = total > 0 ? Math.round(current / total * 100) : 0;
+      if (text) text.textContent = `${label} ${current}/${total}（${pct}%）`;
+      if (bar) bar.style.width = `${pct}%`;
+      if (currentFile) currentFile.textContent = file || '';
+    }
+
+    function selectedIndexes(selector) {
+      return [...document.querySelectorAll(selector + ':checked')].map(el => Number(el.value));
+    }
+
+    function updateSelectionButton(selector, buttonId, prefix, suffix) {
+      const count = document.querySelectorAll(`.${selector}:checked`).length;
+      const button = document.getElementById(buttonId);
+      if (button) button.textContent = `${prefix} ${count} ${suffix}`;
+    }
+
+    // ===== Button 1: Organize revoked audio =====
     async function moveRevokedFiles() {
-      const ok = await showConfirm({
-        title: '移动"撤回"文件',
-        message: '将所有文件名包含"撤回"的文件移动到"撤回文件夹"中。\n\n此操作会改变文件位置，确认继续？',
-        type: 'warning',
-        okText: '确认移动'
-      });
-      if (!ok) return;
-
       const btn = document.getElementById('btnMoveRevoked');
-      const btnRestore = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 移动撤回的返场故事音频文件 <span class="btn-tip" data-tip="将所有文件名包含\'撤回\'的音频文件移动到撤回文件夹中"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg></span>';
       btn.disabled = true;
-      btn.innerHTML = '<div class="loading"></div> 处理中...';
-
-      ssePost('/api/move-revoked', { root: currentRoot }, {
-        onProgress(msg) {
-          const pct = Math.round(msg.current / msg.total * 100);
-          btn.innerHTML = `<div class="loading"></div> 移动中 ${msg.current}/${msg.total} (${pct}%) ${msg.file}`;
-        },
-        onDone(data) {
-          btn.disabled = false;
-          btn.innerHTML = btnRestore;
-          if (data.success) {
-            let content = '';
-            if (data.moved.length === 0) {
-              content = '<div class="result-item info"><div class="result-file">未找到文件名包含"撤回"的文件</div></div>';
-            } else {
-              content = `<p style="margin-bottom:12px;">成功移动 <strong>${data.moved.length}</strong> 个文件到: <code>${data.targetDir}</code></p>`;
-              data.moved.forEach(m => {
-                content += `<div class="result-item success"><div class="result-file">${m.from.split('/').pop()}</div><div class="result-detail">从: ${m.from}<br>到: ${m.to}</div></div>`;
-              });
-            }
-            if (data.errors.length > 0) {
-              data.errors.forEach(e => {
-                content += `<div class="result-item error"><div class="result-file">${e.file}</div><div class="result-detail">错误: ${e.error}</div></div>`;
-              });
-            }
-            showModal('移动"撤回"文件结果', content);
-            loadTree();
-          } else {
-            showToast('操作失败: ' + data.error, 'error');
-          }
-        },
-        onError(e) {
-          btn.disabled = false;
-          btn.innerHTML = btnRestore;
-          showToast('请求失败: ' + e.message, 'error');
+      btn.innerHTML = '<div class="loading"></div> 扫描中...';
+      showTaskProgress('扫描撤回音频', '正在查找文件名包含“撤回”的音频');
+      try {
+        const resp = await fetch('/api/scan-revoked-audio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ root: currentRoot }) });
+        const data = await resp.json();
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
+        if (!data.success) throw new Error(data.error);
+        audioCandidates = data.data;
+        if (audioCandidates.length === 0) {
+          showModal('整理撤回音频', '<div class="result-item info"><div class="result-file">没有找到文件名包含“撤回”的音频文件</div></div>');
+          return;
         }
-      });
-    }
-
-    // ===== Button 2: Find keyword files =====
-    function findKeywordFiles() {
-      const btn = document.getElementById('btnFindKeywords');
-      const btnRestore = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 查找包含撤回返场故事的文档 <span class="btn-tip" data-tip="搜索Word文档中同时包含返场故事和撤回关键词的文件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg></span>';
-      btn.disabled = true;
-      btn.innerHTML = '<div class="loading"></div> 搜索中...';
-
-      ssePost('/api/find-keywords', { root: currentRoot }, {
-        onProgress(msg) {
-          const pct = Math.round(msg.current / msg.total * 100);
-          btn.innerHTML = `<div class="loading"></div> 搜索中 ${msg.current}/${msg.total} (${pct}%) ${msg.file}`;
-        },
-        onDone(data) {
-          btn.disabled = false;
-          btn.innerHTML = btnRestore;
-          if (data.success) {
-            foundKeywordFiles = data.data.map(d => d.file);
-            let content = `<p style="margin-bottom:12px;">共扫描 <strong>${data.totalScanned}</strong> 个Word文件，找到 <strong>${data.data.length}</strong> 个匹配文件</p>`;
-            if (data.data.length === 0) {
-              content += '<div class="result-item info"><div class="result-file">未找到同时包含"返场故事"和"撤回"在同一行的Word文件</div></div>';
-            } else {
-              data.data.forEach(item => {
-                const fileName = item.file.split('/').pop();
-                content += `<div class="result-item success"><div class="result-file" style="cursor:pointer;color:var(--primary);text-decoration:underline;" onclick="closeModal();previewFile('${item.file.replace(/'/g, "\\'")}','${fileName.replace(/'/g, "\\'")}')" title="点击预览此文件">${item.file}</div>`;
-                item.matchedLines.forEach(line => {
-                  content += `<div class="result-detail">第 ${line.lineNumber} 行: ${escapeHtml(line.content)}</div>`;
-                });
-                content += '</div>';
-              });
-            }
-            showModal('查找"返场故事+撤回"结果', content);
-            showToast(`找到 ${data.data.length} 个匹配文件`, data.data.length > 0 ? 'success' : 'info');
-          } else {
-            showToast('搜索失败: ' + data.error, 'error');
-          }
-        },
-        onError(e) {
-          btn.disabled = false;
-          btn.innerHTML = btnRestore;
-          showToast('请求失败: ' + e.message, 'error');
-        }
-      });
-    }
-
-    // ===== Button 3: Remove content =====
-    async function removeContent() {
-      let message = '将删除匹配Word文件中同时包含"返场故事"和"撤回"的行及后续所有内容。\n\n原文件会自动备份到"备份文件夹"。';
-      if (foundKeywordFiles.length > 0) {
-        message += `\n\n已找到 ${foundKeywordFiles.length} 个文件待处理。`;
-      } else {
-        message += '\n\n将先搜索匹配文件再执行删除。';
+        let content = `<p>共找到 <strong>${audioCandidates.length}</strong> 个音频文件，请确认要移动的文件。</p><div class="selection-list">`;
+        audioCandidates.forEach((item, index) => {
+          content += `<label class="selection-row"><input class="audio-select" type="checkbox" value="${index}" checked onchange="updateSelectionButton('audio-select','audioActionButton','移动选中的','个音频')"><span><span class="selection-file">${escapeHtml(item.relativePath)}</span><span class="selection-detail">${formatFileSize(item.size)}</span></span></label>`;
+        });
+        content += `</div><div style="display:flex;justify-content:flex-end;"><button id="audioActionButton" class="btn btn-primary" onclick="executeSelectedAudio()">移动选中的 ${audioCandidates.length} 个音频</button></div>`;
+        showModal('选择要整理的撤回音频', content);
+      } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
+        showToast('扫描失败：' + e.message, 'error');
       }
-      const ok = await showConfirm({
-        title: '删除"返场故事"后续内容',
-        message: message,
-        type: 'danger',
-        okText: '确认删除'
-      });
+    }
+
+    async function executeSelectedAudio() {
+      const files = selectedIndexes('.audio-select').map(index => audioCandidates[index]?.file).filter(Boolean);
+      if (files.length === 0) return showToast('请至少选择一个音频文件', 'info');
+      const ok = await showConfirm({ title: '确认整理撤回音频', message: `将移动 ${files.length} 个音频到“撤回文件夹”。\n\n文件位置会发生变化，确认继续？`, type: 'warning', okText: '确认移动' });
       if (!ok) return;
-
-      const btn = document.getElementById('btnRemoveContent');
-      const btnRestore = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> 删除需要撤回的返场故事 <span class="btn-tip" data-tip="删除匹配文档中返场故事+撤回所在行及后续内容，原文件自动备份"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg></span>';
+      closeModal();
+      const btn = document.getElementById('btnMoveRevoked');
       btn.disabled = true;
-      btn.innerHTML = '<div class="loading"></div> 处理中...';
-
-      const body = { root: currentRoot };
-      if (foundKeywordFiles.length > 0) {
-        body.files = foundKeywordFiles;
-      }
-
-      ssePost('/api/remove-content', body, {
-        onProgress(msg) {
-          const pct = Math.round(msg.current / msg.total * 100);
-          const label = msg.phase === 'scan' ? '扫描中' : '删除中';
-          btn.innerHTML = `<div class="loading"></div> ${label} ${msg.current}/${msg.total} (${pct}%) ${msg.file}`;
-        },
+      btn.innerHTML = '<div class="loading"></div> 整理中...';
+      showTaskProgress('整理撤回音频');
+      ssePost('/api/move-revoked', { root: currentRoot, files }, {
+        onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, '移动中'); },
         onDone(data) {
           btn.disabled = false;
-          btn.innerHTML = btnRestore;
-          if (data.success) {
-            let content = '';
-            if (data.data.length === 0) {
-              content = '<div class="result-item info"><div class="result-file">没有需要处理的文件</div></div>';
-            } else {
-              data.data.forEach(item => {
-                if (item.modified) {
-                  content += `<div class="result-item success"><div class="result-file">${item.file}</div><div class="result-detail">已删除 ${item.removedParagraphs} 个段落<br>备份: ${item.backupPath}</div></div>`;
-                } else {
-                  content += `<div class="result-item error"><div class="result-file">${item.file}</div><div class="result-detail">${item.error || item.reason}</div></div>`;
-                }
-              });
-            }
-            showModal('删除"返场故事"后续内容结果', content);
-            const modCount = data.data.filter(d => d.modified).length;
-            showToast(`处理完成: ${modCount} 个文件已修改`, modCount > 0 ? 'success' : 'info');
-          } else {
-            showToast('操作失败: ' + data.error, 'error');
-          }
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
+          if (!data.success) return showToast('操作失败：' + data.error, 'error');
+          let content = `<p>成功移动 <strong>${data.moved.length}</strong> 个音频到 <code>${escapeHtml(data.targetDir)}</code>。</p>`;
+          data.moved.forEach(item => { content += `<div class="result-item success"><div class="result-file">${escapeHtml(item.from.split('/').pop())}</div><div class="result-detail">已移动到：${escapeHtml(item.to)}</div></div>`; });
+          data.errors.forEach(item => { content += `<div class="result-item error"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">错误：${escapeHtml(item.error)}</div></div>`; });
+          showModal('整理撤回音频结果', content);
+          loadTree();
         },
         onError(e) {
           btn.disabled = false;
-          btn.innerHTML = btnRestore;
-          showToast('请求失败: ' + e.message, 'error');
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
+          showToast('请求失败：' + e.message, 'error');
         }
       });
+    }
+
+    // ===== Button 2: Scan and process revoked documents =====
+    function processRevokedDocuments() {
+      const btn = document.getElementById('btnProcessDocuments');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading"></div> 扫描中...';
+      showTaskProgress('扫描撤回文档', '正在查找同时包含“返场故事”和“撤回”的 Word 段落');
+      ssePost('/api/find-keywords', { root: currentRoot }, {
+        onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, '扫描中'); },
+        onDone(data) {
+          btn.disabled = false;
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
+          if (!data.success) return showToast('扫描失败：' + data.error, 'error');
+          documentCandidates = data.data;
+          if (documentCandidates.length === 0) {
+            showModal('处理撤回文档', `<p>共扫描 ${data.totalScanned} 个 Word 文档。</p><div class="result-item info"><div class="result-file">没有找到匹配段落</div></div>`);
+            return;
+          }
+          let content = `<p>共扫描 <strong>${data.totalScanned}</strong> 个 Word 文档，找到 <strong>${documentCandidates.length}</strong> 个匹配文件。</p><div class="danger-note">删除范围：从命中“返场故事 + 撤回”的段落开始，删除该段及其后的全部内容。原文件会先备份。</div><div class="selection-list">`;
+          documentCandidates.forEach((item, index) => {
+            content += `<label class="selection-row"><input class="document-select" type="checkbox" value="${index}" checked onchange="updateSelectionButton('document-select','documentActionButton','处理选中的','个文档')"><span><button class="selection-file doc-preview-link" type="button" onclick="previewDocumentCandidate(${index})">${escapeHtml(item.relativePath || item.file)}</button>`;
+            item.matchedLines.forEach(line => { content += `<span class="selection-detail">第 ${line.lineNumber} 行：${escapeHtml(line.content)}</span>`; });
+            content += '</span></label>';
+          });
+          content += `</div><div style="display:flex;justify-content:flex-end;"><button id="documentActionButton" class="btn btn-danger" onclick="executeSelectedDocuments()">处理选中的 ${documentCandidates.length} 个文档</button></div>`;
+          showModal('选择要处理的撤回文档', content);
+        },
+        onError(e) {
+          btn.disabled = false;
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
+          showToast('请求失败：' + e.message, 'error');
+        }
+      });
+    }
+
+    function previewDocumentCandidate(index) {
+      const item = documentCandidates[index];
+      if (!item) return;
+      closeModal();
+      previewFile(item.file, (item.relativePath || item.file).split('/').pop());
+    }
+
+    async function executeSelectedDocuments() {
+      const files = selectedIndexes('.document-select').map(index => documentCandidates[index]?.file).filter(Boolean);
+      if (files.length === 0) return showToast('请至少选择一个 Word 文档', 'info');
+      const ok = await showConfirm({ title: '确认处理撤回文档', message: `将处理 ${files.length} 个 Word 文档。\n\n每个文件都会从命中段落开始删除到文档结尾，原文件先备份。`, type: 'danger', okText: '确认处理' });
+      if (!ok) return;
+      closeModal();
+      const btn = document.getElementById('btnProcessDocuments');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading"></div> 处理中...';
+      showTaskProgress('处理撤回文档');
+      ssePost('/api/remove-content', { root: currentRoot, files }, {
+        onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, '处理第'); },
+        onDone(data) {
+          btn.disabled = false;
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
+          if (!data.success) return showToast('操作失败：' + data.error, 'error');
+          let content = '';
+          data.data.forEach(item => {
+            if (item.modified) content += `<div class="result-item success"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">已删除 ${item.removedParagraphs} 个段落<br>备份：${escapeHtml(item.backupPath)}</div></div>`;
+            else content += `<div class="result-item error"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">${escapeHtml(item.error || item.reason || '未修改')}</div></div>`;
+          });
+          if (data.restorable) content = `<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-primary" onclick="restoreTask('${data.taskId}')">恢复本次修改</button></div>` + content;
+          showModal('处理撤回文档结果', content || '<div class="result-item info"><div class="result-file">没有完成修改</div></div>');
+          const count = data.data.filter(item => item.modified).length;
+          showToast(`处理完成：${count} 个文件已修改`, count > 0 ? 'success' : 'info');
+          loadTree();
+        },
+        onError(e) {
+          btn.disabled = false;
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
+          showToast('请求失败：' + e.message, 'error');
+        }
+      });
+    }
+
+    async function restoreTask(taskId) {
+      const ok = await showConfirm({ title: '恢复本次文档修改', message: '将使用备份覆盖当前文档。当前版本会先另行备份，确认恢复？', type: 'warning', okText: '确认恢复' });
+      if (!ok) return;
+      closeModal();
+      showTaskProgress('恢复文档备份', '正在恢复文件');
+      try {
+        const resp = await fetch('/api/restore-task', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ root: currentRoot, taskId }) });
+        const data = await resp.json();
+        if (!data.success) throw new Error(data.error);
+        let content = `<p>已恢复 <strong>${data.restoredCount}</strong> 个文件。</p>`;
+        data.data.forEach(item => { content += `<div class="result-item ${item.restored ? 'success' : 'error'}"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">${item.restored ? '恢复成功' : '恢复失败：' + escapeHtml(item.error)}</div></div>`; });
+        showModal('恢复结果', content);
+        loadTree();
+      } catch (e) {
+        showToast('恢复失败：' + e.message, 'error');
+      }
     }
 
     // ===== 查看操作日志 =====
     async function viewLogs() {
       try {
         const root = currentRoot || document.getElementById('rootPath').value.trim();
-        const resp = await fetch(`/api/logs?root=${encodeURIComponent(root)}`);
+        const [resp, backupsResp] = await Promise.all([
+          fetch(`/api/logs?root=${encodeURIComponent(root)}`),
+          fetch(`/api/backups?root=${encodeURIComponent(root)}`)
+        ]);
         const data = await resp.json();
+        const backupsData = await backupsResp.json();
+        const backups = backupsData.success ? backupsData.data : [];
         if (!data.success) { showToast('获取日志列表失败: ' + data.error, 'error'); return; }
+        let backupContent = '';
+        if (backups.length > 0) {
+          backupContent = '<div style="margin-bottom:14px;"><div style="font-weight:600;margin-bottom:8px;color:var(--ink);">可恢复的文档任务</div><div style="display:flex;gap:6px;flex-wrap:wrap;">';
+          backups.slice(0, 8).forEach(task => {
+            const label = new Date(task.createdAt).toLocaleString('zh-CN');
+            backupContent += `<button class="btn btn-outline" onclick="restoreTask('${task.taskId}')">${escapeHtml(label)} · ${task.count} 个文件</button>`;
+          });
+          backupContent += '</div></div>';
+        }
         if (data.files.length === 0) {
-          showModal('操作日志', '<div class="result-item info"><div class="result-file">暂无操作日志</div></div>');
+          showModal('操作日志', backupContent + '<div class="result-item info"><div class="result-file">暂无操作日志</div></div>');
           return;
         }
-        let content = '<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
+        let content = backupContent + '<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
         content += '<input type="text" id="logSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value)" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:\'Noto Sans SC\',sans-serif;">';
         content += '<span id="logSearchCount" style="font-size:11px;color:var(--ink-subtle);white-space:nowrap;"></span>';
         content += '<button onclick="logSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▲</button>';
