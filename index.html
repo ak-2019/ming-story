@@ -510,6 +510,34 @@
       margin: 12px 0;
     }
 
+    .selection-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      padding: 8px 10px;
+      border: 1px solid var(--hairline);
+      background: var(--surface-2);
+    }
+
+    .selection-summary {
+      color: var(--ink-muted);
+      font-size: 13px;
+    }
+
+    .selection-toolbar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .selection-toolbar .btn {
+      padding: 5px 12px;
+      min-height: 30px;
+    }
+
     .selection-row {
       display: grid;
       grid-template-columns: 24px minmax(0, 1fr);
@@ -2527,10 +2555,58 @@
       return [...document.querySelectorAll(selector + ':checked')].map(el => Number(el.value));
     }
 
-    function updateSelectionButton(selector, buttonId, prefix, suffix) {
-      const count = document.querySelectorAll(`.${selector}:checked`).length;
-      const button = document.getElementById(buttonId);
-      if (button) button.textContent = `${prefix} ${count} ${suffix}`;
+    function updateSelectionControls({ selector, actionButtonId, selectAllButtonId, clearAllButtonId, summaryId, actionPrefix, itemLabel }) {
+      const options = [...document.querySelectorAll(`.${selector}`)].filter(option => !option.disabled);
+      const selectedCount = options.filter(option => option.checked).length;
+      const totalCount = options.length;
+      const actionButton = document.getElementById(actionButtonId);
+      const selectAllButton = document.getElementById(selectAllButtonId);
+      const clearAllButton = document.getElementById(clearAllButtonId);
+      const summary = document.getElementById(summaryId);
+
+      if (actionButton) {
+        actionButton.textContent = `${actionPrefix} ${selectedCount} 个${itemLabel}`;
+        actionButton.disabled = totalCount === 0 || selectedCount === 0;
+      }
+      if (selectAllButton) selectAllButton.disabled = totalCount === 0 || selectedCount === totalCount;
+      if (clearAllButton) clearAllButton.disabled = totalCount === 0 || selectedCount === 0;
+      if (summary) summary.textContent = totalCount === 0
+        ? '没有可选项'
+        : `已选择 ${selectedCount} / ${totalCount} 个${itemLabel}`;
+    }
+
+    function setSelection(selector, checked, update) {
+      const options = [...document.querySelectorAll(`.${selector}`)].filter(option => !option.disabled);
+      if (options.length === 0) {
+        update();
+        return;
+      }
+      options.forEach(option => { option.checked = checked; });
+      update();
+    }
+
+    function updateAudioSelection() {
+      updateSelectionControls({
+        selector: 'audio-select',
+        actionButtonId: 'audioActionButton',
+        selectAllButtonId: 'audioSelectAllButton',
+        clearAllButtonId: 'audioClearAllButton',
+        summaryId: 'audioSelectionSummary',
+        actionPrefix: '移动选中的',
+        itemLabel: '音频'
+      });
+    }
+
+    function updateDocumentSelection() {
+      updateSelectionControls({
+        selector: 'document-select',
+        actionButtonId: 'documentActionButton',
+        selectAllButtonId: 'documentSelectAllButton',
+        clearAllButtonId: 'documentClearAllButton',
+        summaryId: 'documentSelectionSummary',
+        actionPrefix: '处理选中的',
+        itemLabel: '文档'
+      });
     }
 
     // ===== Button 1: Organize revoked audio =====
@@ -2545,17 +2621,18 @@
         btn.disabled = false;
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
         if (!data.success) throw new Error(data.error);
-        audioCandidates = data.data;
+        audioCandidates = Array.isArray(data.data) ? data.data : [];
         if (audioCandidates.length === 0) {
-          showModal('整理撤回音频', '<div class="result-item info"><div class="result-file">没有找到文件名包含“撤回”的音频文件</div></div>');
+          showModal('整理撤回音频', '<div class="result-item info"><div class="result-file">没有找到文件名包含“撤回”的音频文件</div><div class="result-detail">当前没有可选项，无需进行整理。</div></div>');
           return;
         }
-        let content = `<p>共找到 <strong>${audioCandidates.length}</strong> 个音频文件，请确认要移动的文件。</p><div class="selection-list">`;
+        let content = `<p>共找到 <strong>${audioCandidates.length}</strong> 个音频文件，请确认要移动的文件。</p><div class="selection-toolbar"><span class="selection-summary" id="audioSelectionSummary">已选择 ${audioCandidates.length} / ${audioCandidates.length} 个音频</span><div class="selection-toolbar-actions"><button id="audioSelectAllButton" class="btn" type="button" onclick="setSelection('audio-select', true, updateAudioSelection)" disabled>全选</button><button id="audioClearAllButton" class="btn" type="button" onclick="setSelection('audio-select', false, updateAudioSelection)">取消全选</button></div></div><div class="selection-list">`;
         audioCandidates.forEach((item, index) => {
-          content += `<label class="selection-row"><input class="audio-select" type="checkbox" value="${index}" checked onchange="updateSelectionButton('audio-select','audioActionButton','移动选中的','个音频')"><span><span class="selection-file">${escapeHtml(item.relativePath)}</span><span class="selection-detail">${formatFileSize(item.size)}</span></span></label>`;
+          content += `<label class="selection-row"><input class="audio-select" type="checkbox" value="${index}" checked onchange="updateAudioSelection()"><span><span class="selection-file">${escapeHtml(item.relativePath)}</span><span class="selection-detail">${formatFileSize(item.size)}</span></span></label>`;
         });
         content += `</div><div style="display:flex;justify-content:flex-end;"><button id="audioActionButton" class="btn btn-primary" onclick="executeSelectedAudio()">移动选中的 ${audioCandidates.length} 个音频</button></div>`;
         showModal('选择要整理的撤回音频', content);
+        updateAudioSelection();
       } catch (e) {
         btn.disabled = false;
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
@@ -2605,19 +2682,20 @@
           btn.disabled = false;
           btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
           if (!data.success) return showToast('扫描失败：' + data.error, 'error');
-          documentCandidates = data.data;
+          documentCandidates = Array.isArray(data.data) ? data.data : [];
           if (documentCandidates.length === 0) {
-            showModal('处理撤回文档', `<p>共扫描 ${data.totalScanned} 个 Word 文档。</p><div class="result-item info"><div class="result-file">没有找到匹配段落</div></div>`);
+            showModal('处理撤回文档', `<p>共扫描 ${data.totalScanned} 个 Word 文档。</p><div class="result-item info"><div class="result-file">没有找到匹配段落</div><div class="result-detail">当前没有可选项，无需进行处理。</div></div>`);
             return;
           }
-          let content = `<p>共扫描 <strong>${data.totalScanned}</strong> 个 Word 文档，找到 <strong>${documentCandidates.length}</strong> 个匹配文件。</p><div class="danger-note">删除范围：从命中“返场故事 + 撤回”的段落开始，删除该段及其后的全部内容。原文件会先备份。</div><div class="selection-list">`;
+          let content = `<p>共扫描 <strong>${data.totalScanned}</strong> 个 Word 文档，找到 <strong>${documentCandidates.length}</strong> 个匹配文件。</p><div class="danger-note">删除范围：从命中“返场故事 + 撤回”的段落开始，删除该段及其后的全部内容。原文件会先备份。</div><div class="selection-toolbar"><span class="selection-summary" id="documentSelectionSummary">已选择 ${documentCandidates.length} / ${documentCandidates.length} 个文档</span><div class="selection-toolbar-actions"><button id="documentSelectAllButton" class="btn" type="button" onclick="setSelection('document-select', true, updateDocumentSelection)" disabled>全选</button><button id="documentClearAllButton" class="btn" type="button" onclick="setSelection('document-select', false, updateDocumentSelection)">取消全选</button></div></div><div class="selection-list">`;
           documentCandidates.forEach((item, index) => {
-            content += `<label class="selection-row"><input class="document-select" type="checkbox" value="${index}" checked onchange="updateSelectionButton('document-select','documentActionButton','处理选中的','个文档')"><span><button class="selection-file doc-preview-link" type="button" onclick="previewDocumentCandidate(${index})">${escapeHtml(item.relativePath || item.file)}</button>`;
+            content += `<label class="selection-row"><input class="document-select" type="checkbox" value="${index}" checked onchange="updateDocumentSelection()"><span><button class="selection-file doc-preview-link" type="button" onclick="previewDocumentCandidate(${index})">${escapeHtml(item.relativePath || item.file)}</button>`;
             item.matchedLines.forEach(line => { content += `<span class="selection-detail">第 ${line.lineNumber} 行：${escapeHtml(line.content)}</span>`; });
             content += '</span></label>';
           });
           content += `</div><div style="display:flex;justify-content:flex-end;"><button id="documentActionButton" class="btn btn-danger" onclick="executeSelectedDocuments()">处理选中的 ${documentCandidates.length} 个文档</button></div>`;
           showModal('选择要处理的撤回文档', content);
+          updateDocumentSelection();
         },
         onError(e) {
           btn.disabled = false;
