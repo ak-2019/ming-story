@@ -2,4 +2,11 @@ node_modules/
 temp/
 *.log
 dist/
+.portable-dist-previous/
+.portable-build.lock
 .file-manager-state.json
+build/.cache/
+build/.portable-dist-staging/
+build/打包失败报告.txt
+启动错误.log
+诊断信息.txt

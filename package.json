@@ -7,7 +7,8 @@
     "start": "node launcher.js",
     "start:server": "node server.js",
     "stop": "node stop.js",
-    "check": "node --check server.js && node --check launcher.js && node --check stop.js && node --check build/build-portable.js && cscript //nologo \"启动文件管理系统.vbs\" /check && cscript //nologo \"停止文件管理系统.vbs\" /check"
+    "test": "node --test --test-concurrency=1",
+    "check": "node --check server.js && node --check launcher.js && node --check stop.js && node --check process-identity.js && node --check build/build-portable.js && cscript //nologo \"启动文件管理系统.vbs\" /check && cscript //nologo \"停止文件管理系统.vbs\" /check && npm run test"
   },
   "dependencies": {
     "express": "^4.18.2",

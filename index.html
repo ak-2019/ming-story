@@ -6,7 +6,7 @@
   <title>大明帝国 · 文件管理</title>
   <script>
     if (location.protocol === 'file:') {
-      document.write('<style>body{margin:0;font-family:"Microsoft YaHei",sans-serif;background:#f5f1e8;display:flex;align-items:center;justify-content:center;height:100vh;}</style></head><body><div style="text-align:center;background:#fff;border:2px solid #c0392b;border-radius:8px;padding:40px 50px;box-shadow:0 4px 20px rgba(0,0,0,0.1);"><h2 style="color:#c0392b;margin-bottom:16px;">请通过启动脚本打开</h2><p style="margin-bottom:12px;line-height:1.8;">直接打开 index.html 无法使用。</p><p style="margin-bottom:20px;">请双击 <b>启动文件管理系统.vbs</b> 启动服务。</p><a href="http://127.0.0.1:3000" style="display:inline-block;padding:10px 24px;background:#c0392b;color:#fff;border-radius:4px;text-decoration:none;">如已启动，点击进入</a></div></body></html>');
+      document.write('<style>body{margin:0;font-family:"Microsoft YaHei",sans-serif;background:#f5f1e8;display:flex;align-items:center;justify-content:center;height:100vh;}</style></head><body><div style="text-align:center;background:#fff;border:2px solid #c0392b;border-radius:8px;padding:40px 50px;box-shadow:0 4px 20px rgba(0,0,0,0.1);"><h2 style="color:#c0392b;margin-bottom:16px;">请通过启动脚本打开</h2><p style="margin-bottom:12px;line-height:1.8;">直接打开 index.html 无法使用。</p><p style="margin-bottom:0;">请双击 <b>启动文件管理系统.vbs</b>，程序会自动打开正确地址。</p></div></body></html>');
       document.close();
     }
   </script>
@@ -575,6 +575,22 @@
       transition: width 0.2s ease;
     }
 
+    .task-progress-bar.indeterminate span {
+      width: 35%;
+      animation: task-indeterminate 1.2s ease-in-out infinite;
+    }
+
+    @keyframes task-indeterminate {
+      0% { transform: translateX(-110%); }
+      100% { transform: translateX(320%); }
+    }
+
+    .task-progress-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
     .task-current-file {
       color: var(--ink-subtle);
       font-size: 12px;
@@ -582,6 +598,79 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    .result-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border: 1px solid var(--hairline);
+      background: var(--surface-1);
+      margin-bottom: 12px;
+    }
+
+    .result-summary-item {
+      padding: 10px 12px;
+      text-align: center;
+      border-right: 1px solid var(--hairline);
+    }
+
+    .result-summary-item:last-child { border-right: 0; }
+    .result-summary-count { display: block; font-size: 20px; font-weight: 700; line-height: 1.2; }
+    .result-summary-label { display: block; margin-top: 3px; color: var(--ink-subtle); font-size: 11px; }
+    .result-summary-item.success .result-summary-count { color: var(--success); }
+    .result-summary-item.skipped .result-summary-count { color: #9a7209; }
+    .result-summary-item.failed .result-summary-count { color: var(--danger); }
+
+    .issue-details {
+      margin: 10px 0;
+      border: 1px solid var(--hairline);
+      background: var(--surface-1);
+    }
+
+    .issue-details summary {
+      padding: 8px 10px;
+      cursor: pointer;
+      color: var(--ink-muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .issue-details-body {
+      max-height: 180px;
+      overflow: auto;
+      padding: 0 10px 8px;
+    }
+
+    .issue-row {
+      padding: 6px 0;
+      border-top: 1px solid var(--hairline);
+      color: var(--ink-muted);
+      font-size: 12px;
+      word-break: break-all;
+    }
+
+    .tree-loading,
+    .tree-empty {
+      padding: 7px 12px 7px 44px;
+      color: var(--ink-subtle);
+      font-size: 11px;
+    }
+
+    .tree-more {
+      display: block;
+      width: calc(100% - 12px);
+      margin: 4px 6px;
+      padding: 7px 10px;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      background: var(--surface-1);
+      color: var(--primary);
+      font-size: 11px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .tree-more:hover { background: var(--surface-2); }
+    .tree-more:disabled { color: var(--ink-subtle); cursor: wait; }
 
     .danger-note {
       padding: 10px 12px;
@@ -628,6 +717,20 @@
       color: var(--ink);
       padding-bottom: 10px;
       border-bottom: 2px solid var(--primary);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .preview-title-name { min-width: 0; word-break: break-all; }
+    .preview-title-meta { color: var(--ink-subtle); font-family: 'Microsoft YaHei', sans-serif; font-size: 11px; font-weight: 400; }
+
+    @media (max-width: 640px) {
+      .result-summary { grid-template-columns: 1fr; }
+      .result-summary-item { border-right: 0; border-bottom: 1px solid var(--hairline); }
+      .result-summary-item:last-child { border-bottom: 0; }
     }
 
     /* Excel Table — 表格 */
@@ -1354,7 +1457,7 @@
         <div class="preview-placeholder">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           <span style="font-size:15px; font-family:'SimSun',serif;">点击左侧卷目，翻阅典籍</span>
-          <span style="font-size:12px;">支持 Word · Excel · 文本 · 图片</span>
+          <span style="font-size:12px;">支持 Word · 文本 · 图片；Excel 请用本地软件打开</span>
         </div>
       </div>
     </div>
@@ -1366,7 +1469,7 @@
       <h3 id="modalTitle"></h3>
       <div id="modalContent"></div>
       <div style="margin-top: 20px; text-align: right;">
-        <button class="btn btn-primary" onclick="document.getElementById('modalOverlay').classList.remove('show')">关闭</button>
+        <button class="btn btn-primary" onclick="closeModal()">关闭</button>
       </div>
     </div>
   </div>
@@ -1420,7 +1523,7 @@
           <code style="font-size:16px; color:var(--primary); font-family:'Microsoft YaHei',monospace;">启动文件管理系统.vbs</code>
           <p style="font-size:12px; color:var(--ink-tertiary); margin-top:8px; font-family:'Microsoft YaHei',sans-serif;">启动后浏览器会自动打开</p>
         </div>
-        <a href="http://localhost:3000" style="display:inline-block; padding:10px 24px; background:var(--primary); color:var(--on-primary); border:none; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer; font-family:'Microsoft YaHei',sans-serif; text-decoration:none;">服务已启动，点击进入</a>
+        <p style="font-size:13px;color:var(--ink-muted);font-family:'Microsoft YaHei',sans-serif;">启动脚本会自动打开程序实际使用的地址。</p>
       </div>
       <div id="guideRedirect" style="display:none;">
         <p style="font-size:14px; color:var(--success); font-family:'Microsoft YaHei',sans-serif;">服务运行中，正在跳转...</p>
@@ -1442,6 +1545,24 @@
     let activeLabel = null;
     let audioCandidates = [];
     let documentCandidates = [];
+    let activeScan = null;
+    let activePreviewController = null;
+    let activeRootSettingsController = null;
+    let previewRequestId = 0;
+    let treeLoadId = 0;
+    let rootContextId = 0;
+    let rootSettingsRequestId = 0;
+    let wordScrollListeners = [];
+
+    function clearWordPreviewListeners() {
+      wordScrollListeners.forEach(({ element, handler }) => element.removeEventListener('scroll', handler));
+      wordScrollListeners = [];
+    }
+
+    function addWordScrollListener(element, handler) {
+      element.addEventListener('scroll', handler);
+      wordScrollListeners.push({ element, handler });
+    }
 
     // ===== Tooltip =====
     (function() {
@@ -1502,18 +1623,58 @@
         <p style="margin-bottom:10px;">留空将使用程序所在文件夹的上级目录。</p>
         <input id="rootSettingsInput" type="text" value="${escapeHtml(saved).replace(/"/g, '&quot;')}" placeholder="输入 Windows 文件夹路径"
           style="width:100%;padding:9px 10px;border:1px solid var(--hairline-strong);border-radius:4px;background:var(--canvas);color:var(--ink);font-size:13px;outline:none;">
+        <div id="rootSettingsError" style="display:none;margin-top:8px;color:var(--danger);font-size:12px;line-height:1.6;"></div>
         <div style="display:flex;justify-content:flex-end;margin-top:12px;">
-          <button class="btn btn-primary" onclick="applyRootSettings()">应用目录</button>
+          <button class="btn btn-primary" id="rootSettingsApply" onclick="applyRootSettings()">应用目录</button>
         </div>
       `);
       setTimeout(() => document.getElementById('rootSettingsInput')?.focus(), 0);
     }
 
-    function applyRootSettings() {
+    async function applyRootSettings() {
       const input = document.getElementById('rootSettingsInput');
-      document.getElementById('rootPath').value = input ? input.value.trim() : '';
-      closeModal();
-      loadTree();
+      const nextRoot = input ? input.value.trim() : '';
+      const errorEl = document.getElementById('rootSettingsError');
+      const applyButton = document.getElementById('rootSettingsApply');
+      const loadId = ++rootSettingsRequestId;
+      if (activeRootSettingsController) activeRootSettingsController.abort();
+      const controller = new AbortController();
+      activeRootSettingsController = controller;
+      if (errorEl) {
+        errorEl.style.display = 'none';
+        errorEl.textContent = '';
+      }
+      if (applyButton) {
+        applyButton.disabled = true;
+        applyButton.textContent = '正在检查...';
+      }
+
+      try {
+        const url = nextRoot ? `/api/tree?root=${encodeURIComponent(nextRoot)}` : '/api/tree';
+        const resp = await fetch(url, { signal: controller.signal });
+        const data = await resp.json();
+        if (loadId !== rootSettingsRequestId) return;
+        if (!data.success) throw new Error(data.error || '目录不可用');
+        treeLoadId++;
+        document.getElementById('rootPath').value = nextRoot;
+        applyLoadedTree(data);
+        if (activeRootSettingsController === controller) activeRootSettingsController = null;
+        closeModal();
+        showToast(`已加载目录: ${data.root}`, 'success');
+      } catch (e) {
+        if (loadId !== rootSettingsRequestId) return;
+        if (e.name === 'AbortError') return;
+        if (errorEl) {
+          errorEl.textContent = `无法使用该目录：${e.message}`;
+          errorEl.style.display = 'block';
+        }
+      } finally {
+        if (activeRootSettingsController === controller) activeRootSettingsController = null;
+        if (loadId === rootSettingsRequestId && applyButton) {
+          applyButton.disabled = false;
+          applyButton.textContent = '应用目录';
+        }
+      }
     }
 
     // ===== Guide =====
@@ -1573,7 +1734,7 @@
           <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid var(--ink-subtle);">
             <strong>📄 文件预览</strong><br>
             <span style="color:var(--ink-muted);">
-              支持 Word（原样+阅读双视图）、Excel（多Sheet切换）、文本/日志、图片的在线预览。<br>
+              支持 Word（.docx，原样+阅读双视图）、文本/日志和图片预览；Excel 文件请使用本地表格软件打开。<br>
               Word 预览支持目录导航和 <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Ctrl+F</kbd> 内容搜索定位。
             </span>
           </div>
@@ -1600,6 +1761,12 @@
 
     function closeModal(e) {
       if (!e || e.target === document.getElementById('modalOverlay')) {
+        if (activeScan) cancelActiveScan(false);
+        if (activeRootSettingsController) {
+          rootSettingsRequestId++;
+          activeRootSettingsController.abort();
+          activeRootSettingsController = null;
+        }
         document.getElementById('modalOverlay').classList.remove('show');
       }
     }
@@ -1686,11 +1853,8 @@
       }
     };
 
-    function countFiles(node) {
-      if (node.type === 'file') return 1;
-      let count = 0;
-      if (node.children) node.children.forEach(c => count += countFiles(c));
-      return count;
+    function updateLoadedFileCount() {
+      document.getElementById('fileCount').textContent = `已加载 ${totalFiles} 册`;
     }
 
     function renderTree(node, depth = 0) {
@@ -1732,23 +1896,134 @@
 
         const children = document.createElement('div');
         children.className = 'tree-children';
-        if (node.children) {
-          node.children.forEach(child => {
-            children.appendChild(renderTree(child, depth + 1));
+        node._loaded = Array.isArray(node.children);
+        node._loading = false;
+        node._pagination = node.pagination || null;
+        let loadingMore = false;
+
+        function removeStatusRows() {
+          [...children.children].forEach(child => {
+            if (child.classList.contains('tree-empty') || child.classList.contains('tree-loading') || child.classList.contains('tree-more')) {
+              child.remove();
+            }
           });
         }
 
-        label.addEventListener('click', () => {
-          const isOpen = children.classList.toggle('open');
+        function appendChildNodes(items) {
+          removeStatusRows();
+          items.forEach(child => children.appendChild(renderTree(child, depth + 1)));
+        }
+
+        function renderPagination() {
+          const existing = [...children.children].find(child => child.classList.contains('tree-more'));
+          if (existing) existing.remove();
+          if (!node._pagination || !node._pagination.hasMore) {
+            if (node._loaded && node.children.length === 0) children.innerHTML = '<div class="tree-empty">空文件夹</div>';
+            return;
+          }
+
+          const remaining = Math.max(0, Number(node._pagination.total || 0) - Number(node._pagination.nextOffset || 0));
+          const moreButton = document.createElement('button');
+          moreButton.type = 'button';
+          moreButton.className = 'tree-more';
+          moreButton.textContent = remaining > 0 ? `继续加载（剩余 ${remaining} 项）` : '继续加载';
+          moreButton.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            if (loadingMore) return;
+            loadingMore = true;
+            moreButton.disabled = true;
+            moreButton.textContent = '正在加载...';
+            const requestLoadId = treeLoadId;
+            const requestRoot = currentRoot;
+            try {
+              const offset = Number(node._pagination.nextOffset || 0);
+              const version = Number(node._pagination.directoryMtimeMs || 0);
+              const url = `/api/tree?root=${encodeURIComponent(requestRoot)}&path=${encodeURIComponent(node.fullPath)}&offset=${offset}&version=${version}`;
+              const resp = await fetch(url);
+              const data = await resp.json();
+              if (requestLoadId !== treeLoadId || requestRoot !== currentRoot || !item.isConnected) return;
+              if (!data.success) {
+                if (data.code === 'DIRECTORY_CHANGED') {
+                  moreButton.textContent = '目录已变化，正在刷新...';
+                  showToast('目录内容已变化，正在重新加载', 'info');
+                  await loadTree();
+                  return;
+                }
+                throw new Error(data.error);
+              }
+              const page = Array.isArray(data.data.children) ? data.data.children : [];
+              node.children.push(...page);
+              node._pagination = data.data.pagination || null;
+              appendChildNodes(page);
+              renderPagination();
+              if (Array.isArray(data.skipped) && data.skipped.length > 0) {
+                showToast(`有 ${data.skipped.length} 个项目无法读取`, 'info');
+              }
+            } catch (e) {
+              if (requestLoadId === treeLoadId && requestRoot === currentRoot && item.isConnected) {
+                moreButton.disabled = false;
+                moreButton.textContent = '加载失败，点击重试';
+                showToast(`继续加载失败：${e.message}`, 'error');
+              }
+            } finally {
+              loadingMore = false;
+            }
+          });
+          children.appendChild(moreButton);
+        }
+
+        if (node._loaded) {
+          appendChildNodes(node.children);
+          renderPagination();
+        }
+
+        function setOpen(isOpen) {
+          children.classList.toggle('open', isOpen);
           toggle.classList.toggle('expanded', isOpen);
           icon.innerHTML = isOpen ? fOpenIcon : fIcon;
+        }
+
+        label.addEventListener('click', async () => {
+          if (children.classList.contains('open')) {
+            setOpen(false);
+            return;
+          }
+
+          if (!node._loaded && !node._loading) {
+            node._loading = true;
+            children.innerHTML = '<div class="tree-loading">正在读取...</div>';
+            setOpen(true);
+            const requestLoadId = treeLoadId;
+            const requestRoot = currentRoot;
+            try {
+              const url = `/api/tree?root=${encodeURIComponent(requestRoot)}&path=${encodeURIComponent(node.fullPath)}`;
+              const resp = await fetch(url);
+              const data = await resp.json();
+              if (requestLoadId !== treeLoadId || requestRoot !== currentRoot || !item.isConnected) return;
+              if (!data.success) throw new Error(data.error);
+              node.children = Array.isArray(data.data.children) ? data.data.children : [];
+              node._pagination = data.data.pagination || null;
+              children.innerHTML = '';
+              appendChildNodes(node.children);
+              node._loaded = true;
+              renderPagination();
+              if (Array.isArray(data.skipped) && data.skipped.length > 0) {
+                showToast(`有 ${data.skipped.length} 个项目无法读取`, 'info');
+              }
+            } catch (e) {
+              if (requestLoadId === treeLoadId && requestRoot === currentRoot && item.isConnected) {
+                children.innerHTML = `<div class="tree-empty" style="color:var(--danger);">读取失败：${escapeHtml(e.message)}</div>`;
+              }
+            } finally {
+              node._loading = false;
+            }
+          }
+          setOpen(true);
         });
 
         // 默认展开第一层
         if (depth === 0) {
-          children.classList.add('open');
-          toggle.classList.add('expanded');
-          icon.innerHTML = fOpenIcon;
+          setOpen(true);
         }
 
         item.appendChild(label);
@@ -1779,12 +2054,47 @@
 
         item.appendChild(label);
         totalFiles++;
+        updateLoadedFileCount();
       }
 
       return item;
     }
 
-    async function loadTree(isFallback) {
+    function pathKey(value) {
+      return String(value || '').replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase();
+    }
+
+    function applyLoadedTree(data) {
+      const rootChanged = currentRoot && pathKey(currentRoot) !== pathKey(data.root);
+      if (rootChanged) {
+        rootContextId++;
+        previewRequestId++;
+        if (activePreviewController) activePreviewController.abort();
+        activePreviewController = null;
+        clearWordPreviewListeners();
+        document.getElementById('previewArea').innerHTML = '<div class="preview-placeholder"><div class="preview-seal">阅</div><div>管理目录已切换，请重新选择文件</div></div>';
+      }
+
+      currentRoot = data.root;
+      localStorage.setItem('fileManager_root', currentRoot);
+      const rootLabel = currentRoot.split(/[\\/]/).filter(Boolean).pop() || currentRoot;
+      const rootLabelEl = document.getElementById('currentRootLabel');
+      rootLabelEl.textContent = rootLabel;
+      rootLabelEl.title = currentRoot;
+      totalFiles = 0;
+      activeLabel = null;
+      const container = document.getElementById('treeContainer');
+      container.innerHTML = '';
+      container.appendChild(renderTree(data.data));
+      updateLoadedFileCount();
+      if (Array.isArray(data.skipped) && data.skipped.length > 0) {
+        showToast(`目录已加载，但有 ${data.skipped.length} 个项目无法读取`, 'info');
+      }
+    }
+
+    async function loadTree(options = {}) {
+      const fallbackOnInvalid = Boolean(options && options.fallbackOnInvalid);
+      const loadId = ++treeLoadId;
       const root = document.getElementById('rootPath').value.trim();
       const container = document.getElementById('treeContainer');
       container.innerHTML = '<div class="preview-placeholder"><div class="loading" style="width:24px;height:24px;border-width:2px;"></div><span style="font-size:13px;">正在翻阅目录...</span></div>';
@@ -1793,36 +2103,38 @@
         const url = root ? `/api/tree?root=${encodeURIComponent(root)}` : '/api/tree';
         const resp = await fetch(url);
         const data = await resp.json();
+        if (loadId !== treeLoadId) return;
 
         if (!data.success) {
-          if (root && !isFallback) {
+          if (root && fallbackOnInvalid) {
             localStorage.removeItem('fileManager_root');
             document.getElementById('rootPath').value = '';
             showToast('保存的路径已失效，已切换到默认目录', 'info');
-            return loadTree(true);
+            return loadTree({ fallbackOnInvalid: false });
           }
-          container.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">错误: ${data.error}</span></div>`;
-          return;
+          container.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">错误: ${escapeHtml(data.error || '目录不可用')}</span></div>`;
+          return false;
         }
 
-        currentRoot = data.root;
-        localStorage.setItem('fileManager_root', currentRoot);
-        const rootLabel = currentRoot.split(/[\\/]/).filter(Boolean).pop() || currentRoot;
-        const rootLabelEl = document.getElementById('currentRootLabel');
-        rootLabelEl.textContent = rootLabel;
-        rootLabelEl.title = currentRoot;
-        totalFiles = 0;
-        container.innerHTML = '';
-        container.appendChild(renderTree(data.data));
-        document.getElementById('fileCount').textContent = `${totalFiles} 册`;
+        applyLoadedTree(data);
         showToast(`已加载目录: ${data.root}`, 'success');
+        return true;
       } catch (e) {
+        if (loadId !== treeLoadId) return;
         container.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">连接失败，请确保服务已启动</span></div>`;
+        return false;
       }
     }
 
     // ===== Preview =====
     async function previewFile(fullPath, fileName) {
+      const requestId = ++previewRequestId;
+      const requestRootContextId = rootContextId;
+      const requestRoot = currentRoot;
+      if (activePreviewController) activePreviewController.abort();
+      clearWordPreviewListeners();
+      const controller = new AbortController();
+      activePreviewController = controller;
       const area = document.getElementById('previewArea');
       area.innerHTML = '<div class="preview-placeholder"><div class="loading" style="width:24px;height:24px;border-width:2px;"></div><span style="font-size:13px;">正在展卷...</span></div>';
       _tocOriginalHtml = '';
@@ -1830,15 +2142,23 @@
       _tocReadingBuilt = false;
 
       try {
-        const resp = await fetch(`/api/preview?root=${encodeURIComponent(currentRoot)}&path=${encodeURIComponent(fullPath)}`);
+        const resp = await fetch(`/api/preview?root=${encodeURIComponent(requestRoot)}&path=${encodeURIComponent(fullPath)}`, { signal: controller.signal });
         const data = await resp.json();
+        if (requestId !== previewRequestId || requestRootContextId !== rootContextId || requestRoot !== currentRoot) return;
 
         if (!data.success) {
-          area.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">${data.error}</span></div>`;
+          if (data.code === 'FILE_TOO_LARGE' || data.code === 'PREVIEW_UNAVAILABLE') {
+            const noticeTitle = data.code === 'FILE_TOO_LARGE'
+              ? '文件较大，已停止浏览器预览'
+              : '当前未启用浏览器预览';
+            area.innerHTML = renderPreviewTitle(data, fileName) + `<div class="result-item info"><div class="result-file">${noticeTitle}</div><div class="result-detail">${escapeHtml(data.error)}</div></div>`;
+          } else {
+            area.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">${escapeHtml(data.error)}</span></div>`;
+          }
           return;
         }
 
-        let html = `<div class="preview-title">${data.fileName}</div>`;
+        let html = renderPreviewTitle(data, fileName);
 
         if (data.type === 'excel') {
           html += `<div class="excel-view-bar">
@@ -1852,12 +2172,12 @@
           if (sheetNames.length > 1) {
             html += '<div class="sheet-tabs">';
             sheetNames.forEach((name, i) => {
-              html += `<div class="sheet-tab ${i === 0 ? 'active' : ''}" onclick="switchSheet(this, '${name}', 'excelOriginalView')">${name}</div>`;
+              html += `<div class="sheet-tab ${i === 0 ? 'active' : ''}" data-sheet-index="${i}" onclick="switchSheet(this, ${i}, 'excelOriginalView')">${escapeHtml(name)}</div>`;
             });
             html += '</div>';
           }
           sheetNames.forEach((name, i) => {
-            html += `<div class="sheet-content excel-original-view" data-sheet="${name}" style="${i > 0 ? 'display:none' : ''}">${styledData[name] || data.data[name]}</div>`;
+            html += `<div class="sheet-content excel-original-view" data-sheet-index="${i}" style="${i > 0 ? 'display:none' : ''}">${styledData[name] || data.data[name]}</div>`;
           });
           html += `</div>`;
           // Reading view (plain tables)
@@ -1865,21 +2185,21 @@
           if (sheetNames.length > 1) {
             html += '<div class="sheet-tabs">';
             sheetNames.forEach((name, i) => {
-              html += `<div class="sheet-tab ${i === 0 ? 'active' : ''}" onclick="switchSheet(this, '${name}', 'excelReadingView')">${name}</div>`;
+              html += `<div class="sheet-tab ${i === 0 ? 'active' : ''}" data-sheet-index="${i}" onclick="switchSheet(this, ${i}, 'excelReadingView')">${escapeHtml(name)}</div>`;
             });
             html += '</div>';
           }
           sheetNames.forEach((name, i) => {
-            html += `<div class="sheet-content" data-sheet="${name}" style="${i > 0 ? 'display:none' : ''}">${data.data[name]}</div>`;
+            html += `<div class="sheet-content" data-sheet-index="${i}" style="${i > 0 ? 'display:none' : ''}">${data.data[name]}</div>`;
           });
           html += `</div>`;
         } else if (data.type === 'word') {
-          html += `<div class="word-wrap"><div class="word-toc" id="wordToc"><div class="word-view-bar"><button class="word-view-btn active" id="btnViewOriginal" onclick="switchWordView('original')">📄 原样</button><button class="word-view-btn" id="btnViewReading" onclick="switchWordView('reading')">📖 阅读</button></div><div style="padding:8px 10px;border-bottom:1px solid var(--hairline);"><div style="display:flex;align-items:center;gap:4px;"><input type="text" id="wordSearchInput" placeholder="搜索内容..." onkeydown="if(event.key==='Enter'){searchWord(this.value)}" style="flex:1;padding:4px 8px;border:1px solid var(--hairline-strong);border-radius:3px;font-size:11px;outline:none;font-family:'Microsoft YaHei',sans-serif;min-width:0;"><button onclick="searchWord(document.getElementById('wordSearchInput').value)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:3px 6px;cursor:pointer;font-size:11px;">🔍</button></div><div style="display:flex;align-items:center;gap:4px;margin-top:4px;"><span id="wordSearchCount" style="flex:1;font-size:10px;color:var(--ink-subtle);"></span><button onclick="wordSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▲</button><button onclick="wordSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▼</button><button onclick="clearWordSearch(true)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">✕</button></div></div><div class="word-toc-title">目 录</div><div id="wordTocLinks"></div></div><div id="wordOriginalView"><div class="word-preview-container" id="wordContainer"></div></div><div id="wordReadingView" style="display:none"><div class="word-reading-view" id="wordReadingBody">${data.html || ''}</div></div></div>`;
+          html += `<div class="word-wrap"><div class="word-toc" id="wordToc"><div class="word-view-bar"><button class="word-view-btn active" id="btnViewOriginal" onclick="switchWordView('original')">📄 原样</button><button class="word-view-btn" id="btnViewReading" onclick="switchWordView('reading')">📖 阅读</button></div><div style="padding:8px 10px;border-bottom:1px solid var(--hairline);"><div style="display:flex;align-items:center;gap:4px;"><input type="text" id="wordSearchInput" placeholder="搜索内容..." onkeydown="if(event.key==='Enter'){searchWord(this.value)}" style="flex:1;padding:4px 8px;border:1px solid var(--hairline-strong);border-radius:3px;font-size:11px;outline:none;font-family:'Microsoft YaHei',sans-serif;min-width:0;"><button onclick="searchWord(document.getElementById('wordSearchInput').value)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:3px 6px;cursor:pointer;font-size:11px;">🔍</button></div><div style="display:flex;align-items:center;gap:4px;margin-top:4px;"><span id="wordSearchCount" style="flex:1;font-size:10px;color:var(--ink-subtle);"></span><button onclick="wordSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▲</button><button onclick="wordSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">▼</button><button onclick="clearWordSearch(true)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:3px;padding:1px 6px;cursor:pointer;font-size:10px;">✕</button></div></div><div class="word-toc-title">目 录</div><div id="wordTocLinks"></div></div><div id="wordOriginalView"><div class="word-preview-container" id="wordContainer"></div></div><div id="wordReadingView" style="display:none"><div class="word-reading-view" id="wordReadingBody">${sanitizePreviewHtml(data.html || '')}</div></div></div>`;
         } else if (data.type === 'text') {
           if (data.fileName && data.fileName.endsWith('.log')) {
             html += `<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">
-              <input type="text" id="logSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value)" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:'Microsoft YaHei',sans-serif;">
-              <span id="logSearchCount" style="font-size:11px;color:var(--ink-subtle);white-space:nowrap;"></span>
+              <input type="text" id="previewLogSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value, 'logPreviewContent', 'previewLogSearchCount')" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:'Microsoft YaHei',sans-serif;">
+              <span id="previewLogSearchCount" style="font-size:11px;color:var(--ink-subtle);white-space:nowrap;"></span>
               <button onclick="logSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▲</button>
               <button onclick="logSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▼</button>
             </div>`;
@@ -1895,19 +2215,23 @@
         if (data.type === 'excel') {
           initExcelFilterUI();
         } else if (data.type === 'word') {
-          renderDocx(data.data, data.headings || []);
+          renderDocx(data.data, data.headings || [], requestId);
         }
       } catch (e) {
-        area.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">预览失败: ${e.message}</span></div>`;
+        if (e.name === 'AbortError' || requestId !== previewRequestId || requestRootContextId !== rootContextId || requestRoot !== currentRoot) return;
+        area.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">预览失败: ${escapeHtml(e.message)}</span></div>`;
+      } finally {
+        if (activePreviewController === controller) activePreviewController = null;
       }
     }
 
-    function switchSheet(tab, sheetName, parentId) {
+    function switchSheet(tab, sheetIndex, parentId) {
       const parent = parentId ? document.getElementById(parentId) : document;
       parent.querySelectorAll('.sheet-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       parent.querySelectorAll('.sheet-content').forEach(c => c.style.display = 'none');
-      parent.querySelector(`.sheet-content[data-sheet="${sheetName}"]`).style.display = '';
+      const content = parent.querySelector(`.sheet-content[data-sheet-index="${sheetIndex}"]`);
+      if (content) content.style.display = '';
     }
 
     function switchExcelView(view) {
@@ -2293,7 +2617,7 @@
     }
 
     // ===== Word Render (docx-preview) =====
-    async function renderDocx(base64Data, serverHeadings) {
+    async function renderDocx(base64Data, serverHeadings, requestId) {
       const container = document.getElementById('wordContainer');
       if (!container) return;
 
@@ -2319,10 +2643,13 @@
           renderEndnotes: true,
         });
 
+        if (requestId !== previewRequestId || !container.isConnected) return;
+
         // Build TOC using server-provided headings matched to rendered DOM
-        buildWordToc(container, serverHeadings);
+        buildWordToc(container, serverHeadings, requestId);
       } catch(e) {
-        container.innerHTML = '<div style="padding:24px;color:var(--danger);">Word渲染失败: ' + e.message + '</div>';
+        if (requestId !== previewRequestId || !container.isConnected) return;
+        container.innerHTML = '<div style="padding:24px;color:var(--danger);">Word渲染失败: ' + escapeHtml(e.message) + '</div>';
       }
     }
 
@@ -2373,6 +2700,7 @@
     function buildReadingToc() {
       const body = document.getElementById('wordReadingBody');
       if (!body) return;
+      const requestId = previewRequestId;
 
       const headings = body.querySelectorAll('h1, h2, h3, h4, h5, h6');
       if (headings.length === 0) {
@@ -2386,7 +2714,8 @@
         h.id = id;
         const level = parseInt(h.tagName.charAt(1));
         const text = (h.textContent || '').trim();
-        html += `<a href="#${id}" data-level="${level}" title="${text}">${text}</a>`;
+        const safeText = escapeHtml(text);
+        html += `<a href="#${id}" data-level="${level}" title="${safeText}">${safeText}</a>`;
       });
       _tocReadingHtml = html;
 
@@ -2394,8 +2723,10 @@
       const previewArea = document.getElementById('previewArea');
       if (previewArea) {
         const targets = [...headings];
-        previewArea.addEventListener('scroll', () => {
-          if (document.getElementById('wordReadingView').style.display === 'none') return;
+        const handler = () => {
+          if (requestId !== previewRequestId) return;
+          const readingView = document.getElementById('wordReadingView');
+          if (!readingView || readingView.style.display === 'none') return;
           const linksDiv = document.getElementById('wordTocLinks');
           if (!linksDiv) return;
           let current = null;
@@ -2405,11 +2736,13 @@
             const link = linksDiv.querySelector(`a[href="#${current.id}"]`);
             if (link) link.classList.add('active');
           }
-        });
+        };
+        addWordScrollListener(previewArea, handler);
       }
     }
 
-    function buildWordToc(body, serverHeadings) {
+    function buildWordToc(body, serverHeadings, requestId = previewRequestId) {
+      if (requestId !== previewRequestId || !body.isConnected) return;
       const linksDiv = document.getElementById('wordTocLinks');
       if (!linksDiv) return;
 
@@ -2467,7 +2800,8 @@
 
       let html = '';
       items.forEach(item => {
-        html += `<a href="#${item.id}" data-level="${item.level}" title="${item.text}">${item.text}</a>`;
+        const safeText = escapeHtml(item.text);
+        html += `<a href="#${item.id}" data-level="${item.level}" title="${safeText}">${safeText}</a>`;
       });
       _tocOriginalHtml = html;
       linksDiv.innerHTML = html;
@@ -2477,8 +2811,10 @@
       const previewArea = document.getElementById('previewArea');
       if (previewArea) {
         const allTargets = items.map(item => document.getElementById(item.id)).filter(Boolean);
-        previewArea.addEventListener('scroll', () => {
-          if (document.getElementById('wordOriginalView').style.display === 'none') return;
+        const handler = () => {
+          if (requestId !== previewRequestId) return;
+          const originalView = document.getElementById('wordOriginalView');
+          if (!originalView || originalView.style.display === 'none') return;
           const ld = document.getElementById('wordTocLinks');
           if (!ld) return;
           let current = null;
@@ -2488,26 +2824,70 @@
             const link = ld.querySelector(`a[href="#${current.id}"]`);
             if (link) link.classList.add('active');
           }
-        });
+        };
+        addWordScrollListener(previewArea, handler);
       }
     }
 
     function escapeHtml(text) {
       const div = document.createElement('div');
-      div.textContent = text;
+      div.textContent = text == null ? '' : String(text);
       return div.innerHTML;
     }
 
+    function inlineJsString(value) {
+      return escapeHtml(JSON.stringify(String(value == null ? '' : value)));
+    }
+
+    function sanitizePreviewHtml(html) {
+      const template = document.createElement('template');
+      template.innerHTML = String(html || '');
+      template.content.querySelectorAll('script,iframe,object,embed,form,input,button,textarea,select,option,link,meta,base,style,svg,math').forEach(node => node.remove());
+      const allowedAttributes = new Set(['href', 'src', 'alt', 'title', 'colspan', 'rowspan', 'width', 'height', 'start']);
+      template.content.querySelectorAll('*').forEach(node => {
+        [...node.attributes].forEach(attribute => {
+          const name = attribute.name.toLowerCase();
+          if (!allowedAttributes.has(name)) {
+            node.removeAttribute(attribute.name);
+            return;
+          }
+          if (name === 'href') {
+            const value = attribute.value.trim();
+            if (!value.startsWith('#') && !/^(https?:|mailto:)/i.test(value)) node.removeAttribute(attribute.name);
+          }
+          if (name === 'src' && !/^data:image\/(png|jpe?g|gif|bmp|webp);base64,/i.test(attribute.value.trim())) {
+            node.removeAttribute(attribute.name);
+          }
+        });
+        if (node.tagName === 'A' && node.hasAttribute('href') && !node.getAttribute('href').startsWith('#')) {
+          node.setAttribute('target', '_blank');
+          node.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
+      return template.innerHTML;
+    }
+
     // ===== SSE Helper =====
-    function ssePost(url, body, { onProgress, onDone, onError }) {
-      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(resp => {
+    function ssePost(url, body, { onProgress, onDone, onError, signal }) {
+      let settled = false;
+      const fail = error => {
+        if (settled) return;
+        settled = true;
+        if (onError) {
+          try { onError(error); } catch (callbackError) { console.error(callbackError); }
+        }
+      };
+      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal }).then(resp => {
         if (!resp.ok || !resp.body) throw new Error(`服务器返回 ${resp.status}`);
         const reader = resp.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
         function read() {
           reader.read().then(({ done, value }) => {
-            if (done) return;
+            if (done) {
+              if (!settled && !(signal && signal.aborted)) fail(new Error('服务器连接提前结束'));
+              return;
+            }
             buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split('\n');
             buffer = lines.pop();
@@ -2516,14 +2896,21 @@
               try {
                 const msg = JSON.parse(line.slice(6));
                 if (msg.type === 'progress' && onProgress) onProgress(msg);
-                else if (msg.type === 'done') onDone(msg);
-              } catch(e) {}
+                else if (msg.type === 'done' && !settled) {
+                  if (onDone) onDone(msg);
+                  settled = true;
+                }
+              } catch(e) {
+                fail(new Error(`无法处理服务器响应：${e.message}`));
+                return;
+              }
             }
+            if (settled) return;
             read();
-          }).catch(e => onError(e));
+          }).catch(fail);
         }
         read();
-      }).catch(e => onError(e));
+      }).catch(fail);
     }
 
     function formatFileSize(size) {
@@ -2533,22 +2920,101 @@
       return `${(size / 1024 / 1024).toFixed(1)} MB`;
     }
 
-    function showTaskProgress(title, message = '准备开始') {
+    function formatFileTime(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('zh-CN', { hour12: false });
+    }
+
+    function renderPreviewTitle(data, fallbackName) {
+      const typeLabels = { excel: 'Excel', word: 'Word', text: '文本', image: '图片' };
+      const parts = [];
+      if (typeLabels[data.type]) parts.push(typeLabels[data.type]);
+      if (Number.isFinite(data.size)) parts.push(formatFileSize(data.size));
+      const time = formatFileTime(data.mtime);
+      if (time) parts.push(`修改于 ${time}`);
+      return `<div class="preview-title"><span class="preview-title-name">${escapeHtml(data.fileName || fallbackName || '')}</span><span class="preview-title-meta">${escapeHtml(parts.join(' · '))}</span></div>`;
+    }
+
+    function renderResultSummary(summary = {}) {
+      const success = Number(summary.success) || 0;
+      const skipped = Number(summary.skipped) || 0;
+      const failed = Number(summary.failed) || 0;
+      return `<div class="result-summary">
+        <div class="result-summary-item success"><span class="result-summary-count">${success}</span><span class="result-summary-label">成功</span></div>
+        <div class="result-summary-item skipped"><span class="result-summary-count">${skipped}</span><span class="result-summary-label">跳过</span></div>
+        <div class="result-summary-item failed"><span class="result-summary-count">${failed}</span><span class="result-summary-label">失败</span></div>
+      </div>`;
+    }
+
+    function renderIssueDetails(skipped = [], errors = []) {
+      const items = [];
+      skipped.forEach(item => items.push({ kind: '跳过', file: item.file || item.path || '', detail: item.reason || item.error || '无法读取' }));
+      errors.forEach(item => items.push({ kind: '失败', file: item.file || item.path || '', detail: item.error || item.reason || '未知错误' }));
+      if (items.length === 0) return '';
+      const rows = items.map(item => `<div class="issue-row"><strong>${escapeHtml(item.kind)}</strong> · ${escapeHtml(item.file)}<br>${escapeHtml(item.detail)}</div>`).join('');
+      return `<details class="issue-details" ${errors.length > 0 ? 'open' : ''}><summary>查看异常详情（${items.length} 项）</summary><div class="issue-details-body">${rows}</div></details>`;
+    }
+
+    function renderScanSummary({ totalScanned = 0, found = 0, skipped = [], errors = [], unit = '个文件' }) {
+      return `<p>扫描 <strong>${totalScanned}</strong> ${unit} · 找到 <strong>${found}</strong> 个 · 跳过 <strong>${skipped.length}</strong> 项 · 读取失败 <strong>${errors.length}</strong> 项</p>${renderIssueDetails(skipped, errors)}`;
+    }
+
+    function showTaskProgress(title, message = '准备开始', cancellable = false) {
       showModal(title, `<div class="task-progress">
         <div id="taskProgressText">${escapeHtml(message)}</div>
-        <div class="task-progress-bar"><span id="taskProgressBar"></span></div>
+        <div class="task-progress-bar indeterminate" id="taskProgressBarTrack"><span id="taskProgressBar"></span></div>
         <div id="taskProgressFile" class="task-current-file"></div>
+        ${cancellable ? '<div class="task-progress-actions"><button class="btn btn-danger" type="button" onclick="cancelActiveScan()">取消扫描</button></div>' : ''}
       </div>`);
+    }
+
+    function showTaskError(title, message) {
+      showModal(title, `<div class="result-item error"><div class="result-file">操作未完成</div><div class="result-detail">${escapeHtml(message)}</div></div>`);
     }
 
     function updateTaskProgress(current, total, file, label) {
       const text = document.getElementById('taskProgressText');
       const bar = document.getElementById('taskProgressBar');
+      const track = document.getElementById('taskProgressBarTrack');
       const currentFile = document.getElementById('taskProgressFile');
       const pct = total > 0 ? Math.round(current / total * 100) : 0;
-      if (text) text.textContent = `${label} ${current}/${total}（${pct}%）`;
-      if (bar) bar.style.width = `${pct}%`;
+      if (text) text.textContent = total > 0 ? `${label} ${current}/${total}（${pct}%）` : `${label} ${current} 个文件`;
+      if (track) track.classList.toggle('indeterminate', total <= 0);
+      if (bar && total > 0) bar.style.width = `${pct}%`;
       if (currentFile) currentFile.textContent = file || '';
+    }
+
+    function beginCancellableScan(title, message, onCancel) {
+      if (activeScan) {
+        const previous = activeScan;
+        previous.cancelled = true;
+        previous.controller.abort();
+        if (previous.onCancel) previous.onCancel();
+      }
+      const scan = { controller: new AbortController(), cancelled: false, title, onCancel };
+      activeScan = scan;
+      showTaskProgress(title, message, true);
+      return scan;
+    }
+
+    function finishScan(scan) {
+      if (activeScan === scan) activeScan = null;
+      return !scan.cancelled;
+    }
+
+    function cancelActiveScan(showResult = true) {
+      const scan = activeScan;
+      if (!scan) return;
+      scan.cancelled = true;
+      activeScan = null;
+      scan.controller.abort();
+      if (scan.onCancel) scan.onCancel();
+      if (showResult) {
+        showModal(scan.title, '<div class="result-item info"><div class="result-file">扫描已取消</div><div class="result-detail">没有执行任何文件修改。</div></div>');
+      } else {
+        showToast('扫描已取消，没有修改文件', 'info');
+      }
     }
 
     function selectedIndexes(selector) {
@@ -2610,62 +3076,81 @@
     }
 
     // ===== Button 1: Organize revoked audio =====
-    async function moveRevokedFiles() {
+    function moveRevokedFiles() {
       const btn = document.getElementById('btnMoveRevoked');
+      const resetButton = () => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
+      };
       btn.disabled = true;
       btn.innerHTML = '<div class="loading"></div> 扫描中...';
-      showTaskProgress('扫描撤回音频', '正在查找文件名包含“撤回”的音频');
-      try {
-        const resp = await fetch('/api/scan-revoked-audio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ root: currentRoot }) });
-        const data = await resp.json();
-        btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
-        if (!data.success) throw new Error(data.error);
-        audioCandidates = Array.isArray(data.data) ? data.data : [];
-        if (audioCandidates.length === 0) {
-          showModal('整理撤回音频', '<div class="result-item info"><div class="result-file">没有找到文件名包含“撤回”的音频文件</div><div class="result-detail">当前没有可选项，无需进行整理。</div></div>');
-          return;
+      const scan = beginCancellableScan('扫描撤回音频', '正在查找文件名包含“撤回”的音频', resetButton);
+      ssePost('/api/scan-revoked-audio', { root: currentRoot }, {
+        signal: scan.controller.signal,
+        onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, msg.phase === 'fingerprint' ? '校验文件' : '已扫描'); },
+        onDone(data) {
+          if (!finishScan(scan)) return;
+          resetButton();
+          if (!data.success) return showTaskError('扫描撤回音频失败', data.error || '服务器未能完成扫描');
+          const skipped = Array.isArray(data.skipped) ? data.skipped : [];
+          const errors = Array.isArray(data.errors) ? data.errors : [];
+          audioCandidates = Array.isArray(data.data) ? data.data : [];
+          const scanSummary = renderScanSummary({ totalScanned: data.totalScanned, found: audioCandidates.length, skipped, errors, unit: '个文件' });
+          if (audioCandidates.length === 0) {
+            showModal('整理撤回音频', scanSummary + '<div class="result-item info"><div class="result-file">没有找到文件名包含“撤回”的音频文件</div><div class="result-detail">当前没有可选项，无需进行整理。</div></div>');
+            return;
+          }
+          let content = scanSummary + `<div class="selection-toolbar"><span class="selection-summary" id="audioSelectionSummary">已选择 ${audioCandidates.length} / ${audioCandidates.length} 个音频</span><div class="selection-toolbar-actions"><button id="audioSelectAllButton" class="btn" type="button" onclick="setSelection('audio-select', true, updateAudioSelection)" disabled>全选</button><button id="audioClearAllButton" class="btn" type="button" onclick="setSelection('audio-select', false, updateAudioSelection)">取消全选</button></div></div><div class="selection-list">`;
+          audioCandidates.forEach((item, index) => {
+            content += `<label class="selection-row"><input class="audio-select" type="checkbox" value="${index}" checked onchange="updateAudioSelection()"><span><span class="selection-file">${escapeHtml(item.relativePath)}</span><span class="selection-detail">${formatFileSize(item.size)} · 修改于 ${escapeHtml(formatFileTime(item.mtime))}</span></span></label>`;
+          });
+          content += `</div><div style="display:flex;justify-content:flex-end;"><button id="audioActionButton" class="btn btn-primary" onclick="executeSelectedAudio()">移动选中的 ${audioCandidates.length} 个音频</button></div>`;
+          showModal('选择要整理的撤回音频', content);
+          updateAudioSelection();
+        },
+        onError(e) {
+          if (scan.cancelled || e.name === 'AbortError') return;
+          finishScan(scan);
+          resetButton();
+          showTaskError('扫描撤回音频失败', e.message);
         }
-        let content = `<p>共找到 <strong>${audioCandidates.length}</strong> 个音频文件，请确认要移动的文件。</p><div class="selection-toolbar"><span class="selection-summary" id="audioSelectionSummary">已选择 ${audioCandidates.length} / ${audioCandidates.length} 个音频</span><div class="selection-toolbar-actions"><button id="audioSelectAllButton" class="btn" type="button" onclick="setSelection('audio-select', true, updateAudioSelection)" disabled>全选</button><button id="audioClearAllButton" class="btn" type="button" onclick="setSelection('audio-select', false, updateAudioSelection)">取消全选</button></div></div><div class="selection-list">`;
-        audioCandidates.forEach((item, index) => {
-          content += `<label class="selection-row"><input class="audio-select" type="checkbox" value="${index}" checked onchange="updateAudioSelection()"><span><span class="selection-file">${escapeHtml(item.relativePath)}</span><span class="selection-detail">${formatFileSize(item.size)}</span></span></label>`;
-        });
-        content += `</div><div style="display:flex;justify-content:flex-end;"><button id="audioActionButton" class="btn btn-primary" onclick="executeSelectedAudio()">移动选中的 ${audioCandidates.length} 个音频</button></div>`;
-        showModal('选择要整理的撤回音频', content);
-        updateAudioSelection();
-      } catch (e) {
-        btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
-        showToast('扫描失败：' + e.message, 'error');
-      }
+      });
     }
 
     async function executeSelectedAudio() {
-      const files = selectedIndexes('.audio-select').map(index => audioCandidates[index]?.file).filter(Boolean);
-      if (files.length === 0) return showToast('请至少选择一个音频文件', 'info');
-      const ok = await showConfirm({ title: '确认整理撤回音频', message: `将移动 ${files.length} 个音频到“撤回文件夹”。\n\n文件位置会发生变化，确认继续？`, type: 'warning', okText: '确认移动' });
+      const items = selectedIndexes('.audio-select').map(index => audioCandidates[index]).filter(Boolean)
+        .map(item => ({ file: item.file, size: item.size, mtimeMs: item.mtimeMs, sha256: item.sha256 }));
+      if (items.length === 0) return showToast('请至少选择一个音频文件', 'info');
+      const ok = await showConfirm({ title: '确认整理撤回音频', message: `将移动 ${items.length} 个音频到“撤回文件夹”。\n\n文件位置会发生变化，但完成后可以一键撤回。`, type: 'warning', okText: '确认移动' });
       if (!ok) return;
       closeModal();
       const btn = document.getElementById('btnMoveRevoked');
       btn.disabled = true;
       btn.innerHTML = '<div class="loading"></div> 整理中...';
       showTaskProgress('整理撤回音频');
-      ssePost('/api/move-revoked', { root: currentRoot, files }, {
+      ssePost('/api/move-revoked', { root: currentRoot, items }, {
         onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, '移动中'); },
         onDone(data) {
           btn.disabled = false;
           btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
-          if (!data.success) return showToast('操作失败：' + data.error, 'error');
-          let content = `<p>成功移动 <strong>${data.moved.length}</strong> 个音频到 <code>${escapeHtml(data.targetDir)}</code>。</p>`;
+          if (!data.success) return showTaskError('整理撤回音频失败', data.error || '服务器未能完成操作');
+          const skipped = Array.isArray(data.skipped) ? data.skipped : [];
+          const errors = Array.isArray(data.errors) ? data.errors : [];
+          const warnings = Array.isArray(data.warnings) ? data.warnings : [];
+          let content = renderResultSummary(data.summary);
+          if (data.restorable) content += `<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-primary" onclick="restoreTask('${data.taskId}', 'move-audio')">撤回本次整理</button></div>`;
+          content += `<p>音频目标位置：<code>${escapeHtml(data.targetDir)}</code></p>`;
           data.moved.forEach(item => { content += `<div class="result-item success"><div class="result-file">${escapeHtml(item.from.split('/').pop())}</div><div class="result-detail">已移动到：${escapeHtml(item.to)}</div></div>`; });
-          data.errors.forEach(item => { content += `<div class="result-item error"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">错误：${escapeHtml(item.error)}</div></div>`; });
+          skipped.forEach(item => { content += `<div class="result-item info"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">已跳过：${escapeHtml(item.reason)}</div></div>`; });
+          warnings.forEach(item => { content += `<div class="result-item info"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">提示：${escapeHtml(item.reason)}</div></div>`; });
+          errors.forEach(item => { content += `<div class="result-item error"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">错误：${escapeHtml(item.error)}</div></div>`; });
           showModal('整理撤回音频结果', content);
           loadTree();
         },
         onError(e) {
           btn.disabled = false;
           btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
-          showToast('请求失败：' + e.message, 'error');
+          showTaskError('整理撤回音频失败', e.message);
         }
       });
     }
@@ -2673,24 +3158,33 @@
     // ===== Button 2: Scan and process revoked documents =====
     function processRevokedDocuments() {
       const btn = document.getElementById('btnProcessDocuments');
+      const resetButton = () => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
+      };
       btn.disabled = true;
       btn.innerHTML = '<div class="loading"></div> 扫描中...';
-      showTaskProgress('扫描撤回文档', '正在查找同时包含“返场故事”和“撤回”的 Word 段落');
+      const scan = beginCancellableScan('扫描撤回文档', '正在查找同时包含“返场故事”和“撤回”的 Word 段落', resetButton);
       ssePost('/api/find-keywords', { root: currentRoot }, {
-        onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, '扫描中'); },
+        signal: scan.controller.signal,
+        onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, msg.phase === 'inspect' ? '检查文档' : '已扫描'); },
         onDone(data) {
-          btn.disabled = false;
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
-          if (!data.success) return showToast('扫描失败：' + data.error, 'error');
+          if (!finishScan(scan)) return;
+          resetButton();
+          if (!data.success) return showTaskError('扫描撤回文档失败', data.error || '服务器未能完成扫描');
+          const skipped = Array.isArray(data.skipped) ? data.skipped : [];
+          const errors = Array.isArray(data.errors) ? data.errors : [];
           documentCandidates = Array.isArray(data.data) ? data.data : [];
+          const scanSummary = renderScanSummary({ totalScanned: data.totalScanned, found: documentCandidates.length, skipped, errors, unit: '个 Word 文档' });
           if (documentCandidates.length === 0) {
-            showModal('处理撤回文档', `<p>共扫描 ${data.totalScanned} 个 Word 文档。</p><div class="result-item info"><div class="result-file">没有找到匹配段落</div><div class="result-detail">当前没有可选项，无需进行处理。</div></div>`);
+            showModal('处理撤回文档', scanSummary + '<div class="result-item info"><div class="result-file">没有找到匹配段落</div><div class="result-detail">当前没有可选项，无需进行处理。</div></div>');
             return;
           }
-          let content = `<p>共扫描 <strong>${data.totalScanned}</strong> 个 Word 文档，找到 <strong>${documentCandidates.length}</strong> 个匹配文件。</p><div class="danger-note">删除范围：从命中“返场故事 + 撤回”的段落开始，删除该段及其后的全部内容。原文件会先备份。</div><div class="selection-toolbar"><span class="selection-summary" id="documentSelectionSummary">已选择 ${documentCandidates.length} / ${documentCandidates.length} 个文档</span><div class="selection-toolbar-actions"><button id="documentSelectAllButton" class="btn" type="button" onclick="setSelection('document-select', true, updateDocumentSelection)" disabled>全选</button><button id="documentClearAllButton" class="btn" type="button" onclick="setSelection('document-select', false, updateDocumentSelection)">取消全选</button></div></div><div class="selection-list">`;
+          let content = scanSummary + `<div class="danger-note">删除范围：从命中“返场故事 + 撤回”的段落开始，删除该段及其后的全部内容。原文件会先备份。</div><div class="selection-toolbar"><span class="selection-summary" id="documentSelectionSummary">已选择 ${documentCandidates.length} / ${documentCandidates.length} 个文档</span><div class="selection-toolbar-actions"><button id="documentSelectAllButton" class="btn" type="button" onclick="setSelection('document-select', true, updateDocumentSelection)" disabled>全选</button><button id="documentClearAllButton" class="btn" type="button" onclick="setSelection('document-select', false, updateDocumentSelection)">取消全选</button></div></div><div class="selection-list">`;
           documentCandidates.forEach((item, index) => {
             content += `<label class="selection-row"><input class="document-select" type="checkbox" value="${index}" checked onchange="updateDocumentSelection()"><span><button class="selection-file doc-preview-link" type="button" onclick="previewDocumentCandidate(${index})">${escapeHtml(item.relativePath || item.file)}</button>`;
             item.matchedLines.forEach(line => { content += `<span class="selection-detail">第 ${line.lineNumber} 行：${escapeHtml(line.content)}</span>`; });
+            content += `<span class="selection-detail">${formatFileSize(item.size)} · 修改于 ${escapeHtml(formatFileTime(item.mtime))}</span>`;
             content += '</span></label>';
           });
           content += `</div><div style="display:flex;justify-content:flex-end;"><button id="documentActionButton" class="btn btn-danger" onclick="executeSelectedDocuments()">处理选中的 ${documentCandidates.length} 个文档</button></div>`;
@@ -2698,9 +3192,10 @@
           updateDocumentSelection();
         },
         onError(e) {
-          btn.disabled = false;
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
-          showToast('请求失败：' + e.message, 'error');
+          if (scan.cancelled || e.name === 'AbortError') return;
+          finishScan(scan);
+          resetButton();
+          showTaskError('扫描撤回文档失败', e.message);
         }
       });
     }
@@ -2713,27 +3208,33 @@
     }
 
     async function executeSelectedDocuments() {
-      const files = selectedIndexes('.document-select').map(index => documentCandidates[index]?.file).filter(Boolean);
-      if (files.length === 0) return showToast('请至少选择一个 Word 文档', 'info');
-      const ok = await showConfirm({ title: '确认处理撤回文档', message: `将处理 ${files.length} 个 Word 文档。\n\n每个文件都会从命中段落开始删除到文档结尾，原文件先备份。`, type: 'danger', okText: '确认处理' });
+      const items = selectedIndexes('.document-select').map(index => documentCandidates[index]).filter(Boolean)
+        .map(item => ({ file: item.file, size: item.size, mtimeMs: item.mtimeMs, sha256: item.sha256 }));
+      if (items.length === 0) return showToast('请至少选择一个 Word 文档', 'info');
+      const ok = await showConfirm({ title: '确认处理撤回文档', message: `将处理 ${items.length} 个 Word 文档。\n\n每个文件都会从命中段落开始删除到文档结尾，原文件先备份。扫描后发生变化的文件会自动跳过。`, type: 'danger', okText: '确认处理' });
       if (!ok) return;
       closeModal();
       const btn = document.getElementById('btnProcessDocuments');
       btn.disabled = true;
       btn.innerHTML = '<div class="loading"></div> 处理中...';
       showTaskProgress('处理撤回文档');
-      ssePost('/api/remove-content', { root: currentRoot, files }, {
+      ssePost('/api/remove-content', { root: currentRoot, items }, {
         onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, '处理第'); },
         onDone(data) {
           btn.disabled = false;
           btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
-          if (!data.success) return showToast('操作失败：' + data.error, 'error');
-          let content = '';
-          data.data.forEach(item => {
-            if (item.modified) content += `<div class="result-item success"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">已删除 ${item.removedParagraphs} 个段落<br>备份：${escapeHtml(item.backupPath)}</div></div>`;
-            else content += `<div class="result-item error"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">${escapeHtml(item.error || item.reason || '未修改')}</div></div>`;
+          if (!data.success) return showTaskError('处理撤回文档失败', data.error || '服务器未能完成操作');
+          let content = renderResultSummary(data.summary);
+          const warnings = Array.isArray(data.warnings) ? data.warnings : [];
+          warnings.forEach(warning => {
+            content += `<div class="result-item info"><div class="result-file">操作日志提示</div><div class="result-detail">${escapeHtml(warning)}</div></div>`;
           });
-          if (data.restorable) content = `<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-primary" onclick="restoreTask('${data.taskId}')">恢复本次修改</button></div>` + content;
+          data.data.forEach(item => {
+            if (item.modified) content += `<div class="result-item success"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">已删除 ${item.removedParagraphs} 个段落<br>备份：${escapeHtml(item.backupPath)}${item.warning ? `<br>提示：${escapeHtml(item.warning)}` : ''}</div></div>`;
+            else if (item.skipped || (item.reason && !item.error)) content += `<div class="result-item info"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">已跳过：${escapeHtml(item.reason || '未修改')}</div></div>`;
+            else content += `<div class="result-item error"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">${escapeHtml(item.error || '处理失败')}</div></div>`;
+          });
+          if (data.restorable) content = `<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-primary" onclick="restoreTask('${data.taskId}', 'remove-content')">恢复本次修改</button></div>` + content;
           showModal('处理撤回文档结果', content || '<div class="result-item info"><div class="result-file">没有完成修改</div></div>');
           const count = data.data.filter(item => item.modified).length;
           showToast(`处理完成：${count} 个文件已修改`, count > 0 ? 'success' : 'info');
@@ -2742,26 +3243,39 @@
         onError(e) {
           btn.disabled = false;
           btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
-          showToast('请求失败：' + e.message, 'error');
+          showTaskError('处理撤回文档失败', e.message);
         }
       });
     }
 
-    async function restoreTask(taskId) {
-      const ok = await showConfirm({ title: '恢复本次文档修改', message: '将使用备份覆盖当前文档。当前版本会先另行备份，确认恢复？', type: 'warning', okText: '确认恢复' });
+    async function restoreTask(taskId, taskType = 'remove-content') {
+      const isAudio = taskType === 'move-audio';
+      const ok = await showConfirm({
+        title: isAudio ? '撤回本次音频整理' : '恢复本次文档修改',
+        message: isAudio
+          ? '将把音频移回整理前的位置。原位置已有同名文件时不会覆盖，而会安全跳过。'
+          : '将使用备份覆盖当前文档。当前版本会先另行备份，确认恢复？',
+        type: 'warning',
+        okText: isAudio ? '确认撤回' : '确认恢复'
+      });
       if (!ok) return;
       closeModal();
-      showTaskProgress('恢复文档备份', '正在恢复文件');
+      showTaskProgress(isAudio ? '撤回音频整理' : '恢复文档备份', '正在恢复文件');
       try {
         const resp = await fetch('/api/restore-task', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ root: currentRoot, taskId }) });
         const data = await resp.json();
         if (!data.success) throw new Error(data.error);
-        let content = `<p>已恢复 <strong>${data.restoredCount}</strong> 个文件。</p>`;
-        data.data.forEach(item => { content += `<div class="result-item ${item.restored ? 'success' : 'error'}"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">${item.restored ? '恢复成功' : '恢复失败：' + escapeHtml(item.error)}</div></div>`; });
-        showModal('恢复结果', content);
+        let content = renderResultSummary(data.summary);
+        if (data.warning) content += `<div class="result-item info"><div class="result-file">任务记录提示</div><div class="result-detail">${escapeHtml(data.warning)}</div></div>`;
+        data.data.forEach(item => {
+          const className = item.restored ? 'success' : item.skipped ? 'info' : 'error';
+          const detail = item.restored ? `恢复成功${item.warning ? `；${item.warning}` : ''}` : item.skipped ? `已跳过：${item.reason}` : `恢复失败：${item.error}`;
+          content += `<div class="result-item ${className}"><div class="result-file">${escapeHtml(item.file)}</div><div class="result-detail">${escapeHtml(detail)}</div></div>`;
+        });
+        showModal(isAudio ? '撤回音频整理结果' : '恢复文档结果', content);
         loadTree();
       } catch (e) {
-        showToast('恢复失败：' + e.message, 'error');
+        showTaskError(isAudio ? '撤回音频整理失败' : '恢复文档失败', e.message);
       }
     }
 
@@ -2779,10 +3293,11 @@
         if (!data.success) { showToast('获取日志列表失败: ' + data.error, 'error'); return; }
         let backupContent = '';
         if (backups.length > 0) {
-          backupContent = '<div style="margin-bottom:14px;"><div style="font-weight:600;margin-bottom:8px;color:var(--ink);">可恢复的文档任务</div><div style="display:flex;gap:6px;flex-wrap:wrap;">';
-          backups.slice(0, 8).forEach(task => {
+          backupContent = '<div style="margin-bottom:14px;"><div style="font-weight:600;margin-bottom:8px;color:var(--ink);">可恢复的历史任务</div><div style="display:flex;gap:6px;flex-wrap:wrap;">';
+          backups.forEach(task => {
             const label = new Date(task.createdAt).toLocaleString('zh-CN');
-            backupContent += `<button class="btn btn-outline" onclick="restoreTask('${task.taskId}')">${escapeHtml(label)} · ${task.count} 个文件</button>`;
+            const taskLabel = task.type === 'move-audio' ? '音频整理' : task.type === 'before-restore' ? '恢复前版本' : '文档修改';
+            backupContent += `<button class="btn btn-outline" onclick="restoreTask(${inlineJsString(task.taskId)}, ${inlineJsString(task.type)})">${escapeHtml(taskLabel)} · ${escapeHtml(label)} · ${task.count} 个</button>`;
           });
           backupContent += '</div></div>';
         }
@@ -2791,8 +3306,8 @@
           return;
         }
         let content = backupContent + '<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
-        content += '<input type="text" id="logSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value)" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:\'Noto Sans SC\',sans-serif;">';
-        content += '<span id="logSearchCount" style="font-size:11px;color:var(--ink-subtle);white-space:nowrap;"></span>';
+        content += '<input type="text" id="operationLogSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value, \'logContent\', \'operationLogSearchCount\')" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:\'Noto Sans SC\',sans-serif;">';
+        content += '<span id="operationLogSearchCount" style="font-size:11px;color:var(--ink-subtle);white-space:nowrap;"></span>';
         content += '<button onclick="logSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▲</button>';
         content += '<button onclick="logSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▼</button>';
         content += '</div>';
@@ -2800,7 +3315,7 @@
         content += '<div style="min-width:140px;border-right:1px solid var(--hairline);padding-right:12px;overflow-y:auto;">';
         data.files.forEach((f, i) => {
           const label = f.replace('.log', '');
-          content += `<div class="log-date-item${i === 0 ? ' active' : ''}" onclick="viewLogFile('${f}', this)" style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:13px;margin-bottom:4px;${i === 0 ? 'background:var(--primary);color:var(--on-primary);' : 'color:var(--ink-muted);'}">${label}</div>`;
+          content += `<div class="log-date-item${i === 0 ? ' active' : ''}" onclick="viewLogFile(${inlineJsString(f)}, this)" style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:13px;margin-bottom:4px;${i === 0 ? 'background:var(--primary);color:var(--on-primary);' : 'color:var(--ink-muted);'}">${escapeHtml(label)}</div>`;
         });
         content += '</div>';
         content += '<div id="logContent" style="flex:1;overflow:auto;font-size:12px;line-height:1.8;color:var(--ink);padding:4px 8px;background:var(--surface-1);border-radius:4px;">加载中...</div>';
@@ -2813,10 +3328,14 @@
     }
 
     const LOG_STYLES = {
-      '移动撤回文件':       { color: '#2563eb', bg: '#eff6ff', icon: '📁', label: '移动' },
-      '移动撤回文件-失败':  { color: '#2563eb', bg: '#eff6ff', icon: '❌', label: '移动失败' },
+      '移动撤回音频':       { color: '#2563eb', bg: '#eff6ff', icon: '📁', label: '移动' },
+      '移动撤回音频-跳过':  { color: '#9a7209', bg: '#fffbeb', icon: '○', label: '移动跳过' },
+      '移动撤回音频-失败':  { color: '#c0392b', bg: '#fef2f2', icon: '×', label: '移动失败' },
+      '撤回音频整理':       { color: '#27713a', bg: '#f0fdf4', icon: '↩', label: '撤回移动' },
       '删除返场故事内容':   { color: '#7c3aed', bg: '#f5f3ff', icon: '🗑️', label: '删除' },
+      '删除返场故事内容-跳过': { color: '#9a7209', bg: '#fffbeb', icon: '○', label: '处理跳过' },
       '删除返场故事内容-失败': { color: '#7c3aed', bg: '#f5f3ff', icon: '❌', label: '删除失败' },
+      '恢复文档备份':       { color: '#27713a', bg: '#f0fdf4', icon: '↩', label: '恢复文档' },
     };
     const LOG_DEFAULT_STYLE = { color: '#6b7280', bg: '#f9fafb', icon: '📋', label: '操作' };
 
@@ -2835,31 +3354,34 @@
         }
       }
       return entries.map(e => {
-        if (!e.time) return `<div class="log-line" style="padding:4px 8px;font-size:12px;color:var(--ink-muted);">${e.details.join('\n').replace(/</g,'&lt;')}</div>`;
+        if (!e.time) return `<div class="log-line" style="padding:4px 8px;font-size:12px;color:var(--ink-muted);">${escapeHtml(e.details.join('\n'))}</div>`;
         const s = LOG_STYLES[e.action] || LOG_DEFAULT_STYLE;
         const detailHtml = e.details.filter(d => d.trim()).map(d => {
           const trimmed = d.replace(/^\s+/, '');
           const arrow = trimmed.includes('→');
           if (arrow) {
             const parts = trimmed.split('→');
-            return `<div style="display:flex;align-items:flex-start;gap:4px;padding:3px 0;"><span style="color:#9ca3af;">•</span><span style="word-break:break-all;">${parts[0].trim().replace(/</g,'&lt;')} <span style="color:${s.color};font-weight:600;">→</span> ${parts.slice(1).join('→').trim().replace(/</g,'&lt;')}</span></div>`;
+            return `<div style="display:flex;align-items:flex-start;gap:4px;padding:3px 0;"><span style="color:#9ca3af;">•</span><span style="word-break:break-all;">${escapeHtml(parts[0].trim())} <span style="color:${s.color};font-weight:600;">→</span> ${escapeHtml(parts.slice(1).join('→').trim())}</span></div>`;
           }
-          return `<div style="padding:2px 0;"><span style="color:#9ca3af;">•</span> ${trimmed.replace(/</g,'&lt;')}</div>`;
+          return `<div style="padding:2px 0;"><span style="color:#9ca3af;">•</span> ${escapeHtml(trimmed)}</div>`;
         }).join('');
-        const summaryLine = e.details[0] ? e.details[0].replace(/</g,'&lt;') : '';
+        const summaryLine = e.details[0] ? escapeHtml(e.details[0]) : '';
         const fileList = e.details.length > 1 ? `<div style="margin-top:4px;padding:6px 8px;background:rgba(0,0,0,0.03);border-radius:4px;font-size:11px;line-height:1.6;">${detailHtml}</div>` : (summaryLine ? `<div style="margin-top:2px;font-size:12px;color:#374151;">${summaryLine}</div>` : '');
         return `<div class="log-line" style="margin-bottom:8px;border-left:3px solid ${s.color};background:${s.bg};border-radius:0 4px 4px 0;padding:8px 12px;">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
             <span style="font-weight:700;color:#111;font-size:12px;font-family:monospace;">${e.time}</span>
             <span>${s.icon}</span>
-            <span style="font-weight:600;color:${s.color};font-size:12px;">${e.action}</span>
+            <span style="font-weight:600;color:${s.color};font-size:12px;">${escapeHtml(e.action)}</span>
           </div>
           ${fileList}
         </div>`;
       }).join('');
     }
 
+    let logLoadId = 0;
+
     async function viewLogFile(filename, el) {
+      const loadId = ++logLoadId;
       if (el) {
         el.parentElement.querySelectorAll('.log-date-item').forEach(d => {
           d.classList.remove('active');
@@ -2872,34 +3394,48 @@
       }
       const logDiv = document.getElementById('logContent');
       if (!logDiv) return;
+      _logSearchMatches = [];
+      _logSearchIdx = -1;
+      _logSearchCountEl = document.getElementById('operationLogSearchCount');
+      if (_logSearchCountEl) _logSearchCountEl.textContent = '';
       logDiv.innerHTML = '<span style="color:var(--ink-subtle);">加载中...</span>';
       try {
         const root = currentRoot || document.getElementById('rootPath').value.trim();
         const resp = await fetch(`/api/logs/${encodeURIComponent(filename)}?root=${encodeURIComponent(root)}`);
         const data = await resp.json();
+        if (loadId !== logLoadId) return;
         if (data.success) {
           if (!data.content) { logDiv.innerHTML = '<span style="color:var(--ink-subtle);">（空日志）</span>'; return; }
-          logDiv.innerHTML = formatLogContent(data.content);
+          const truncatedNotice = data.truncated
+            ? `<div class="result-item info" style="margin-bottom:10px;"><div class="result-file">日志较大，仅显示最近 ${formatFileSize(data.loadedSize || data.limit)}</div><div class="result-detail">最多显示最近 ${data.lineLimit || 10000} 行；日志总大小 ${formatFileSize(data.totalSize)}，较早内容仍保留在原日志文件中。</div></div>`
+            : '';
+          logDiv.innerHTML = truncatedNotice + formatLogContent(data.content);
+          const keyword = document.getElementById('operationLogSearchInput')?.value || '';
+          if (keyword.trim()) searchLog(keyword, 'logContent', 'operationLogSearchCount');
         } else {
-          logDiv.innerHTML = '<span style="color:var(--danger);">读取失败: ' + data.error + '</span>';
+          logDiv.innerHTML = '<span style="color:var(--danger);">读取失败: ' + escapeHtml(data.error) + '</span>';
         }
       } catch (e) {
-        logDiv.innerHTML = '<span style="color:var(--danger);">请求失败: ' + e.message + '</span>';
+        if (loadId !== logLoadId) return;
+        logDiv.innerHTML = '<span style="color:var(--danger);">请求失败: ' + escapeHtml(e.message) + '</span>';
       }
     }
 
     // ===== 日志搜索 =====
     let _logSearchMatches = [];
     let _logSearchIdx = -1;
+    let _logSearchCountEl = null;
 
-    function searchLog(keyword) {
-      const container = document.getElementById('logContent') || document.getElementById('logPreviewContent');
-      const countEl = document.getElementById('logSearchCount');
+    function searchLog(keyword, containerId, countId) {
+      const container = containerId ? document.getElementById(containerId) : null;
+      const countEl = countId ? document.getElementById(countId) : null;
       if (!container) return;
+      _logSearchCountEl = countEl;
       // Clear previous highlights
       container.querySelectorAll('.log-highlight').forEach(el => {
-        el.outerHTML = el.textContent;
+        el.replaceWith(document.createTextNode(el.textContent || ''));
       });
+      container.normalize();
       _logSearchMatches = [];
       _logSearchIdx = -1;
       if (countEl) countEl.textContent = '';
@@ -2941,13 +3477,15 @@
     }
 
     function scrollToLogMatch(idx) {
+      if (!_logSearchMatches[idx] || !_logSearchMatches[idx].isConnected) return;
       _logSearchMatches.forEach((el, i) => {
         el.style.background = i === idx ? '#f97316' : '#fbbf24';
         el.style.fontWeight = i === idx ? '700' : '';
       });
       _logSearchMatches[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const countEl = document.getElementById('logSearchCount');
-      if (countEl) countEl.textContent = `共 ${_logSearchMatches.length} 次出现 | ${idx + 1} / ${_logSearchMatches.length}`;
+      if (_logSearchCountEl && _logSearchCountEl.isConnected) {
+        _logSearchCountEl.textContent = `共 ${_logSearchMatches.length} 次出现 | ${idx + 1} / ${_logSearchMatches.length}`;
+      }
     }
 
     // ===== Resize Handle =====
@@ -3049,8 +3587,8 @@
     (function() {
       const savedRoot = localStorage.getItem('fileManager_root');
       if (savedRoot) document.getElementById('rootPath').value = savedRoot;
+      loadTree({ fallbackOnInvalid: Boolean(savedRoot) });
     })();
-    loadTree();
   </script>
 </body>
 </html>
