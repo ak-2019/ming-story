@@ -382,3 +382,30 @@ test('Excel 超出行数上限时会停止预览', async t => {
   assert.equal(result.data.success, false);
   assert.match(result.data.error, /内容过大/);
 });
+
+test('知行合一牌匾复用同一组件且页面脚本可编译', () => {
+  const page = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const inlineScripts = [...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
+    .map(match => match[1])
+    .filter(script => script.trim());
+
+  assert.match(page, /id="brandMottoButton"[^>]+onclick="openMottoOverlay\(\)"/);
+  assert.match(page, /id="welcomeMottoMount"/);
+  assert.match(page, /id="overlayMottoMount"/);
+  assert.equal((page.match(/function createMottoPlaque\(/g) || []).length, 1);
+  assert.equal((page.match(/function emitMottoSparks\(/g) || []).length, 1);
+  assert.equal((page.match(/function emitMottoSparkTrail\(/g) || []).length, 1);
+  assert.match(page, /welcomeMount\.replaceChildren\(createMottoPlaque\('compact'\)\)/);
+  assert.match(page, /overlayMount\.replaceChildren\(createMottoPlaque\(\)\)/);
+  assert.match(page, /background:\s*transparent/);
+  assert.match(page, /for \(const cornerName of \['top-left', 'top-right', 'bottom-left', 'bottom-right'\]\)/);
+  assert.match(page, /for \(const crestPosition of \['top', 'bottom'\]\)/);
+  assert.doesNotMatch(page, /motto-plaque-pattern/);
+  assert.match(page, /emitMottoSparkTrail\(cx, cy, targetX, targetY/);
+  assert.match(page, /animation:\s*motto-word-fly 2\.4s/);
+  assert.match(page, /duration:\s*1400/);
+  assert.ok(inlineScripts.length > 0, '未找到页面内联脚本');
+  for (const script of inlineScripts) {
+    assert.doesNotThrow(() => new Function(script), '页面内联脚本存在语法错误');
+  }
+});

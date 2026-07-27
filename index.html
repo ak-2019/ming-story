@@ -83,133 +83,261 @@
 
     .header h1 svg { width: 22px; height: 22px; stroke: var(--primary); }
 
-    .header-motto {
+    .brand-trigger {
       display: flex;
       align-items: center;
-      gap: 0;
-      font-family: 'SimSun', serif;
-      user-select: none;
-      padding: 6px 32px;
-      border: 2px solid var(--primary);
-      border-radius: 2px;
-      position: relative;
-      background: linear-gradient(135deg, var(--surface-1), var(--canvas), var(--surface-1));
-      box-shadow: inset 0 0 0 1px var(--primary-muted), 0 1px 4px rgba(0,0,0,0.08);
+      gap: 10px;
+      min-width: 0;
+      padding: 4px 2px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      white-space: nowrap;
     }
-    .header-motto::before,
-    .header-motto::after {
+
+    .brand-trigger:hover { color: var(--primary); }
+    .brand-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+    .brand-trigger svg { flex: 0 0 auto; }
+
+    .motto-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(31,20,16,0.84);
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+    }
+
+    .motto-overlay.show { display: flex; }
+
+    .motto-plaque {
+      --motto-accent: rgba(224,188,112,0.9);
+      --motto-accent-soft: rgba(224,188,112,0.34);
+      --motto-text: #f1d79e;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(680px, 92vw);
+      min-height: 220px;
+      padding: 46px 72px;
+      border: 1px solid var(--motto-accent);
+      border-radius: 2px;
+      background: rgba(28,18,14,0.08);
+      color: var(--motto-text);
+      box-shadow: inset 0 0 0 6px rgba(10,6,4,0.12), inset 0 0 0 7px var(--motto-accent-soft), 0 24px 68px rgba(0,0,0,0.28);
+      backdrop-filter: blur(2px);
+      font-family: 'STKaiti', 'KaiTi', 'FangSong', 'SimSun', serif;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+
+    .motto-plaque::before {
       content: '';
       position: absolute;
-      border: 1.5px solid var(--primary);
-      opacity: 0.35;
-      border-radius: 1px;
+      inset: 14px;
+      border: 1px solid var(--motto-accent-soft);
       pointer-events: none;
     }
-    .header-motto::before {
-      top: 3px; left: 3px; right: 3px; bottom: 3px;
+
+    .motto-plaque::after {
+      content: '';
+      position: absolute;
+      inset: 23px 28px;
+      border-top: 1px solid var(--motto-accent-soft);
+      border-bottom: 1px solid var(--motto-accent-soft);
+      pointer-events: none;
     }
-    .header-motto::after {
-      top: -6px; left: -6px; right: -6px; bottom: -6px;
-      border-width: 3px;
-      opacity: 0.15;
-      border-radius: 2px;
+
+    .motto-plaque:hover {
+      border-color: var(--motto-accent);
+      background: rgba(224,188,112,0.035);
+      box-shadow: inset 0 0 0 6px rgba(10,6,4,0.11), inset 0 0 0 7px rgba(224,188,112,0.46), 0 26px 72px rgba(0,0,0,0.3);
     }
-    .header-motto span {
-      padding: 0 12px;
+    .motto-plaque:active { transform: translateY(1px); }
+    .motto-plaque:focus-visible { outline: 3px solid var(--primary-muted); outline-offset: 4px; }
+
+    .motto-plaque-text {
       position: relative;
-      color: var(--primary);
-      font-weight: 700;
-      font-size: 20px;
-      letter-spacing: 6px;
-      cursor: pointer;
-      transition: color 0.2s, text-shadow 0.2s, transform 0.15s;
+      z-index: 1;
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 500px;
     }
-    .header-motto span:hover {
-      color: #a93226;
-      text-shadow: 0 0 10px rgba(192,57,43,0.6), 0 0 24px rgba(192,57,43,0.35), 0 0 40px rgba(243,156,18,0.2);
-      transform: scale(1.08);
+
+    .motto-plaque-character {
+      color: var(--motto-text);
+      font-size: 72px;
+      font-weight: 600;
+      line-height: 1;
+      text-shadow: 0 2px 0 rgba(29,17,11,0.72), 0 0 18px rgba(224,188,112,0.22);
     }
-    .header-motto span:active {
-      transform: scale(0.95);
+
+    .motto-plaque.compact {
+      --motto-accent: rgba(141,91,28,0.76);
+      --motto-accent-soft: rgba(141,91,28,0.24);
+      --motto-text: #92352b;
+      width: min(540px, 88vw);
+      min-height: 168px;
+      padding: 34px 52px;
+      background: rgba(247,243,235,0.14);
+      box-shadow: inset 0 0 0 6px rgba(247,243,235,0.28), inset 0 0 0 7px var(--motto-accent-soft), 0 12px 30px rgba(44,24,16,0.08);
     }
-    .header-motto span::before,
-    .header-motto span::after {
+
+    .motto-plaque.compact:hover {
+      background: rgba(192,57,43,0.025);
+      box-shadow: inset 0 0 0 6px rgba(247,243,235,0.24), inset 0 0 0 7px rgba(141,91,28,0.34), 0 14px 34px rgba(44,24,16,0.1);
+    }
+    .motto-plaque.compact .motto-plaque-character {
+      font-size: 54px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.9), 0 0 13px rgba(146,53,43,0.12);
+    }
+
+    .motto-plaque-corner {
+      position: absolute;
+      z-index: 2;
+      width: 38px;
+      height: 38px;
+      pointer-events: none;
+    }
+
+    .motto-plaque-corner::after {
+      content: '';
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border: 1px solid var(--motto-accent);
+      transform: rotate(45deg);
+    }
+
+    .motto-plaque-corner.top-left { top: 7px; left: 7px; border-top: 2px solid var(--motto-accent); border-left: 2px solid var(--motto-accent); }
+    .motto-plaque-corner.top-right { top: 7px; right: 7px; border-top: 2px solid var(--motto-accent); border-right: 2px solid var(--motto-accent); }
+    .motto-plaque-corner.bottom-left { bottom: 7px; left: 7px; border-bottom: 2px solid var(--motto-accent); border-left: 2px solid var(--motto-accent); }
+    .motto-plaque-corner.bottom-right { right: 7px; bottom: 7px; border-right: 2px solid var(--motto-accent); border-bottom: 2px solid var(--motto-accent); }
+
+    .motto-plaque-corner.top-left::after { top: 7px; left: 7px; }
+    .motto-plaque-corner.top-right::after { top: 7px; right: 7px; }
+    .motto-plaque-corner.bottom-left::after { bottom: 7px; left: 7px; }
+    .motto-plaque-corner.bottom-right::after { right: 7px; bottom: 7px; }
+
+    .motto-plaque-crest {
+      position: absolute;
+      left: 50%;
+      z-index: 2;
+      width: 118px;
+      height: 18px;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .motto-plaque-crest::before {
       content: '';
       position: absolute;
       top: 50%;
-      width: 20px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--primary-muted), transparent);
-    }
-    .header-motto span::before { right: 100%; }
-    .header-motto span::after { left: 100%; }
-    .header-motto .motto-dot {
-      width: 5px;
-      height: 5px;
-      background: var(--primary);
-      border-radius: 50%;
-      opacity: 0.4;
-      flex-shrink: 0;
-    }
-    .motto-seal {
-      position: absolute;
-      top: -10px;
-      right: -10px;
-      width: 22px;
-      height: 22px;
-      background: var(--primary);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 1px 4px rgba(192,57,43,0.4);
-      transition: transform 0.2s, box-shadow 0.2s;
-      z-index: 2;
-    }
-    .motto-seal:hover {
-      transform: scale(1.2);
-      box-shadow: 0 2px 8px rgba(192,57,43,0.6);
-    }
-    .motto-seal svg { width: 12px; height: 12px; stroke: #fff; }
-    .motto-reveal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(44,24,16,0.85);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .motto-reveal.show { display: flex; }
-    .motto-reveal-text {
-      font-family: 'SimSun', serif;
-      font-size: 72px;
-      font-weight: 700;
-      letter-spacing: 24px;
-      color: #c0392b;
-      text-shadow: 0 0 30px rgba(192,57,43,0.5), 0 0 60px rgba(192,57,43,0.25), 0 4px 12px rgba(0,0,0,0.4);
-      animation: motto-reveal-in 0.6s ease-out;
-      user-select: none;
-    }
-    @keyframes motto-reveal-in {
-      0% { opacity: 0; transform: scale(0.6); letter-spacing: 60px; }
-      100% { opacity: 1; transform: scale(1); letter-spacing: 24px; }
+      left: 0;
+      width: 100%;
+      border-top: 1px solid var(--motto-accent-soft);
     }
 
-    @keyframes motto-spark {
-      0% { opacity: 1; transform: translate(0, 0) scale(1); }
-      100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0); }
-    }
-    .motto-spark {
+    .motto-plaque-crest::after {
+      content: '';
       position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      border: 1px solid var(--motto-accent);
+      background: rgba(28,18,14,0.22);
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .motto-plaque-crest.top { top: -9px; }
+    .motto-plaque-crest.bottom { bottom: -9px; transform: translateX(-50%) rotate(180deg); }
+    .motto-plaque.compact .motto-plaque-crest::after { background: rgba(247,243,235,0.82); }
+
+    .welcome-placeholder {
+      justify-content: flex-start;
+      padding-top: 18px;
+    }
+
+    .welcome-motto-slot {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      flex: 0 0 auto;
+    }
+
+    .welcome-copy {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 0;
+      gap: 12px;
+      padding-bottom: 70px;
+    }
+
+    @keyframes motto-overlay-enter {
+      from { opacity: 0; transform: scale(0.88); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .motto-overlay.show .motto-plaque { animation: motto-overlay-enter 0.28s ease-out; }
+
+    @keyframes motto-spark-fly {
+      0% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--spark-angle)) scaleY(0.45); }
+      45% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--spark-angle)) scaleY(0.08); }
+    }
+
+    .motto-spark {
+      position: fixed;
       width: 4px;
-      height: 4px;
-      border-radius: 50%;
+      height: 10px;
+      border-radius: 999px;
       pointer-events: none;
-      animation: motto-spark 0.5s ease-out forwards;
-      z-index: 10;
+      animation: motto-spark-fly 0.68s ease-out forwards;
+      z-index: 622;
+    }
+
+    @keyframes motto-word-fly {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      10% { opacity: 1; transform: translate(-50%, -50%) scale(0.9); }
+      68% { opacity: 1; transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rotation)) scale(1); }
+      88% { opacity: 1; transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rotation)) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rotation)) scale(1.02); }
+    }
+
+    .motto-effect-word {
+      position: fixed;
+      z-index: 621;
+      opacity: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: rgba(242,209,139,0.96);
+      text-shadow: 0 0 7px rgba(242,209,139,0.72), 0 1px 2px rgba(44,24,16,0.8);
+      font-family: 'STKaiti', 'KaiTi', 'FangSong', 'SimSun', serif;
+      font-size: 24px;
+      font-weight: 600;
+      pointer-events: none;
+      animation: motto-word-fly 2.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      animation-delay: var(--delay);
+    }
+
+    .motto-effect-word.on-canvas {
+      color: rgba(169,50,38,0.94);
+      text-shadow: 0 0 7px rgba(192,57,43,0.36), 0 1px 2px rgba(255,255,255,0.9);
     }
 
     .header-actions {
@@ -218,9 +346,6 @@
       align-items: center;
       min-width: 0;
     }
-
-    .header-motto,
-    .motto-reveal { display: none !important; }
 
     .current-root-label {
       max-width: 320px;
@@ -1258,6 +1383,13 @@
 
     @media (prefers-reduced-motion: reduce) {
       .dashboard-bar-fill { transition: none; }
+      .motto-overlay.show .motto-plaque { animation: none; }
+      .motto-spark { display: none; }
+      .motto-effect-word {
+        opacity: 1;
+        animation: none;
+        transform: translate(-50%, -50%) translate(var(--tx), var(--ty));
+      }
     }
 
     @media (max-width: 820px) {
@@ -1281,9 +1413,19 @@
       .header { padding: 0 10px; }
       .header h1 { font-size: 16px; letter-spacing: 0; }
       .header h1 svg { display: none; }
+      .brand-section { display: none; }
       .current-root-label { display: none; }
       .header-actions { gap: 4px; }
       .preview-area { padding: 18px 14px; }
+      .welcome-placeholder { padding-top: 8px; }
+      .welcome-copy { padding-bottom: 36px; }
+      .motto-overlay { padding: 16px; }
+      .motto-plaque { width: min(520px, 94vw); min-height: 174px; padding: 32px 38px; }
+      .motto-plaque .motto-plaque-character { font-size: 52px; }
+      .motto-plaque.compact { width: min(410px, 90vw); min-height: 132px; padding: 24px 32px; }
+      .motto-plaque.compact .motto-plaque-character { font-size: 40px; }
+      .motto-plaque-corner { width: 30px; height: 30px; }
+      .motto-plaque-crest { width: 88px; }
       .dashboard-header { align-items: stretch; flex-direction: column; }
       .dashboard-actions { align-self: flex-start; }
       .dashboard-summary-grid { grid-template-columns: 1fr; }
@@ -1956,8 +2098,10 @@
 <body>
   <div class="header">
     <h1>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      大明帝国 · 文件管理
+      <button type="button" class="brand-trigger" id="brandMottoButton" onclick="openMottoOverlay()" aria-controls="mottoOverlay" aria-expanded="false" title="大明帝国">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>大明帝国<span class="brand-section"> · 文件管理</span></span>
+      </button>
     </h1>
     <div class="header-actions">
       <span class="current-root-label" id="currentRootLabel" title="当前管理目录">正在读取目录...</span>
@@ -1983,6 +2127,10 @@
         <span class="header-action-text">帮助</span>
       </button>
     </div>
+  </div>
+
+  <div class="motto-overlay" id="mottoOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="知行合一" onclick="closeMottoOverlay(event)">
+    <div id="overlayMottoMount"></div>
   </div>
 
   <div class="main">
@@ -2020,10 +2168,13 @@
         <span class="toolbar-note">所有批量操作都会先扫描并让你确认</span>
       </div>
       <div class="preview-area" id="previewArea">
-        <div class="preview-placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          <span style="font-size:15px; font-family:'SimSun',serif;">点击左侧卷目，翻阅典籍</span>
-          <span style="font-size:12px;">支持 Word · 文本 · 图片；Excel 请用本地软件打开</span>
+        <div class="preview-placeholder welcome-placeholder">
+          <div class="welcome-motto-slot" id="welcomeMottoMount"></div>
+          <div class="welcome-copy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span style="font-size:15px; font-family:'SimSun',serif;">点击左侧卷目，翻阅典籍</span>
+            <span style="font-size:12px;">支持 Word · 文本 · 图片；Excel 请用本地软件打开</span>
+          </div>
         </div>
       </div>
     </div>
@@ -4491,8 +4642,13 @@
 
     // ===== Keyboard Shortcuts =====
     document.addEventListener('keydown', (e) => {
-      // Esc: close modal / confirm dialog
+      // Esc: close motto overlay / modal / confirm dialog
       if (e.key === 'Escape') {
+        const mottoOverlay = document.getElementById('mottoOverlay');
+        if (mottoOverlay && mottoOverlay.classList.contains('show')) {
+          closeMottoOverlay();
+          return;
+        }
         const confirmOverlay = document.getElementById('confirmOverlay');
         if (confirmOverlay && confirmOverlay.classList.contains('show')) {
           document.getElementById('confirmCancel').click();
@@ -4515,35 +4671,198 @@
       }
     });
 
-    // ===== Motto Spark Effect =====
-    document.querySelectorAll('.header-motto span').forEach(el => {
-      el.addEventListener('click', function(e) {
-        const rect = this.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const colors = ['#c0392b', '#e74c3c', '#f39c12', '#f1c40f', '#ff6b35', '#d4a017'];
-        for (let i = 0; i < 24; i++) {
-          const spark = document.createElement('div');
-          spark.className = 'motto-spark';
-          const angle = (Math.PI * 2 / 24) * i + (Math.random() - 0.5) * 0.5;
-          const dist = 20 + Math.random() * 30;
-          spark.style.cssText = `
-            left:${cx}px; top:${cy}px;
-            --sx:${Math.cos(angle) * dist}px;
-            --sy:${Math.sin(angle) * dist}px;
-            background:${colors[Math.floor(Math.random() * colors.length)]};
-            width:${3 + Math.random() * 3}px;
-            height:${3 + Math.random() * 3}px;
-            box-shadow: 0 0 4px ${colors[Math.floor(Math.random() * colors.length)]};
-          `;
-          document.body.appendChild(spark);
-          setTimeout(() => spark.remove(), 500);
-        }
+    // ===== Shared Motto Plaque =====
+    const MOTTO_WORDS = ['人心', '格局', '知行', '担当', '远见', '定力', '取舍', '敬畏'];
+    const MOTTO_SPARK_COLORS = ['#f1d79e', '#d4a017', '#e6a34a', '#c95a3e', '#f7ead0'];
+    let mottoReturnFocus = null;
+    let mottoEffectGeneration = 0;
+
+    function createMottoPlaque(variant = 'default') {
+      const plaque = document.createElement('button');
+      plaque.type = 'button';
+      plaque.className = `motto-plaque${variant === 'compact' ? ' compact' : ''}`;
+      plaque.title = '知行合一';
+      plaque.setAttribute('aria-label', '知行合一，点击显示主题词');
+
+      for (const cornerName of ['top-left', 'top-right', 'bottom-left', 'bottom-right']) {
+        const corner = document.createElement('span');
+        corner.className = `motto-plaque-corner ${cornerName}`;
+        corner.setAttribute('aria-hidden', 'true');
+        plaque.appendChild(corner);
+      }
+      for (const crestPosition of ['top', 'bottom']) {
+        const crest = document.createElement('span');
+        crest.className = `motto-plaque-crest ${crestPosition}`;
+        crest.setAttribute('aria-hidden', 'true');
+        plaque.appendChild(crest);
+      }
+
+      const text = document.createElement('span');
+      text.className = 'motto-plaque-text';
+      for (const character of '知行合一') {
+        const characterElement = document.createElement('span');
+        characterElement.className = 'motto-plaque-character';
+        characterElement.textContent = character;
+        text.appendChild(characterElement);
+      }
+      plaque.appendChild(text);
+      plaque.addEventListener('click', (event) => {
+        event.stopPropagation();
+        launchMottoEffect(plaque);
       });
-    });
+      return plaque;
+    }
+
+    function mountMottoPlaques() {
+      const welcomeMount = document.getElementById('welcomeMottoMount');
+      const overlayMount = document.getElementById('overlayMottoMount');
+      if (welcomeMount) welcomeMount.replaceChildren(createMottoPlaque('compact'));
+      if (overlayMount) overlayMount.replaceChildren(createMottoPlaque());
+    }
+
+    function emitMottoSparks(originX, originY, options = {}) {
+      const {
+        count = 10,
+        minDistance = 14,
+        maxDistance = 46,
+        delay = 0,
+        generation = mottoEffectGeneration,
+        reducedMotion = false
+      } = options;
+      if (reducedMotion) return;
+
+      const createBurst = () => {
+        if (generation !== mottoEffectGeneration) return;
+        for (let i = 0; i < count; i++) {
+          const spark = document.createElement('span');
+          const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.58;
+          const distance = minDistance + Math.random() * Math.max(0, maxDistance - minDistance);
+          const size = 2 + Math.random() * 3;
+          const color = MOTTO_SPARK_COLORS[Math.floor(Math.random() * MOTTO_SPARK_COLORS.length)];
+          spark.className = 'motto-spark';
+          spark.style.left = `${originX}px`;
+          spark.style.top = `${originY}px`;
+          spark.style.width = `${size}px`;
+          spark.style.height = `${size * 3.2}px`;
+          spark.style.animationDuration = `${0.62 + Math.random() * 0.34}s`;
+          spark.style.setProperty('--spark-angle', `${angle * 180 / Math.PI + 90}deg`);
+          spark.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+          spark.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+          spark.style.background = color;
+          spark.style.boxShadow = `0 0 5px ${color}, 0 0 11px ${color}`;
+          document.body.appendChild(spark);
+          setTimeout(() => spark.remove(), 1050);
+        }
+      };
+
+      if (delay > 0) setTimeout(createBurst, delay);
+      else createBurst();
+    }
+
+    function emitMottoSparkTrail(originX, originY, targetX, targetY, options = {}) {
+      const {
+        delay = 0,
+        duration = 760,
+        generation = mottoEffectGeneration,
+        reducedMotion = false
+      } = options;
+      if (reducedMotion) return;
+
+      const steps = 5;
+      for (let step = 1; step <= steps; step++) {
+        const progress = step / steps;
+        const easedProgress = 1 - Math.pow(1 - progress, 2.6);
+        const isFinalBurst = step === steps;
+        emitMottoSparks(
+          originX + (targetX - originX) * easedProgress,
+          originY + (targetY - originY) * easedProgress,
+          {
+            count: isFinalBurst ? 11 : 4,
+            minDistance: isFinalBurst ? 18 : 7,
+            maxDistance: isFinalBurst ? 56 : 27,
+            delay: delay + Math.round(progress * duration),
+            generation,
+            reducedMotion
+          }
+        );
+      }
+    }
+
+    function launchMottoEffect(plaque) {
+      const rect = plaque.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const generation = ++mottoEffectGeneration;
+      const onCanvas = plaque.classList.contains('compact');
+
+      emitMottoSparks(cx, cy, {
+        count: 36,
+        minDistance: 66,
+        maxDistance: 180,
+        generation,
+        reducedMotion
+      });
+
+      const wordPool = [...MOTTO_WORDS];
+      for (let i = wordPool.length - 1; i > 0; i--) {
+        const swapIndex = Math.floor(Math.random() * (i + 1));
+        [wordPool[i], wordPool[swapIndex]] = [wordPool[swapIndex], wordPool[i]];
+      }
+
+      wordPool.slice(0, 4).forEach((word, index) => {
+        const angle = -Math.PI * 0.9 + index * (Math.PI * 0.6) + (Math.random() - 0.5) * 0.28;
+        const distance = reducedMotion ? 62 : 150 + Math.random() * 72;
+        const targetX = Math.max(48, Math.min(window.innerWidth - 48, cx + Math.cos(angle) * distance));
+        const targetY = Math.max(30, Math.min(window.innerHeight - 30, cy + Math.sin(angle) * distance));
+        const delayMs = reducedMotion ? 0 : index * 100;
+        const wordElement = document.createElement('span');
+        wordElement.className = `motto-effect-word${onCanvas ? ' on-canvas' : ''}`;
+        wordElement.textContent = word;
+        wordElement.style.left = `${cx}px`;
+        wordElement.style.top = `${cy}px`;
+        wordElement.style.setProperty('--tx', `${targetX - cx}px`);
+        wordElement.style.setProperty('--ty', `${targetY - cy}px`);
+        wordElement.style.setProperty('--rotation', `${-8 + Math.random() * 16}deg`);
+        wordElement.style.setProperty('--delay', `${delayMs / 1000}s`);
+        document.body.appendChild(wordElement);
+        setTimeout(() => wordElement.remove(), reducedMotion ? 1200 : 2850);
+
+        emitMottoSparkTrail(cx, cy, targetX, targetY, {
+          delay: delayMs + 220,
+          duration: 1400,
+          generation,
+          reducedMotion
+        });
+      });
+    }
+
+    function openMottoOverlay() {
+      const overlay = document.getElementById('mottoOverlay');
+      if (!overlay) return;
+      mottoReturnFocus = document.activeElement;
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.getElementById('brandMottoButton')?.setAttribute('aria-expanded', 'true');
+      requestAnimationFrame(() => overlay.querySelector('.motto-plaque')?.focus());
+    }
+
+    function closeMottoOverlay(event) {
+      if (event && event.target.closest('.motto-plaque')) return;
+      const overlay = document.getElementById('mottoOverlay');
+      if (!overlay || !overlay.classList.contains('show')) return;
+      overlay.classList.remove('show');
+      mottoEffectGeneration++;
+      overlay.setAttribute('aria-hidden', 'true');
+      document.getElementById('brandMottoButton')?.setAttribute('aria-expanded', 'false');
+      document.querySelectorAll('.motto-spark, .motto-effect-word').forEach((element) => element.remove());
+      if (mottoReturnFocus && typeof mottoReturnFocus.focus === 'function') mottoReturnFocus.focus();
+      mottoReturnFocus = null;
+    }
 
     // ===== Init =====
     (function() {
+      mountMottoPlaques();
       const savedRoot = localStorage.getItem('fileManager_root');
       if (savedRoot) document.getElementById('rootPath').value = savedRoot;
       loadTree({ fallbackOnInvalid: Boolean(savedRoot) });
