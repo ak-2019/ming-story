@@ -178,6 +178,79 @@ test('恢复中断的 Word 修改后清理临时原文件', async t => {
   assert.equal(savedManifest.items[0].recoveryRelativePath, undefined);
 });
 
+test('音频预览返回文件信息并安全支持分段播放', async t => {
+  const root = makeTempDir();
+  const file = path.join(root, '测试音频.mp3');
+  const wavFile = path.join(root, '测试音频.wav');
+  const textFile = path.join(root, '不是音频.txt');
+  const outsideFile = path.join(path.dirname(root), `${path.basename(root)}-outside.mp3`);
+  fs.writeFileSync(file, Buffer.from('0123456789'));
+  fs.writeFileSync(wavFile, Buffer.from('RIFF-test'));
+  fs.writeFileSync(textFile, 'text');
+  fs.writeFileSync(outsideFile, 'outside');
+  const server = await startAppServer(app);
+  t.after(async () => {
+    await closeServer(server);
+    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(outsideFile, { force: true });
+  });
+
+  const previewRoute = `/api/preview?root=${encodeURIComponent(root)}&path=${encodeURIComponent(file)}`;
+  const preview = await jsonRequest(serverPort(server), 'GET', previewRoute);
+  assert.equal(preview.data.success, true);
+  assert.equal(preview.data.type, 'audio');
+  assert.equal(preview.data.format, 'MP3');
+  assert.equal(preview.data.mimeType, 'audio/mpeg');
+  assert.equal(preview.data.size, 10);
+  assert.equal(preview.data.formatDetails, undefined);
+
+  const wavPreviewRoute = `/api/preview?root=${encodeURIComponent(root)}&path=${encodeURIComponent(wavFile)}`;
+  const wavPreview = await jsonRequest(serverPort(server), 'GET', wavPreviewRoute);
+  assert.equal(wavPreview.data.success, true);
+  assert.equal(wavPreview.data.format, 'WAV');
+  assert.match(wavPreview.data.formatDetails.introduction, /未压缩的 PCM/);
+  assert.match(wavPreview.data.formatDetails.comparison, /MP3、AAC、M4A/);
+  assert.match(wavPreview.data.formatDetails.comparison, /FLAC/);
+
+  const mediaUrl = `http://127.0.0.1:${serverPort(server)}/api/media?root=${encodeURIComponent(root)}&path=${encodeURIComponent(file)}`;
+  const rangeResponse = await fetch(mediaUrl, { headers: { Range: 'bytes=2-5' } });
+  assert.equal(rangeResponse.status, 206);
+  assert.equal(rangeResponse.headers.get('accept-ranges'), 'bytes');
+  assert.equal(rangeResponse.headers.get('content-range'), 'bytes 2-5/10');
+  assert.equal(rangeResponse.headers.get('content-length'), '4');
+  assert.equal(rangeResponse.headers.get('content-type'), 'audio/mpeg');
+  assert.equal(Buffer.from(await rangeResponse.arrayBuffer()).toString(), '2345');
+
+  const suffixResponse = await fetch(mediaUrl, { headers: { Range: 'bytes=-3' } });
+  assert.equal(suffixResponse.status, 206);
+  assert.equal(Buffer.from(await suffixResponse.arrayBuffer()).toString(), '789');
+
+  const invalidRange = await fetch(mediaUrl, { headers: { Range: 'bytes=20-30' } });
+  assert.equal(invalidRange.status, 416);
+  assert.equal(invalidRange.headers.get('content-range'), 'bytes */10');
+
+  const textUrl = `http://127.0.0.1:${serverPort(server)}/api/media?root=${encodeURIComponent(root)}&path=${encodeURIComponent(textFile)}`;
+  assert.equal((await fetch(textUrl)).status, 415);
+  const outsideUrl = `http://127.0.0.1:${serverPort(server)}/api/media?root=${encodeURIComponent(root)}&path=${encodeURIComponent(outsideFile)}`;
+  assert.equal((await fetch(outsideUrl)).status, 400);
+
+  const page = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(page, /id="audioPlaybackRate"/);
+  assert.match(page, /class="audio-speed-symbol"/);
+  assert.match(page, /class="audio-speed-label"/);
+  for (const rate of ['0.5', '0.75', '1', '1.25', '1.5', '2']) {
+    assert.match(page, new RegExp(`option value=\"${rate.replace('.', '\\.')}\"`));
+  }
+  assert.match(page, /player\.defaultPlaybackRate = rate/);
+  assert.match(page, /player\.playbackRate = rate/);
+  const durationFunction = page.match(/function formatAudioDuration\(seconds\) \{([\s\S]*?)\n    \}\n\n    function initAudioPreview/);
+  assert.ok(durationFunction, '未找到音频时长格式化函数');
+  const formatAudioDuration = new Function('seconds', durationFunction[1]);
+  assert.equal(formatAudioDuration(35.9), '35 秒');
+  assert.equal(formatAudioDuration(125), '2 分 05 秒');
+  assert.equal(formatAudioDuration(3723), '1 小时 02 分 03 秒');
+});
+
 test('Excel 可在浏览器中预览并转义单元格内容', async t => {
   const root = makeTempDir();
   const file = path.join(root, '表格.xlsx');

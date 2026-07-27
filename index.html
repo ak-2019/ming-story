@@ -727,10 +727,144 @@
     .preview-title-name { min-width: 0; word-break: break-all; }
     .preview-title-meta { color: var(--ink-subtle); font-family: 'Microsoft YaHei', sans-serif; font-size: 11px; font-weight: 400; }
 
+    .audio-preview {
+      width: min(720px, 100%);
+      margin: 28px auto 0;
+    }
+
+    .preview-area .audio-info-table {
+      table-layout: fixed;
+      margin-bottom: 20px;
+      border-top: 1px solid var(--hairline-strong);
+      border-bottom: 1px solid var(--hairline-strong);
+    }
+
+    .preview-area .audio-info-table th,
+    .preview-area .audio-info-table td {
+      padding: 10px 12px;
+      border: 0;
+      border-bottom: 1px solid var(--hairline);
+      background: transparent;
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 13px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .preview-area .audio-info-table tr:last-child th,
+    .preview-area .audio-info-table tr:last-child td { border-bottom: 0; }
+    .preview-area .audio-info-table tr:hover th,
+    .preview-area .audio-info-table tr:hover td { background: var(--surface-1); }
+    .preview-area .audio-info-table th { width: 84px; color: var(--ink-subtle); font-weight: 500; white-space: nowrap; }
+    .preview-area .audio-info-table td { color: var(--ink); word-break: break-word; }
+
+    .audio-player {
+      display: block;
+      flex: 1 1 420px;
+      min-width: 240px;
+      height: 54px;
+    }
+
+    .audio-player-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .audio-speed-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+      padding: 4px 5px 4px 8px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 6px;
+      background: var(--surface-1);
+      color: var(--ink-muted);
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 12px;
+      white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+    }
+
+    .audio-speed-control:hover {
+      border-color: var(--primary);
+      background: var(--canvas);
+    }
+
+    .audio-speed-control:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-muted);
+    }
+
+    .audio-speed-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding-right: 2px;
+      font-weight: 600;
+    }
+
+    .audio-speed-symbol {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--primary-muted);
+      border-radius: 50%;
+      background: var(--canvas);
+      color: var(--primary);
+      font-family: Georgia, serif;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .audio-speed-control select {
+      min-height: 34px;
+      min-width: 74px;
+      padding: 5px 7px;
+      border: 0;
+      border-left: 1px solid var(--hairline);
+      border-radius: 0 3px 3px 0;
+      background: transparent;
+      color: var(--primary);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .audio-speed-control select:focus {
+      outline: 0;
+    }
+
+    .audio-speed-control select:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .audio-preview-status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-left: 3px solid var(--warning);
+      background: var(--warning-bg);
+      color: var(--ink-muted);
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
     @media (max-width: 640px) {
       .result-summary { grid-template-columns: 1fr; }
       .result-summary-item { border-right: 0; border-bottom: 1px solid var(--hairline); }
       .result-summary-item:last-child { border-bottom: 0; }
+      .audio-preview { margin-top: 16px; }
+      .preview-area .audio-info-table tr { display: grid; grid-template-columns: 72px minmax(0, 1fr); }
+      .preview-area .audio-info-table th { width: auto; }
+      .audio-player-row { align-items: stretch; }
+      .audio-player { flex-basis: 100%; min-width: 0; }
+      .audio-speed-control { align-self: flex-end; margin-left: auto; }
     }
 
     /* Excel Table — 表格 */
@@ -1559,6 +1693,14 @@
       wordScrollListeners = [];
     }
 
+    function stopAudioPreview() {
+      const player = document.getElementById('audioPlayer');
+      if (!player) return;
+      player.pause();
+      player.removeAttribute('src');
+      player.load();
+    }
+
     function addWordScrollListener(element, handler) {
       element.addEventListener('scroll', handler);
       wordScrollListeners.push({ element, handler });
@@ -2072,6 +2214,7 @@
         if (activePreviewController) activePreviewController.abort();
         activePreviewController = null;
         clearWordPreviewListeners();
+        stopAudioPreview();
         document.getElementById('previewArea').innerHTML = '<div class="preview-placeholder"><div class="preview-seal">阅</div><div>管理目录已切换，请重新选择文件</div></div>';
       }
 
@@ -2133,6 +2276,7 @@
       const requestRoot = currentRoot;
       if (activePreviewController) activePreviewController.abort();
       clearWordPreviewListeners();
+      stopAudioPreview();
       const controller = new AbortController();
       activePreviewController = controller;
       const area = document.getElementById('previewArea');
@@ -2207,6 +2351,31 @@
           } else {
             html += `<div class="text-preview">${escapeHtml(data.data)}</div>`;
           }
+        } else if (data.type === 'audio') {
+          const mediaUrl = `/api/media?root=${encodeURIComponent(requestRoot)}&path=${encodeURIComponent(fullPath)}`;
+          html += `<div class="audio-preview">
+            <table class="audio-info-table" aria-label="音频文件信息"><tbody>
+              <tr><th scope="row">时长</th><td id="audioDuration">读取中...</td><th scope="row">类型</th><td>${escapeHtml(data.format || '音频')}</td></tr>
+              <tr><th scope="row">修改日期</th><td>${escapeHtml(formatFileTime(data.mtime) || '未知')}</td><th scope="row">大小</th><td>${escapeHtml(formatFileSize(data.size) || '未知')}</td></tr>
+              ${data.formatDetails ? `<tr><th scope="row">格式介绍</th><td colspan="3">${escapeHtml(data.formatDetails.introduction || '')}</td></tr>
+              <tr><th scope="row">格式对比</th><td colspan="3">${escapeHtml(data.formatDetails.comparison || '')}</td></tr>` : ''}
+            </tbody></table>
+            <div class="audio-player-row">
+              <audio class="audio-player" id="audioPlayer" controls preload="metadata" src="${escapeHtml(mediaUrl)}"></audio>
+              <label class="audio-speed-control" for="audioPlaybackRate">
+                <span class="audio-speed-label"><span class="audio-speed-symbol" aria-hidden="true">×</span><span>倍速</span></span>
+                <select id="audioPlaybackRate" aria-label="播放速度">
+                  <option value="0.5">0.5×</option>
+                  <option value="0.75">0.75×</option>
+                  <option value="1" selected>1.0×</option>
+                  <option value="1.25">1.25×</option>
+                  <option value="1.5">1.5×</option>
+                  <option value="2">2.0×</option>
+                </select>
+              </label>
+            </div>
+            <div class="audio-preview-status" id="audioPreviewStatus" hidden></div>
+          </div>`;
         } else if (data.type === 'image') {
           html += `<img class="image-preview" src="${data.data}" alt="${data.fileName}">`;
         }
@@ -2216,12 +2385,79 @@
           initExcelFilterUI();
         } else if (data.type === 'word') {
           renderDocx(data.data, data.headings || [], requestId);
+        } else if (data.type === 'audio') {
+          initAudioPreview(data);
         }
       } catch (e) {
         if (e.name === 'AbortError' || requestId !== previewRequestId || requestRootContextId !== rootContextId || requestRoot !== currentRoot) return;
         area.innerHTML = `<div class="preview-placeholder"><span style="color:var(--danger);">预览失败: ${escapeHtml(e.message)}</span></div>`;
       } finally {
         if (activePreviewController === controller) activePreviewController = null;
+      }
+    }
+
+    function formatAudioDuration(seconds) {
+      if (!Number.isFinite(seconds) || seconds < 0) return '';
+      const totalSeconds = Math.floor(seconds);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const remainingSeconds = totalSeconds % 60;
+      if (hours > 0) {
+        return `${hours} 小时 ${String(minutes).padStart(2, '0')} 分 ${String(remainingSeconds).padStart(2, '0')} 秒`;
+      }
+      if (minutes > 0) return `${minutes} 分 ${String(remainingSeconds).padStart(2, '0')} 秒`;
+      return `${remainingSeconds} 秒`;
+    }
+
+    function initAudioPreview(data) {
+      const player = document.getElementById('audioPlayer');
+      const duration = document.getElementById('audioDuration');
+      const status = document.getElementById('audioPreviewStatus');
+      const playbackRate = document.getElementById('audioPlaybackRate');
+      if (!player || !duration || !status || !playbackRate) return;
+
+      const supportedRates = new Set([0.5, 0.75, 1, 1.25, 1.5, 2]);
+      const applyPlaybackRate = value => {
+        const requestedRate = Number(value);
+        const rate = supportedRates.has(requestedRate) ? requestedRate : 1;
+        player.defaultPlaybackRate = rate;
+        player.playbackRate = rate;
+        playbackRate.value = String(rate);
+      };
+      applyPlaybackRate(1);
+      playbackRate.addEventListener('change', () => applyPlaybackRate(playbackRate.value));
+
+      const updateDuration = () => {
+        if (!player.isConnected) return;
+        const value = formatAudioDuration(player.duration);
+        duration.textContent = value || '无法读取';
+      };
+      const showUnsupported = message => {
+        if (!player.isConnected) return;
+        duration.textContent = '无法读取';
+        playbackRate.disabled = true;
+        status.textContent = message;
+        status.hidden = false;
+      };
+
+      player.addEventListener('loadedmetadata', updateDuration);
+      player.addEventListener('durationchange', updateDuration);
+      player.addEventListener('canplay', () => {
+        if (!player.isConnected) return;
+        playbackRate.disabled = false;
+        status.hidden = true;
+      });
+      player.addEventListener('error', () => {
+        const unsupported = player.error && player.error.code === 4;
+        showUnsupported(unsupported
+          ? `当前浏览器不支持 ${data.format || '此'} 音频格式，请使用本地播放器打开。`
+          : '音频读取失败，请确认文件没有被移动、占用或损坏。');
+      });
+
+      if (data.mimeType && player.canPlayType(data.mimeType) === '') {
+        showUnsupported(`当前浏览器不支持 ${data.format || '此'} 音频格式，请使用本地播放器打开。`);
+      } else if (player.readyState >= 1) {
+        updateDuration();
       }
     }
 
@@ -2927,7 +3163,7 @@
     }
 
     function renderPreviewTitle(data, fallbackName) {
-      const typeLabels = { excel: 'Excel', word: 'Word', text: '文本', image: '图片' };
+      const typeLabels = { excel: 'Excel', word: 'Word', audio: '音频', text: '文本', image: '图片' };
       const parts = [];
       if (typeLabels[data.type]) parts.push(typeLabels[data.type]);
       if (Number.isFinite(data.size)) parts.push(formatFileSize(data.size));

@@ -19,7 +19,22 @@ const SHUTDOWN_TOKEN = crypto.randomBytes(24).toString('hex');
 
 // 默认根目录：当前文件夹的上级目录
 const DEFAULT_ROOT = path.resolve(__dirname, '..');
-const AUDIO_EXTENSIONS = new Set(['.mp3', '.wav', '.m4a', '.aac', '.flac', '.ogg', '.wma']);
+const AUDIO_MIME_TYPES = Object.freeze({
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.m4a': 'audio/mp4',
+  '.aac': 'audio/aac',
+  '.flac': 'audio/flac',
+  '.ogg': 'audio/ogg',
+  '.wma': 'audio/x-ms-wma'
+});
+const AUDIO_FORMAT_DETAILS = Object.freeze({
+  '.wav': {
+    introduction: 'WAV 通常保存未压缩的 PCM 音频，保留完整波形，适合录音、剪辑和归档。',
+    comparison: '相比 MP3、AAC、M4A，WAV 通常更大，但没有有损压缩；相比 FLAC，同为无损时 WAV 通常更大，但编辑兼容性更直接。'
+  }
+});
+const AUDIO_EXTENSIONS = new Set(Object.keys(AUDIO_MIME_TYPES));
 const SKIPPED_DIRECTORIES = new Set(['node_modules', '撤回文件夹', '备份文件夹', '操作日志']);
 const PREVIEW_LIMITS = {
   word: 50 * 1024 * 1024,
@@ -227,6 +242,7 @@ function escapeHtmlText(value) {
 function getPreviewKind(ext) {
   if (ext === '.docx') return 'word';
   if (ext === '.xlsx' || ext === '.xls') return 'excel';
+  if (AUDIO_EXTENSIONS.has(ext)) return 'audio';
   if (['.txt', '.md', '.json', '.csv', '.log', '.xml', '.html', '.css', '.js'].includes(ext)) return 'text';
   if (['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.svg'].includes(ext)) return 'image';
   return null;
@@ -235,6 +251,28 @@ function getPreviewKind(ext) {
 function previewLimitMessage(kind, size, limit) {
   const labels = { word: 'Word', excel: 'Excel', text: '文本', image: '图片' };
   return `${labels[kind] || '文件'}过大（${Math.ceil(size / 1024 / 1024)} MB），浏览器预览上限为 ${Math.floor(limit / 1024 / 1024)} MB，请使用本地软件打开。`;
+}
+
+function parseAudioRange(rangeHeader, fileSize) {
+  if (!rangeHeader) return null;
+  const match = /^bytes=(\d*)-(\d*)$/.exec(String(rangeHeader).trim());
+  if (!match || (!match[1] && !match[2]) || fileSize <= 0) return undefined;
+
+  let start;
+  let end;
+  if (!match[1]) {
+    const suffixLength = Number(match[2]);
+    if (!Number.isSafeInteger(suffixLength) || suffixLength <= 0) return undefined;
+    start = Math.max(0, fileSize - suffixLength);
+    end = fileSize - 1;
+  } else {
+    start = Number(match[1]);
+    end = match[2] ? Number(match[2]) : fileSize - 1;
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end < start) return undefined;
+    end = Math.min(end, fileSize - 1);
+  }
+  if (start >= fileSize) return undefined;
+  return { start, end };
 }
 
 function excelColumnLabel(columnIndex) {
@@ -668,6 +706,53 @@ app.get('/api/tree', async (req, res) => {
   }
 });
 
+// ========== API: 音频分段读取 ==========
+app.get('/api/media', (req, res) => {
+  let fileSize = 0;
+  try {
+    const rootDir = resolveRoot(req.query.root);
+    if (!req.query.path) return res.status(400).end();
+    const filePath = assertWithinRoot(rootDir, req.query.path, { type: 'file' });
+    const ext = path.extname(filePath).toLowerCase();
+    if (!AUDIO_EXTENSIONS.has(ext)) return res.status(415).end();
+
+    const stats = fs.statSync(filePath);
+    fileSize = stats.size;
+    const range = parseAudioRange(req.headers.range, fileSize);
+    if (req.headers.range && !range) {
+      res.setHeader('Content-Range', `bytes */${fileSize}`);
+      return res.status(416).end();
+    }
+
+    const start = range ? range.start : 0;
+    const end = range ? range.end : Math.max(0, fileSize - 1);
+    const contentLength = fileSize === 0 ? 0 : end - start + 1;
+    res.set({
+      'Accept-Ranges': 'bytes',
+      'Cache-Control': 'no-store',
+      'Content-Type': AUDIO_MIME_TYPES[ext],
+      'Content-Length': String(contentLength),
+      'X-Content-Type-Options': 'nosniff'
+    });
+    if (range) {
+      res.status(206);
+      res.setHeader('Content-Range', `bytes ${start}-${end}/${fileSize}`);
+    }
+    if (fileSize === 0) return res.end();
+
+    const stream = fs.createReadStream(filePath, { start, end });
+    stream.on('error', error => {
+      if (!res.headersSent) res.status(500).end();
+      else res.destroy(error);
+    });
+    res.on('close', () => stream.destroy());
+    stream.pipe(res);
+  } catch (e) {
+    if (!res.headersSent) res.status(400).end();
+    else res.destroy(e);
+  }
+});
+
 // ========== API 2: 预览文件内容 ==========
 app.get('/api/preview', async (req, res) => {
   try {
@@ -683,7 +768,7 @@ app.get('/api/preview', async (req, res) => {
     }
     if (!previewKind) return res.json({ success: false, error: `不支持预览此文件类型: ${ext}` });
     const previewLimit = PREVIEW_LIMITS[previewKind];
-    if (fileStats.size > previewLimit) {
+    if (Number.isFinite(previewLimit) && fileStats.size > previewLimit) {
       return res.json({
         success: false,
         code: 'FILE_TOO_LARGE',
@@ -694,7 +779,17 @@ app.get('/api/preview', async (req, res) => {
         ...metadata
       });
     }
-    if (ext === '.xlsx' || ext === '.xls') {
+    if (AUDIO_EXTENSIONS.has(ext)) {
+      res.json({
+        success: true,
+        type: 'audio',
+        mimeType: AUDIO_MIME_TYPES[ext],
+        format: ext.slice(1).toUpperCase(),
+        ...(AUDIO_FORMAT_DETAILS[ext] ? { formatDetails: AUDIO_FORMAT_DETAILS[ext] } : {}),
+        fileName: path.basename(filePath),
+        ...metadata
+      });
+    } else if (ext === '.xlsx' || ext === '.xls') {
       const buffer = fs.readFileSync(filePath);
       const { sheets, styledSheets } = renderExcelWorkbook(buffer);
       res.json({
