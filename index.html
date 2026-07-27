@@ -855,6 +855,419 @@
       line-height: 1.6;
     }
 
+    /* Dashboard — 统计概览 */
+    .dashboard {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      color: var(--ink);
+    }
+
+    .dashboard-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding-bottom: 18px;
+    }
+
+    .dashboard-title {
+      margin: 0;
+      font-family: 'SimSun', serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .dashboard-subtitle {
+      margin-top: 6px;
+      color: var(--ink-subtle);
+      font-size: 12px;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    .dashboard-actions {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .dashboard-view-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 2px;
+      margin-bottom: 18px;
+      padding: 2px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      background: var(--surface-2);
+    }
+
+    .dashboard-view-tab {
+      min-width: 0;
+      min-height: 42px;
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 2px;
+      background: transparent;
+      color: var(--ink-muted);
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.35;
+      cursor: pointer;
+    }
+
+    .dashboard-view-tab:hover {
+      background: var(--surface-1);
+      color: var(--ink);
+    }
+
+    .dashboard-view-tab.active {
+      background: var(--canvas);
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(44,24,16,0.12);
+    }
+
+    .dashboard-view-tab-count {
+      display: block;
+      margin-top: 2px;
+      color: var(--ink-subtle);
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .dashboard-view-tab.active .dashboard-view-tab-count { color: var(--primary); }
+
+    .dashboard-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .dashboard-stat {
+      min-width: 0;
+      padding: 15px 16px;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      background: var(--surface-1);
+    }
+
+    .dashboard-stat-label {
+      color: var(--ink-subtle);
+      font-size: 11px;
+    }
+
+    .dashboard-stat-value {
+      display: block;
+      margin-top: 5px;
+      font-family: 'SimSun', serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+
+    .dashboard-stat-detail {
+      display: block;
+      margin-top: 5px;
+      color: var(--ink-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .dashboard-section {
+      padding: 22px 0;
+      border-top: 1px solid var(--hairline);
+    }
+
+    .dashboard-section-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .dashboard-section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .dashboard-section-note {
+      color: var(--ink-subtle);
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .dashboard-chart {
+      display: grid;
+      gap: 12px;
+    }
+
+    .dashboard-audio-overview {
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr);
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 22px;
+    }
+
+    .dashboard-pie-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .dashboard-pie {
+      position: relative;
+      width: 176px;
+      height: 176px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 1px rgba(44,24,16,0.08);
+    }
+
+    .dashboard-pie::after {
+      content: '';
+      position: absolute;
+      inset: 39px;
+      border-radius: 50%;
+      background: var(--canvas);
+      box-shadow: 0 0 0 1px var(--hairline);
+    }
+
+    .dashboard-pie-center {
+      position: absolute;
+      inset: 48px;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink-subtle);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .dashboard-pie-center strong {
+      color: var(--ink);
+      font-family: 'SimSun', serif;
+      font-size: 25px;
+      line-height: 1.1;
+    }
+
+    .dashboard-pie-legend {
+      display: grid;
+      min-width: 0;
+    }
+
+    .dashboard-pie-legend-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 14px;
+      min-height: 45px;
+      border-bottom: 1px solid var(--hairline);
+      color: var(--ink-muted);
+      font-size: 12px;
+    }
+
+    .dashboard-pie-legend-row:last-child { border-bottom: 0; }
+
+    .dashboard-pie-legend-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .dashboard-pie-legend-count {
+      color: var(--ink);
+      font-weight: 600;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .dashboard-pie-legend-percent {
+      min-width: 54px;
+      color: var(--ink-subtle);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .dashboard-bar-row {
+      display: grid;
+      grid-template-columns: minmax(112px, 150px) minmax(160px, 1fr) minmax(180px, auto);
+      align-items: center;
+      gap: 14px;
+      min-height: 38px;
+    }
+
+    .dashboard-bar-label {
+      min-width: 0;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .dashboard-bar-description {
+      display: block;
+      margin-top: 3px;
+      color: var(--ink-subtle);
+      font-size: 11px;
+      font-weight: 400;
+      line-height: 1.45;
+    }
+
+    .dashboard-bar-track {
+      height: 12px;
+      overflow: hidden;
+      background: var(--surface-2);
+      border: 1px solid var(--hairline);
+    }
+
+    .dashboard-bar-fill {
+      display: block;
+      height: 100%;
+      min-width: 0;
+      transition: width 0.2s ease;
+    }
+
+    .dashboard-series-normal { background: #8b5a2b; }
+    .dashboard-series-backup { background: #6b4c8a; }
+    .dashboard-series-revoked { background: #2563a8; }
+    .dashboard-series-body { background: var(--primary); }
+    .dashboard-series-normal-encore { background: var(--success); }
+    .dashboard-series-revoked-encore { background: #2563a8; }
+    .dashboard-series-other { background: #a67c2e; }
+
+    .dashboard-bar-value {
+      min-width: 0;
+      text-align: right;
+      color: var(--ink-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: nowrap;
+    }
+
+    .dashboard-bar-value strong {
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .dashboard-episode-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 26px;
+    }
+
+    .dashboard-episode-item {
+      min-width: 0;
+    }
+
+    .dashboard-episode-total {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 9px;
+      color: var(--ink-muted);
+      font-size: 12px;
+    }
+
+    .dashboard-episode-total strong {
+      color: var(--ink);
+      font-size: 21px;
+    }
+
+    .dashboard-breakdown {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 9px;
+      color: var(--ink-subtle);
+      font-size: 11px;
+    }
+
+    .dashboard-breakdown-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dashboard-swatch {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+    }
+
+    .dashboard-scan-meta {
+      padding-top: 12px;
+      border-top: 1px solid var(--hairline);
+      color: var(--ink-subtle);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .dashboard-warning {
+      margin-top: 12px;
+      padding: 9px 11px;
+      border-left: 3px solid var(--warning);
+      background: var(--surface-1);
+      color: var(--ink-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .dashboard-loading-state,
+    .dashboard-empty-state {
+      padding: 34px 0;
+      border-top: 1px solid var(--hairline);
+      color: var(--ink-muted);
+    }
+
+    .dashboard-loading-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .dashboard-current-file {
+      min-height: 18px;
+      color: var(--ink-subtle);
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #dashboardButton.active {
+      background: var(--primary-muted);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .dashboard-bar-fill { transition: none; }
+    }
+
+    @media (max-width: 820px) {
+      .header-action-text { display: none; }
+      .btn-icon { width: 34px; min-width: 34px; padding: 0 8px; }
+      .current-root-label { max-width: 120px; }
+      .dashboard-bar-row { grid-template-columns: minmax(100px, 135px) minmax(120px, 1fr); }
+      .dashboard-bar-value { grid-column: 2; text-align: left; white-space: normal; }
+    }
+
     @media (max-width: 640px) {
       .result-summary { grid-template-columns: 1fr; }
       .result-summary-item { border-right: 0; border-bottom: 1px solid var(--hairline); }
@@ -865,6 +1278,21 @@
       .audio-player-row { align-items: stretch; }
       .audio-player { flex-basis: 100%; min-width: 0; }
       .audio-speed-control { align-self: flex-end; margin-left: auto; }
+      .header { padding: 0 10px; }
+      .header h1 { font-size: 16px; letter-spacing: 0; }
+      .header h1 svg { display: none; }
+      .current-root-label { display: none; }
+      .header-actions { gap: 4px; }
+      .preview-area { padding: 18px 14px; }
+      .dashboard-header { align-items: stretch; flex-direction: column; }
+      .dashboard-actions { align-self: flex-start; }
+      .dashboard-summary-grid { grid-template-columns: 1fr; }
+      .dashboard-episode-grid { grid-template-columns: 1fr; gap: 20px; }
+      .dashboard-audio-overview { grid-template-columns: 1fr; gap: 18px; }
+      .dashboard-section-heading { align-items: flex-start; flex-direction: column; }
+      .dashboard-section-note { text-align: left; }
+      .dashboard-bar-row { grid-template-columns: 1fr; gap: 7px; }
+      .dashboard-bar-value { grid-column: 1; }
     }
 
     /* Excel Table — 表格 */
@@ -1534,7 +1962,11 @@
     <div class="header-actions">
       <span class="current-root-label" id="currentRootLabel" title="当前管理目录">正在读取目录...</span>
       <input type="hidden" id="rootPath">
-      <button class="btn btn-outline btn-icon" onclick="loadTree()" title="刷新目录" aria-label="刷新目录">
+      <button class="btn btn-outline btn-icon" id="dashboardButton" onclick="showDashboard()" title="统计概览" aria-label="统计概览" aria-pressed="false">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V7"/><path d="M17 16v-3"/></svg>
+        <span class="header-action-text">统计</span>
+      </button>
+      <button class="btn btn-outline btn-icon" onclick="refreshCurrentView()" title="刷新目录" aria-label="刷新目录">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         <span class="header-action-text">刷新</span>
       </button>
@@ -1686,6 +2118,11 @@
     let treeLoadId = 0;
     let rootContextId = 0;
     let rootSettingsRequestId = 0;
+    let dashboardRequestId = 0;
+    let activeDashboardScan = null;
+    let dashboardData = null;
+    let dashboardActiveModule = 'normal';
+    let currentContentView = 'placeholder';
     let wordScrollListeners = [];
 
     function clearWordPreviewListeners() {
@@ -1835,8 +2272,9 @@
             <strong>1. 启动</strong> — 双击 <code>启动文件管理系统.vbs</code>，浏览器自动打开。开发环境也可以使用 <code>start.bat</code>。<br>
             <strong>2. 选择目录</strong> — 默认管理程序所在文件夹的上级目录；需要切换范围时，从右上角目录设置修改。系统会自动记忆上次的目录。<br>
             <strong>3. 浏览文件</strong> — 左侧目录树点击文件夹展开，点击文件在右侧预览。<br>
-            <strong>4. 执行操作</strong> — 批量操作会先扫描并显示文件清单，确认后才会执行。<br>
-            <strong>5. 查看日志</strong> — 每次操作自动记录日志，可通过右上角日志按钮查看。
+            <strong>4. 查看统计</strong> — 点击右上角“统计”，查看当前目录的模块、剧集和音频构成。<br>
+            <strong>5. 执行操作</strong> — 批量操作会先扫描并显示文件清单，确认后才会执行。<br>
+            <strong>6. 查看日志</strong> — 每次操作自动记录日志，可通过右上角日志按钮查看。
           </p>
 
           <h3 style="font-family:'SimSun',serif;font-size:16px;margin:16px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--hairline);color:var(--primary);">三、功能详细说明</h3>
@@ -1870,6 +2308,14 @@
             <span style="color:var(--ink-muted);">
               所有批量操作（移动、查找、删除）的执行结果会自动记录到"操作日志"文件夹中，按日期分文件存储。<br>
               点击日志按钮可查看历史操作记录。
+            </span>
+          </div>
+
+          <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #2563a8;">
+            <strong style="color:#2563a8;">统计概览</strong><br>
+            <span style="color:var(--ink-muted);">
+              只读扫描当前管理目录；正常、备份、撤回分为三个独立视图，点击标签查看对应模块的文件、剧集和音频统计。<br>
+              扫描过程中可以取消；无法读取的路径会单独提示，不会修改任何文件。
             </span>
           </div>
 
@@ -2211,10 +2657,13 @@
       if (rootChanged) {
         rootContextId++;
         previewRequestId++;
+        stopDashboardRequest();
         if (activePreviewController) activePreviewController.abort();
         activePreviewController = null;
         clearWordPreviewListeners();
         stopAudioPreview();
+        currentContentView = 'placeholder';
+        setDashboardButtonActive(false);
         document.getElementById('previewArea').innerHTML = '<div class="preview-placeholder"><div class="preview-seal">阅</div><div>管理目录已切换，请重新选择文件</div></div>';
       }
 
@@ -2269,11 +2718,20 @@
       }
     }
 
+    async function refreshCurrentView() {
+      const dashboardWasVisible = currentContentView === 'dashboard';
+      const loaded = await loadTree();
+      if (loaded && dashboardWasVisible) showDashboard();
+    }
+
     // ===== Preview =====
     async function previewFile(fullPath, fileName) {
       const requestId = ++previewRequestId;
       const requestRootContextId = rootContextId;
       const requestRoot = currentRoot;
+      stopDashboardRequest();
+      currentContentView = 'preview';
+      setDashboardButtonActive(false);
       if (activePreviewController) activePreviewController.abort();
       clearWordPreviewListeners();
       stopAudioPreview();
@@ -3153,13 +3611,278 @@
       if (!Number.isFinite(size)) return '';
       if (size < 1024) return `${size} B`;
       if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
-      return `${(size / 1024 / 1024).toFixed(1)} MB`;
+      if (size < 1024 * 1024 * 1024) return `${(size / 1024 / 1024).toFixed(1)} MB`;
+      if (size < 1024 * 1024 * 1024 * 1024) return `${(size / 1024 / 1024 / 1024).toFixed(1)} GB`;
+      return `${(size / 1024 / 1024 / 1024 / 1024).toFixed(1)} TB`;
     }
 
     function formatFileTime(value) {
       if (!value) return '';
       const date = new Date(value);
       return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('zh-CN', { hour12: false });
+    }
+
+    function dashboardCount(value) {
+      const number = Number(value);
+      return Number.isFinite(number) && number > 0 ? Math.trunc(number) : 0;
+    }
+
+    function dashboardBarWidth(value, maximum) {
+      const count = dashboardCount(value);
+      const max = dashboardCount(maximum);
+      if (count === 0 || max === 0) return 0;
+      return Math.max(3, Math.round(count / max * 100));
+    }
+
+    function dashboardModuleDefinitions() {
+      return [
+        { key: 'normal', label: '正常记录', series: 'normal' },
+        { key: 'backup', label: '备份文件夹', series: 'backup' },
+        { key: 'revoked', label: '撤回文件夹', series: 'revoked' }
+      ];
+    }
+
+    function setDashboardButtonActive(active) {
+      const button = document.getElementById('dashboardButton');
+      if (!button) return;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+
+    function stopDashboardRequest() {
+      const scan = activeDashboardScan;
+      if (scan) {
+        scan.cancelled = true;
+        scan.controller.abort();
+        activeDashboardScan = null;
+      }
+      dashboardData = null;
+      dashboardRequestId++;
+    }
+
+    function renderDashboardHeader(subtitle, actions = '') {
+      return `<div class="dashboard-header">
+        <div>
+          <h2 class="dashboard-title">统计概览</h2>
+          <div class="dashboard-subtitle">${escapeHtml(subtitle)}</div>
+        </div>
+        ${actions ? `<div class="dashboard-actions">${actions}</div>` : ''}
+      </div>`;
+    }
+
+    function renderDashboardLoading(root) {
+      const area = document.getElementById('previewArea');
+      area.innerHTML = `<div class="dashboard">
+        ${renderDashboardHeader(root, '<button class="btn btn-danger" type="button" onclick="cancelDashboardScan()">取消统计</button>')}
+        <div class="dashboard-loading-state">
+          <div class="dashboard-loading-line"><div class="loading"></div><span id="dashboardProgressText">正在扫描文件和文件夹...</span></div>
+          <div class="task-progress-bar indeterminate" id="dashboardProgressTrack"><span id="dashboardProgressBar"></span></div>
+          <div class="dashboard-current-file" id="dashboardCurrentFile"></div>
+        </div>
+      </div>`;
+      area.scrollTop = 0;
+    }
+
+    function updateDashboardProgress(message) {
+      const text = document.getElementById('dashboardProgressText');
+      const file = document.getElementById('dashboardCurrentFile');
+      if (text) text.textContent = `已扫描 ${dashboardCount(message.current)} 个文件`;
+      if (file) file.textContent = message.file || '';
+    }
+
+    function renderDashboardState(title, detail) {
+      const area = document.getElementById('previewArea');
+      area.innerHTML = `<div class="dashboard">
+        ${renderDashboardHeader(currentRoot, '<button class="btn btn-primary" type="button" onclick="showDashboard()">重新统计</button>')}
+        <div class="dashboard-empty-state"><div class="result-item info"><div class="result-file">${escapeHtml(title)}</div><div class="result-detail">${escapeHtml(detail)}</div></div></div>
+      </div>`;
+      area.scrollTop = 0;
+    }
+
+    function cancelDashboardScan(showResult = true) {
+      if (!activeDashboardScan) return;
+      stopDashboardRequest();
+      if (showResult && currentContentView === 'dashboard') {
+        renderDashboardState('统计已取消', '扫描是只读操作，没有修改任何文件。');
+      }
+    }
+
+    function renderDashboardViewTabs(activeModule) {
+      return `<div class="dashboard-view-tabs" role="tablist" aria-label="统计模块">
+        ${dashboardModuleDefinitions().map(module => `<button class="dashboard-view-tab ${module.key === activeModule ? 'active' : ''}" id="dashboardTab-${module.key}" type="button" role="tab" aria-selected="${module.key === activeModule ? 'true' : 'false'}" aria-controls="dashboardViewPanel" onclick="switchDashboardModule('${module.key}')">${module.label}</button>`).join('')}
+      </div>`;
+    }
+
+    function switchDashboardModule(moduleKey) {
+      if (!dashboardData || !dashboardModuleDefinitions().some(module => module.key === moduleKey)) return;
+      dashboardActiveModule = moduleKey;
+      renderDashboard(dashboardData);
+    }
+
+    function renderDashboardEpisodeItem(label, totalValue, maximum) {
+      const total = dashboardCount(totalValue);
+      return `<div class="dashboard-episode-item">
+        <div class="dashboard-episode-total"><span>${escapeHtml(label)}</span><strong>${total}</strong></div>
+        <div class="dashboard-bar-track" role="img" aria-label="${escapeHtml(`${label} ${total} 个`)}"><span class="dashboard-bar-fill dashboard-series-body" style="width:${dashboardBarWidth(total, maximum)}%"></span></div>
+      </div>`;
+    }
+
+    function dashboardAudioDefinitions() {
+      return [
+        { key: 'body', label: '正文音频', description: '文件名含“第N集”', series: 'body', color: 'var(--primary)' },
+        { key: 'normalEncore', label: '正常返场', description: '不含“第N集”，且文件名不含“撤回”', series: 'normal-encore', color: 'var(--success)' },
+        { key: 'revokedEncore', label: '撤回返场', description: '不含“第N集”，且文件名含“撤回”', series: 'revoked-encore', color: '#2563a8' }
+      ];
+    }
+
+    function renderDashboardAudioPie(audio = {}) {
+      const definitions = dashboardAudioDefinitions();
+      const total = definitions.reduce((sum, item) => sum + dashboardCount(audio[item.key]), 0);
+      let cursor = 0;
+      const segments = definitions.map((item, index) => {
+        const start = cursor;
+        cursor = index === definitions.length - 1
+          ? 100
+          : cursor + (total > 0 ? dashboardCount(audio[item.key]) / total * 100 : 0);
+        return `${item.color} ${start.toFixed(2)}% ${cursor.toFixed(2)}%`;
+      });
+      const style = total > 0
+        ? `background:conic-gradient(${segments.join(',')})`
+        : 'background:var(--surface-2)';
+      const accessibleLabel = definitions.map(item => `${item.label} ${dashboardCount(audio[item.key])} 个`).join('，');
+      const legend = definitions.map(item => {
+        const count = dashboardCount(audio[item.key]);
+        const percent = total > 0 ? (count / total * 100).toFixed(1) : '0.0';
+        return `<div class="dashboard-pie-legend-row">
+          <span class="dashboard-pie-legend-label"><span class="dashboard-swatch dashboard-series-${item.series}"></span>${item.label}</span>
+          <span class="dashboard-pie-legend-count">${count} 个</span>
+          <span class="dashboard-pie-legend-percent">${percent}%</span>
+        </div>`;
+      }).join('');
+      return `<div class="dashboard-audio-overview">
+        <div class="dashboard-pie-wrap"><div class="dashboard-pie" role="img" aria-label="${escapeHtml(accessibleLabel)}" style="${style}"><div class="dashboard-pie-center"><strong>${total}</strong><span>音频</span></div></div></div>
+        <div class="dashboard-pie-legend">${legend}</div>
+      </div>`;
+    }
+
+    function renderDashboardAudioRows(audio = {}) {
+      const definitions = dashboardAudioDefinitions();
+      const total = dashboardCount(audio.total);
+      const maximum = Math.max(1, ...definitions.map(item => dashboardCount(audio[item.key])));
+      return definitions.map(item => {
+        const count = dashboardCount(audio[item.key]);
+        const percent = total > 0 ? Math.round(count / total * 100) : 0;
+        const label = `${item.label}：${count} 个，占全部音频 ${percent}%`;
+        return `<div class="dashboard-bar-row">
+          <div class="dashboard-bar-label">${item.label}<span class="dashboard-bar-description">${item.description}</span></div>
+          <div class="dashboard-bar-track" role="img" aria-label="${escapeHtml(label)}"><span class="dashboard-bar-fill dashboard-series-${item.series}" style="width:${dashboardBarWidth(count, maximum)}%"></span></div>
+          <div class="dashboard-bar-value"><strong>${count}</strong> 个 · ${percent}%</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderDashboard(data) {
+      const modules = data.modules || {};
+      const episodes = data.episodes || {};
+      const audio = data.audio || {};
+      const definitions = dashboardModuleDefinitions();
+      dashboardData = data;
+      if (!definitions.some(module => module.key === dashboardActiveModule)) dashboardActiveModule = 'normal';
+      const activeDefinition = definitions.find(module => module.key === dashboardActiveModule) || definitions[0];
+      const moduleSummary = modules[activeDefinition.key] || {};
+      const moduleAudio = audio.modules && audio.modules[activeDefinition.key] ? audio.modules[activeDefinition.key] : {};
+      const moduleFiles = dashboardCount(moduleSummary.files);
+      const moduleDirectories = dashboardCount(moduleSummary.directories);
+      const moduleBytes = Number(moduleSummary.bytes) || 0;
+      const episodeFolders = episodes.folders || {};
+      const episodeWordDocuments = episodes.wordDocuments || {};
+      const moduleEpisodeFolders = dashboardCount(episodeFolders[activeDefinition.key]);
+      const moduleEpisodeWordDocuments = dashboardCount(episodeWordDocuments[activeDefinition.key]);
+      const episodeMaximum = Math.max(1, moduleEpisodeFolders, moduleEpisodeWordDocuments);
+      const skipped = Array.isArray(data.skipped) ? data.skipped : [];
+      const generatedAt = formatFileTime(data.generatedAt) || '刚刚';
+      const excluded = dashboardCount(data.excludedDirectories);
+      const scanMeta = `读取 ${dashboardCount(data.scannedFiles)} 个文件、${dashboardCount(data.scannedDirectories)} 个目录${excluded > 0 ? `，忽略 ${excluded} 个程序、日志或目录联接` : ''} · 更新于 ${generatedAt}`;
+      const actions = '<button class="btn btn-outline" type="button" onclick="showDashboard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重新统计</button>';
+
+      const area = document.getElementById('previewArea');
+      area.innerHTML = `<div class="dashboard">
+        ${renderDashboardHeader(currentRoot, actions)}
+        ${renderDashboardViewTabs(activeDefinition.key)}
+        <div id="dashboardViewPanel" role="tabpanel" aria-labelledby="dashboardTab-${activeDefinition.key}">
+          <div class="dashboard-summary-grid">
+            <div class="dashboard-stat"><span class="dashboard-stat-label">${activeDefinition.label}</span><strong class="dashboard-stat-value">${moduleFiles}</strong><span class="dashboard-stat-detail">${moduleDirectories} 个文件夹 · ${formatFileSize(moduleBytes)}</span></div>
+            <div class="dashboard-stat"><span class="dashboard-stat-label">第N集文件夹</span><strong class="dashboard-stat-value">${moduleEpisodeFolders}</strong><span class="dashboard-stat-detail">${moduleEpisodeWordDocuments} 个文件名含“第N集”的 Word 文档</span></div>
+            <div class="dashboard-stat"><span class="dashboard-stat-label">音频文件</span><strong class="dashboard-stat-value">${dashboardCount(moduleAudio.total)}</strong><span class="dashboard-stat-detail">总大小 ${formatFileSize(Number(moduleAudio.bytes) || 0)}</span></div>
+          </div>
+
+          <section class="dashboard-section" aria-labelledby="dashboardEpisodeTitle">
+            <div class="dashboard-section-heading"><h3 class="dashboard-section-title" id="dashboardEpisodeTitle">剧集记录</h3><span class="dashboard-section-note">当前视图：${activeDefinition.label}</span></div>
+            <div class="dashboard-episode-grid">
+              ${renderDashboardEpisodeItem('剧集文件夹', moduleEpisodeFolders, episodeMaximum)}
+              ${renderDashboardEpisodeItem('剧集 Word 文档', moduleEpisodeWordDocuments, episodeMaximum)}
+            </div>
+          </section>
+
+          <section class="dashboard-section" aria-labelledby="dashboardAudioTitle">
+            <div class="dashboard-section-heading"><h3 class="dashboard-section-title" id="dashboardAudioTitle">音频构成</h3><span class="dashboard-section-note">${dashboardCount(moduleAudio.total)} 个音频 · ${formatFileSize(Number(moduleAudio.bytes) || 0)}</span></div>
+            ${renderDashboardAudioPie(moduleAudio)}
+            <div class="dashboard-chart">${renderDashboardAudioRows(moduleAudio)}</div>
+          </section>
+        </div>
+
+        <div class="dashboard-scan-meta">${escapeHtml(scanMeta)}。统计仅按文件名和路径进行只读扫描，不会修改文件。</div>
+        ${skipped.length > 0 ? `<div class="dashboard-warning">有 ${skipped.length} 个路径无法读取，以上结果不包含这些项目。</div>${renderIssueDetails([], skipped)}` : ''}
+      </div>`;
+      area.scrollTop = 0;
+    }
+
+    function showDashboard() {
+      if (!currentRoot) {
+        showToast('目录尚未加载完成，请稍后再试', 'info');
+        return;
+      }
+
+      stopDashboardRequest();
+      previewRequestId++;
+      if (activePreviewController) activePreviewController.abort();
+      activePreviewController = null;
+      clearWordPreviewListeners();
+      stopAudioPreview();
+      if (activeLabel) activeLabel.classList.remove('active');
+      activeLabel = null;
+      currentContentView = 'dashboard';
+      setDashboardButtonActive(true);
+      dashboardActiveModule = 'normal';
+
+      const requestId = ++dashboardRequestId;
+      const requestRoot = currentRoot;
+      const requestRootContextId = rootContextId;
+      const scan = { controller: new AbortController(), cancelled: false };
+      activeDashboardScan = scan;
+      renderDashboardLoading(requestRoot);
+
+      ssePost('/api/dashboard-stats', { root: requestRoot }, {
+        signal: scan.controller.signal,
+        onProgress(message) {
+          if (activeDashboardScan !== scan || requestId !== dashboardRequestId || requestRoot !== currentRoot) return;
+          updateDashboardProgress(message);
+        },
+        onDone(data) {
+          if (scan.cancelled || requestId !== dashboardRequestId || requestRootContextId !== rootContextId || requestRoot !== currentRoot) return;
+          if (activeDashboardScan === scan) activeDashboardScan = null;
+          if (!data.success) {
+            renderDashboardState('统计失败', data.error || '服务器未能完成统计，请重新尝试。');
+            return;
+          }
+          renderDashboard(data);
+        },
+        onError(error) {
+          if (scan.cancelled || error.name === 'AbortError' || requestId !== dashboardRequestId || requestRoot !== currentRoot) return;
+          if (activeDashboardScan === scan) activeDashboardScan = null;
+          renderDashboardState('统计失败', error.message || '连接已中断，请重新尝试。');
+        }
+      });
     }
 
     function renderPreviewTitle(data, fallbackName) {

@@ -35,7 +35,10 @@ const AUDIO_FORMAT_DETAILS = Object.freeze({
   }
 });
 const AUDIO_EXTENSIONS = new Set(Object.keys(AUDIO_MIME_TYPES));
+const WORD_EXTENSIONS = new Set(['.doc', '.docx']);
+const EPISODE_NAME_PATTERN = /第\s*\d+\s*集/;
 const SKIPPED_DIRECTORIES = new Set(['node_modules', '撤回文件夹', '备份文件夹', '操作日志']);
+const DASHBOARD_SKIPPED_DIRECTORIES = new Set(['node_modules', '操作日志']);
 const PREVIEW_LIMITS = {
   word: 50 * 1024 * 1024,
   excel: 25 * 1024 * 1024,
@@ -936,6 +939,187 @@ function createCancellationState(res) {
   });
   return state;
 }
+
+function createDashboardModuleSummary() {
+  return { files: 0, directories: 0, bytes: 0 };
+}
+
+function createDashboardModuleBreakdown() {
+  return { total: 0, normal: 0, backup: 0, revoked: 0 };
+}
+
+function createDashboardAudioSummary() {
+  return { total: 0, bytes: 0, body: 0, normalEncore: 0, revokedEncore: 0 };
+}
+
+function dashboardModuleForPath(baseModule, name) {
+  if (name === '备份文件夹') return 'backup';
+  if (name === '撤回文件夹') return 'revoked';
+  return baseModule;
+}
+
+function dashboardRootModule(rootDir) {
+  return path.resolve(rootDir).split(path.sep).reduce((moduleName, segment) => {
+    return dashboardModuleForPath(moduleName, segment);
+  }, 'normal');
+}
+
+function classifyDashboardAudio(name) {
+  if (EPISODE_NAME_PATTERN.test(name)) return 'body';
+  if (name.includes('撤回')) return 'revokedEncore';
+  return 'normalEncore';
+}
+
+async function collectDashboardStats(rootDir, options = {}) {
+  const { onProgress, isCancelled } = options;
+  const modules = {
+    normal: createDashboardModuleSummary(),
+    backup: createDashboardModuleSummary(),
+    revoked: createDashboardModuleSummary()
+  };
+  const episodes = {
+    folders: createDashboardModuleBreakdown(),
+    wordDocuments: createDashboardModuleBreakdown()
+  };
+  const audio = {
+    ...createDashboardAudioSummary(),
+    modules: {
+      normal: createDashboardAudioSummary(),
+      backup: createDashboardAudioSummary(),
+      revoked: createDashboardAudioSummary()
+    }
+  };
+  const skipped = [];
+  const stats = { scannedFiles: 0, scannedDirectories: 0, excludedDirectories: 0 };
+  const projectDir = path.resolve(__dirname);
+  const samePath = (left, right) => {
+    const normalizedLeft = path.resolve(left);
+    const normalizedRight = path.resolve(right);
+    return process.platform === 'win32'
+      ? normalizedLeft.toLowerCase() === normalizedRight.toLowerCase()
+      : normalizedLeft === normalizedRight;
+  };
+  const pending = [{ dirPath: rootDir, moduleName: dashboardRootModule(rootDir) }];
+
+  while (pending.length > 0) {
+    if (isCancelled && isCancelled()) return { cancelled: true, modules, episodes, audio, skipped, stats };
+    const current = pending.pop();
+    let safeDirectory;
+    let entries;
+    try {
+      safeDirectory = assertWithinRoot(rootDir, current.dirPath, { type: 'directory' });
+      if (!samePath(safeDirectory, rootDir) && samePath(safeDirectory, projectDir)) {
+        stats.excludedDirectories++;
+        continue;
+      }
+      entries = await fs.promises.readdir(safeDirectory, { withFileTypes: true });
+      stats.scannedDirectories++;
+    } catch (e) {
+      skipped.push({ path: toPosix(current.dirPath), error: e.message });
+      continue;
+    }
+
+    for (const entry of entries) {
+      if (isCancelled && isCancelled()) return { cancelled: true, modules, episodes, audio, skipped, stats };
+      if (entry.name.startsWith('.') || entry.name.startsWith('~$')) continue;
+      const fullPath = path.join(safeDirectory, entry.name);
+
+      if (entry.isSymbolicLink()) {
+        stats.excludedDirectories++;
+        continue;
+      }
+      if (entry.isDirectory() && (DASHBOARD_SKIPPED_DIRECTORIES.has(entry.name) || samePath(fullPath, projectDir))) {
+        stats.excludedDirectories++;
+        continue;
+      }
+
+      let entryStats;
+      try {
+        entryStats = await fs.promises.lstat(fullPath);
+      } catch (e) {
+        skipped.push({ path: toPosix(fullPath), error: e.message });
+        continue;
+      }
+      if (entryStats.isSymbolicLink()) {
+        stats.excludedDirectories++;
+        continue;
+      }
+
+      if (entryStats.isDirectory()) {
+        const moduleName = dashboardModuleForPath(current.moduleName, entry.name);
+        modules[moduleName].directories++;
+        if (EPISODE_NAME_PATTERN.test(entry.name)) {
+          episodes.folders.total++;
+          episodes.folders[moduleName]++;
+        }
+        pending.push({ dirPath: fullPath, moduleName });
+        continue;
+      }
+      if (!entryStats.isFile()) continue;
+
+      stats.scannedFiles++;
+      modules[current.moduleName].files++;
+      modules[current.moduleName].bytes += entryStats.size;
+      const ext = path.extname(entry.name).toLowerCase();
+
+      if (WORD_EXTENSIONS.has(ext) && EPISODE_NAME_PATTERN.test(entry.name)) {
+        episodes.wordDocuments.total++;
+        episodes.wordDocuments[current.moduleName]++;
+      }
+      if (AUDIO_EXTENSIONS.has(ext)) {
+        const category = classifyDashboardAudio(entry.name);
+        const moduleAudio = audio.modules[current.moduleName];
+        audio.total++;
+        audio.bytes += entryStats.size;
+        audio[category]++;
+        moduleAudio.total++;
+        moduleAudio.bytes += entryStats.size;
+        moduleAudio[category]++;
+      }
+
+      if (onProgress && (stats.scannedFiles === 1 || stats.scannedFiles % 25 === 0)) {
+        onProgress({
+          current: stats.scannedFiles,
+          total: 0,
+          file: toPosix(path.relative(rootDir, fullPath)),
+          phase: 'discover'
+        });
+      }
+      if (stats.scannedFiles % 50 === 0) await new Promise(resolve => setImmediate(resolve));
+    }
+  }
+
+  return { cancelled: false, modules, episodes, audio, skipped, stats };
+}
+
+app.post('/api/dashboard-stats', async (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });
+  const cancellation = createCancellationState(res);
+
+  try {
+    const rootDir = resolveRoot(req.body.root);
+    const result = await collectDashboardStats(rootDir, {
+      isCancelled: () => cancellation.cancelled,
+      onProgress: progress => writeSse(res, { type: 'progress', ...progress })
+    });
+    if (result.cancelled || cancellation.cancelled) return res.end();
+    writeSse(res, {
+      type: 'done',
+      success: true,
+      generatedAt: new Date().toISOString(),
+      scannedFiles: result.stats.scannedFiles,
+      scannedDirectories: result.stats.scannedDirectories,
+      excludedDirectories: result.stats.excludedDirectories,
+      skipped: result.skipped,
+      modules: result.modules,
+      episodes: result.episodes,
+      audio: result.audio
+    });
+  } catch (e) {
+    writeSse(res, { type: 'done', success: false, error: e.message });
+  }
+  res.end();
+});
 
 app.post('/api/scan-revoked-audio', async (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });

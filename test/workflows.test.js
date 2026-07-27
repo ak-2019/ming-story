@@ -15,6 +15,92 @@ const {
   startAppServer
 } = require('../test-support/helpers');
 
+test('统计概览按模块、剧集标记和音频类型正确分类', async t => {
+  const root = makeTempDir();
+  const normalEpisodeDir = path.join(root, '万历回照第 1 集');
+  const normalEncoreDir = path.join(root, '返场素材');
+  const backupEpisodeDir = path.join(root, '备份文件夹', '万历回照第2集备份');
+  const revokedDir = path.join(root, '撤回文件夹', '已撤回');
+  const excludedLogDir = path.join(root, '操作日志', '第9集日志');
+  const excludedDependencyDir = path.join(root, 'node_modules', '第8集依赖');
+  const hiddenDir = path.join(root, '.archive', '第7集');
+  [normalEpisodeDir, normalEncoreDir, backupEpisodeDir, revokedDir, excludedLogDir, excludedDependencyDir, hiddenDir]
+    .forEach(directory => fs.mkdirSync(directory, { recursive: true }));
+
+  fs.writeFileSync(path.join(normalEpisodeDir, '万历回照第 1 集.docx'), 'word-body');
+  fs.writeFileSync(path.join(normalEpisodeDir, '万历回照第1集.wav'), 'audio-body');
+  fs.writeFileSync(path.join(normalEncoreDir, '规则之下.wav'), 'normal-encore');
+  fs.writeFileSync(path.join(normalEncoreDir, '王朝之槛（撤回）.mp3'), 'revoked-encore-normal-folder');
+  fs.writeFileSync(path.join(normalEncoreDir, '随手录音.m4a'), 'normal-untagged-audio');
+  fs.writeFileSync(path.join(normalEncoreDir, '~$第3集.docx'), 'word-temp');
+  fs.writeFileSync(path.join(backupEpisodeDir, '万历回照第2集.doc'), 'word-backup');
+  fs.writeFileSync(path.join(backupEpisodeDir, '万历回照第2集.flac'), 'audio-backup');
+  fs.writeFileSync(path.join(revokedDir, '进退之间（撤回）.ogg'), 'revoked-encore-revoked-folder');
+  fs.writeFileSync(path.join(excludedLogDir, '第9集.docx'), 'excluded-log');
+  fs.writeFileSync(path.join(excludedDependencyDir, '第8集.wav'), 'excluded-dependency');
+  fs.writeFileSync(path.join(hiddenDir, '第7集.wav'), 'excluded-hidden');
+
+  const server = await startAppServer(app);
+  t.after(async () => {
+    await closeServer(server);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  const result = await ssePost(serverPort(server), '/api/dashboard-stats', { root });
+  assert.equal(result.success, true);
+  assert.equal(result.scannedFiles, 8);
+  assert.equal(result.scannedDirectories, 7);
+  assert.equal(result.excludedDirectories, 2);
+  const byteLength = values => values.reduce((sum, value) => sum + Buffer.byteLength(value), 0);
+  assert.deepEqual(result.modules.normal, {
+    files: 5,
+    directories: 2,
+    bytes: byteLength(['word-body', 'audio-body', 'normal-encore', 'revoked-encore-normal-folder', 'normal-untagged-audio'])
+  });
+  assert.deepEqual(result.modules.backup, {
+    files: 2,
+    directories: 2,
+    bytes: byteLength(['word-backup', 'audio-backup'])
+  });
+  assert.deepEqual(result.modules.revoked, {
+    files: 1,
+    directories: 2,
+    bytes: byteLength(['revoked-encore-revoked-folder'])
+  });
+  assert.deepEqual(result.episodes.folders, { total: 2, normal: 1, backup: 1, revoked: 0 });
+  assert.deepEqual(result.episodes.wordDocuments, { total: 2, normal: 1, backup: 1, revoked: 0 });
+  assert.deepEqual(result.audio, {
+    total: 6,
+    bytes: byteLength(['audio-body', 'normal-encore', 'revoked-encore-normal-folder', 'normal-untagged-audio', 'audio-backup', 'revoked-encore-revoked-folder']),
+    body: 2,
+    normalEncore: 2,
+    revokedEncore: 2,
+    modules: {
+      normal: {
+        total: 4,
+        bytes: byteLength(['audio-body', 'normal-encore', 'revoked-encore-normal-folder', 'normal-untagged-audio']),
+        body: 1,
+        normalEncore: 2,
+        revokedEncore: 1
+      },
+      backup: {
+        total: 1,
+        bytes: byteLength(['audio-backup']),
+        body: 1,
+        normalEncore: 0,
+        revokedEncore: 0
+      },
+      revoked: {
+        total: 1,
+        bytes: byteLength(['revoked-encore-revoked-folder']),
+        body: 0,
+        normalEncore: 0,
+        revokedEncore: 1
+      }
+    }
+  });
+});
+
 test('音频扫描、整理和一键撤回保持完整', async t => {
   const root = makeTempDir();
   const file = path.join(root, '第一集撤回.mp3');
