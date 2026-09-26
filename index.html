@@ -983,17 +983,19 @@
     /* Dashboard — 统计概览 */
     .dashboard {
       width: 100%;
-      max-width: 1180px;
+      max-width: 1120px;
       margin: 0 auto;
       color: var(--ink);
     }
 
     .dashboard-header {
       display: flex;
-      align-items: flex-start;
+      align-items: flex-end;
       justify-content: space-between;
       gap: 18px;
-      padding-bottom: 18px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--primary);
     }
 
     .dashboard-title {
@@ -1001,15 +1003,30 @@
       font-family: 'SimSun', serif;
       font-size: 22px;
       font-weight: 700;
-      letter-spacing: 0;
+      letter-spacing: 2px;
     }
 
     .dashboard-subtitle {
-      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 12px;
+      margin-top: 8px;
       color: var(--ink-subtle);
       font-size: 12px;
       line-height: 1.6;
-      word-break: break-all;
+    }
+
+    .dashboard-root {
+      max-width: 520px;
+      padding: 1px 9px;
+      overflow: hidden;
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      background: var(--surface-1);
+      color: var(--ink-muted);
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .dashboard-actions {
@@ -1018,157 +1035,257 @@
       flex: 0 0 auto;
     }
 
-    .dashboard-view-tabs {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 2px;
-      margin-bottom: 18px;
-      padding: 2px;
-      border: 1px solid var(--hairline-strong);
-      border-radius: 4px;
-      background: var(--surface-2);
-    }
-
-    .dashboard-view-tab {
-      min-width: 0;
-      min-height: 42px;
-      padding: 7px 10px;
-      border: 0;
-      border-radius: 2px;
-      background: transparent;
-      color: var(--ink-muted);
-      font-family: 'Microsoft YaHei', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      line-height: 1.35;
-      cursor: pointer;
-    }
-
-    .dashboard-view-tab:hover {
-      background: var(--surface-1);
-      color: var(--ink);
-    }
-
-    .dashboard-view-tab.active {
-      background: var(--canvas);
-      color: var(--primary);
-      box-shadow: 0 1px 3px rgba(44,24,16,0.12);
-    }
-
-    .dashboard-view-tab-count {
-      display: block;
-      margin-top: 2px;
-      color: var(--ink-subtle);
-      font-size: 10px;
-      font-weight: 400;
-    }
-
-    .dashboard-view-tab.active .dashboard-view-tab-count { color: var(--primary); }
-
-    .dashboard-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-
-    .dashboard-stat {
-      min-width: 0;
-      padding: 15px 16px;
-      border: 1px solid var(--hairline);
-      border-radius: 4px;
-      background: var(--surface-1);
-    }
-
-    .dashboard-stat-label {
-      color: var(--ink-subtle);
-      font-size: 11px;
-    }
-
-    .dashboard-stat-value {
-      display: block;
-      margin-top: 5px;
-      font-family: 'SimSun', serif;
-      font-size: 26px;
-      font-weight: 700;
-      line-height: 1.2;
-      color: var(--ink);
-    }
-
-    .dashboard-stat-detail {
-      display: block;
-      margin-top: 5px;
-      color: var(--ink-muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .dashboard-section {
-      padding: 22px 0;
-      border-top: 1px solid var(--hairline);
-    }
-
-    .dashboard-section-heading {
+    .dashboard-caption {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
-    .dashboard-section-title {
+    .dashboard-caption h3 {
+      font-family: 'SimSun', serif;
       font-size: 15px;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 1px;
       color: var(--ink);
     }
 
-    .dashboard-section-note {
+    .dashboard-caption span {
       color: var(--ink-subtle);
-      font-size: 11px;
-      text-align: right;
+      font-size: 11.5px;
     }
 
-    .dashboard-chart {
+    .dashboard-distribution {
+      display: flex;
+      height: 10px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-2);
+    }
+
+    .dashboard-distribution span {
+      height: 100%;
+      transition: width 0.4s var(--ease-out);
+    }
+
+    .dashboard-distribution span + span { box-shadow: -2px 0 0 var(--canvas); }
+
+    .module-normal { --module-color: #8b5a2b; --module-soft: rgba(139,90,43,0.12); }
+    .module-backup { --module-color: #6b4c8a; --module-soft: rgba(107,76,138,0.12); }
+    .module-revoked { --module-color: #2563a8; --module-soft: rgba(37,99,168,0.12); }
+
+    .dashboard-modules {
       display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
+      margin-bottom: 24px;
     }
 
-    .dashboard-audio-overview {
-      display: grid;
-      grid-template-columns: 210px minmax(0, 1fr);
-      align-items: center;
-      gap: 30px;
-      margin-bottom: 22px;
+    .dashboard-module {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+      padding: 14px 16px 14px 20px;
+      overflow: hidden;
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      background: var(--surface-1);
+      color: var(--ink);
+      font-family: 'Microsoft YaHei', sans-serif;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s var(--ease-out), background-color 0.18s;
     }
 
-    .dashboard-pie-wrap {
+    .dashboard-module::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 4px;
+      background: var(--module-color);
+      opacity: 0.4;
+      transition: opacity 0.18s;
+    }
+
+    .dashboard-module:hover { transform: translateY(-2px); border-color: var(--hairline-strong); box-shadow: var(--shadow-md); }
+    .dashboard-module.active { border-color: var(--module-color); background: #fbf8f2; box-shadow: 0 0 0 1px var(--module-color), var(--shadow-md); }
+    .dashboard-module.active::before { opacity: 1; }
+
+    .dashboard-module-head {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--ink-muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .dashboard-module.active .dashboard-module-head { color: var(--module-color); }
+
+    .dashboard-module-share {
+      padding: 1px 8px;
+      border-radius: 999px;
+      background: var(--module-soft);
+      color: var(--module-color);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .dashboard-module-value { display: flex; align-items: baseline; gap: 6px; }
+
+    .dashboard-module-value strong {
+      color: var(--ink);
+      font-family: 'SimSun', serif;
+      font-size: 30px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .dashboard-module-value span { color: var(--ink-subtle); font-size: 12px; }
+
+    .dashboard-module-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--hairline-strong);
+    }
+
+    .dashboard-module-meta > span { min-width: 0; }
+
+    .dashboard-module-meta b {
+      display: block;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dashboard-module-meta small { color: var(--ink-subtle); font-size: 10.5px; }
+
+    .dashboard-panel {
+      padding: 20px 22px 22px;
+      border: 1px solid var(--hairline);
+      border-top: 3px solid var(--module-color);
+      border-radius: 8px;
+      background: rgba(250,247,240,0.72);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .dashboard-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-family: 'SimSun', serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .dashboard-panel-title i {
+      width: 9px;
+      height: 9px;
+      background: var(--module-color);
+      transform: rotate(45deg);
+    }
+
+    .dashboard-panel-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 18px;
+    }
+
+    .dashboard-block {
       min-width: 0;
+      padding: 16px 18px;
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+      background: var(--canvas);
+    }
+
+    .dashboard-episode-row {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr) 52px;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 0;
+    }
+
+    .dashboard-episode-row + .dashboard-episode-row { border-top: 1px dashed var(--hairline); }
+    .dashboard-episode-label { color: var(--ink-muted); font-size: 12.5px; }
+
+    .dashboard-episode-value {
+      font-family: 'SimSun', serif;
+      font-size: 20px;
+      font-weight: 700;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .dashboard-episode-note {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 5px;
+      background: var(--surface-1);
+      color: var(--ink-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .dashboard-episode-note.is-balanced { background: rgba(39,113,58,0.08); color: var(--success); }
+    .dashboard-episode-note.is-diff { background: var(--warning-bg); color: #8a6508; }
+
+    .dashboard-bar-track {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-2);
+    }
+
+    .dashboard-bar-fill {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.4s var(--ease-out);
+    }
+
+    .dashboard-audio {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      align-items: center;
+      gap: 22px;
     }
 
     .dashboard-pie {
       position: relative;
-      width: 176px;
-      height: 176px;
-      flex: 0 0 auto;
+      width: 150px;
+      height: 150px;
       border-radius: 50%;
-      box-shadow: inset 0 0 0 1px rgba(44,24,16,0.08);
     }
 
     .dashboard-pie::after {
       content: '';
       position: absolute;
-      inset: 39px;
+      inset: 28px;
       border-radius: 50%;
       background: var(--canvas);
-      box-shadow: 0 0 0 1px var(--hairline);
+      box-shadow: inset 0 0 0 1px var(--hairline);
     }
 
     .dashboard-pie-center {
       position: absolute;
-      inset: 48px;
+      inset: 28px;
       z-index: 1;
       display: flex;
       flex-direction: column;
@@ -1176,93 +1293,44 @@
       justify-content: center;
       color: var(--ink-subtle);
       font-size: 11px;
-      text-align: center;
     }
 
     .dashboard-pie-center strong {
       color: var(--ink);
       font-family: 'SimSun', serif;
-      font-size: 25px;
+      font-size: 28px;
       line-height: 1.1;
     }
 
-    .dashboard-pie-legend {
+    .dashboard-audio-list { display: grid; gap: 13px; min-width: 0; }
+
+    .dashboard-audio-item {
       display: grid;
-      min-width: 0;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: baseline;
+      gap: 5px 12px;
     }
 
-    .dashboard-pie-legend-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      align-items: center;
-      gap: 14px;
-      min-height: 45px;
-      border-bottom: 1px solid var(--hairline);
-      color: var(--ink-muted);
-      font-size: 12px;
-    }
-
-    .dashboard-pie-legend-row:last-child { border-bottom: 0; }
-
-    .dashboard-pie-legend-label {
+    .dashboard-audio-name {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      min-width: 0;
-      color: var(--ink);
-      font-weight: 600;
-    }
-
-    .dashboard-pie-legend-count {
-      color: var(--ink);
-      font-weight: 600;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .dashboard-pie-legend-percent {
-      min-width: 54px;
-      color: var(--ink-subtle);
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .dashboard-bar-row {
-      display: grid;
-      grid-template-columns: minmax(112px, 150px) minmax(160px, 1fr) minmax(180px, auto);
-      align-items: center;
-      gap: 14px;
-      min-height: 38px;
-    }
-
-    .dashboard-bar-label {
+      gap: 7px;
       min-width: 0;
       color: var(--ink);
       font-size: 13px;
       font-weight: 600;
     }
 
-    .dashboard-bar-description {
-      display: block;
-      margin-top: 3px;
-      color: var(--ink-subtle);
-      font-size: 11px;
-      font-weight: 400;
-      line-height: 1.45;
-    }
+    .dashboard-audio-count { color: var(--ink-muted); font-size: 12px; white-space: nowrap; }
+    .dashboard-audio-count strong { color: var(--ink); font-size: 15px; font-variant-numeric: tabular-nums; }
+    .dashboard-audio-item .dashboard-bar-track { grid-column: 1 / -1; height: 8px; }
+    .dashboard-audio-desc { grid-column: 1 / -1; color: var(--ink-subtle); font-size: 11px; }
 
-    .dashboard-bar-track {
-      height: 12px;
-      overflow: hidden;
-      background: var(--surface-2);
-      border: 1px solid var(--hairline);
-    }
-
-    .dashboard-bar-fill {
-      display: block;
-      height: 100%;
-      min-width: 0;
-      transition: width 0.2s ease;
+    .dashboard-swatch {
+      width: 10px;
+      height: 10px;
+      flex: 0 0 auto;
+      border-radius: 3px;
     }
 
     .dashboard-series-normal { background: #8b5a2b; }
@@ -1271,69 +1339,24 @@
     .dashboard-series-body { background: var(--primary); }
     .dashboard-series-normal-encore { background: var(--success); }
     .dashboard-series-revoked-encore { background: #2563a8; }
-    .dashboard-series-other { background: #a67c2e; }
 
-    .dashboard-bar-value {
-      min-width: 0;
-      text-align: right;
-      color: var(--ink-muted);
-      font-size: 12px;
-      line-height: 1.45;
-      white-space: nowrap;
-    }
-
-    .dashboard-bar-value strong {
-      color: var(--ink);
-      font-size: 13px;
-    }
-
-    .dashboard-episode-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 26px;
-    }
-
-    .dashboard-episode-item {
-      min-width: 0;
-    }
-
-    .dashboard-episode-total {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 9px;
-      color: var(--ink-muted);
-      font-size: 12px;
-    }
-
-    .dashboard-episode-total strong {
-      color: var(--ink);
-      font-size: 21px;
-    }
-
-    .dashboard-breakdown {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 9px;
+    .dashboard-empty-module {
+      padding: 34px 16px;
       color: var(--ink-subtle);
-      font-size: 11px;
+      font-size: 12.5px;
+      line-height: 1.8;
+      text-align: center;
     }
 
-    .dashboard-breakdown-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .dashboard-swatch {
-      width: 8px;
-      height: 8px;
-      flex: 0 0 auto;
+    .dashboard-empty-module strong {
+      display: block;
+      color: var(--ink-muted);
+      font-family: 'SimSun', serif;
+      font-size: 16px;
     }
 
     .dashboard-scan-meta {
+      margin-top: 18px;
       padding-top: 12px;
       border-top: 1px solid var(--hairline);
       color: var(--ink-subtle);
@@ -1345,32 +1368,43 @@
       margin-top: 12px;
       padding: 9px 11px;
       border-left: 3px solid var(--warning);
-      background: var(--surface-1);
+      background: var(--warning-bg);
       color: var(--ink-muted);
       font-size: 12px;
       line-height: 1.6;
     }
 
-    .dashboard-loading-state,
-    .dashboard-empty-state {
-      padding: 34px 0;
-      border-top: 1px solid var(--hairline);
-      color: var(--ink-muted);
+    .dashboard-empty-state { padding: 20px 0; color: var(--ink-muted); }
+
+    .dashboard-loading-card {
+      max-width: 520px;
+      margin: 28px auto 0;
+      padding: 28px 30px 22px;
+      border: 1px solid var(--hairline);
+      border-radius: 10px;
+      background: rgba(250,247,240,0.82);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
     }
 
-    .dashboard-loading-line {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-      font-size: 13px;
+    .dashboard-loading-count {
+      display: block;
+      color: var(--ink);
+      font-family: 'SimSun', serif;
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
     }
+
+    .dashboard-loading-label { color: var(--ink-subtle); font-size: 12px; }
+    .dashboard-loading-card .task-progress-bar { margin: 18px 0 10px; }
 
     .dashboard-current-file {
       min-height: 18px;
+      overflow: hidden;
       color: var(--ink-subtle);
       font-size: 11px;
-      overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -1396,8 +1430,11 @@
       .header-action-text { display: none; }
       .btn-icon { width: 34px; min-width: 34px; padding: 0 8px; }
       .current-root-label { max-width: 120px; }
-      .dashboard-bar-row { grid-template-columns: minmax(100px, 135px) minmax(120px, 1fr); }
-      .dashboard-bar-value { grid-column: 2; text-align: left; white-space: normal; }
+    }
+
+    @media (max-width: 1000px) {
+      .dashboard-module-value strong { font-size: 24px; }
+      .dashboard-panel-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 640px) {
@@ -1428,13 +1465,11 @@
       .motto-plaque-crest { width: 88px; }
       .dashboard-header { align-items: stretch; flex-direction: column; }
       .dashboard-actions { align-self: flex-start; }
-      .dashboard-summary-grid { grid-template-columns: 1fr; }
-      .dashboard-episode-grid { grid-template-columns: 1fr; gap: 20px; }
-      .dashboard-audio-overview { grid-template-columns: 1fr; gap: 18px; }
-      .dashboard-section-heading { align-items: flex-start; flex-direction: column; }
-      .dashboard-section-note { text-align: left; }
-      .dashboard-bar-row { grid-template-columns: 1fr; gap: 7px; }
-      .dashboard-bar-value { grid-column: 1; }
+      .dashboard-modules { grid-template-columns: 1fr; }
+      .dashboard-panel { padding: 16px 14px; }
+      .dashboard-audio { grid-template-columns: 1fr; justify-items: center; }
+      .dashboard-audio-list { width: 100%; }
+      .dashboard-caption { flex-direction: column; gap: 2px; }
     }
 
     /* Excel Table — 表格 */
@@ -2093,13 +2128,817 @@
     .modal strong { color: var(--ink); }
     .modal code { background: var(--surface-2); padding: 2px 6px; border-radius: 2px; font-size: 12px; color: var(--primary); font-family: 'Microsoft YaHei', monospace; }
     .modal p { color: var(--ink-muted); line-height: 1.6; }
+
+    /* ===== 精修层 — 纸本与朱印 ===== */
+    :root {
+      --warning-bg: #fbf1d6;
+      --gold-soft: rgba(176,138,62,0.32);
+      --seal-ink: #fff8ec;
+      --shadow-sm: 0 1px 2px rgba(44,24,16,0.08);
+      --shadow-md: 0 6px 18px rgba(44,24,16,0.14);
+      --shadow-lg: 0 22px 56px rgba(44,24,16,0.24);
+      --ease-out: cubic-bezier(0.22, 0.8, 0.24, 1);
+      --focus-ring: 0 0 0 2px var(--canvas), 0 0 0 4px rgba(192,57,43,0.55);
+      --seal-font: 'STKaiti', 'KaiTi', 'FangSong', 'SimSun', serif;
+    }
+
+    body {
+      background:
+        radial-gradient(1100px 560px at 88% -12%, rgba(196,154,60,0.11), transparent 62%),
+        radial-gradient(900px 520px at -12% 112%, rgba(192,57,43,0.05), transparent 60%),
+        var(--canvas);
+    }
+
+    ::selection { background: rgba(192,57,43,0.18); color: var(--ink); }
+
+    :where(button, a, input, select, summary, [tabindex]):focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    /* 卷首：朱线 + 金线双栏 */
+    .header {
+      position: relative;
+      background: linear-gradient(180deg, #f4efe4 0%, var(--surface-1) 100%);
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -5px;
+      height: 1px;
+      background: var(--gold-soft);
+      pointer-events: none;
+    }
+
+    .brand-seal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      flex: 0 0 auto;
+      border-radius: 4px 3px 5px 3px;
+      background: var(--primary);
+      color: var(--seal-ink);
+      font-family: var(--seal-font);
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1;
+      box-shadow: inset 0 0 0 2px var(--primary), inset 0 0 0 3px rgba(255,248,236,0.72), 0 2px 6px rgba(192,57,43,0.25);
+      transform: rotate(-5deg);
+      transition: transform 0.35s var(--ease-out);
+    }
+
+    .brand-trigger:hover .brand-seal { transform: rotate(0deg) scale(1.08); }
+    .brand-trigger:active .brand-seal { transform: rotate(0deg) scale(0.94); }
+
+    .current-root-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      margin-right: 4px;
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      background: rgba(247,243,235,0.7);
+    }
+
+    .current-root-label::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 3px rgba(39,113,58,0.14);
+    }
+
+    /* 按钮 */
+    .btn {
+      border-radius: 5px;
+      transition: background-color 0.18s var(--ease-out), color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.18s var(--ease-out);
+    }
+
+    .btn:active:not(:disabled) { transform: translateY(0) scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #cc4536 0%, var(--primary) 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #bd392b 0%, var(--primary-hover) 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px rgba(192,57,43,0.28);
+    }
+
+    .btn-primary:active { background: #8b2820; }
+
+    .btn-icon:hover { background: var(--canvas); color: var(--primary); border-color: var(--primary-muted); }
+
+    .btn.is-busy { pointer-events: none; }
+    .btn.is-busy > svg:first-child { animation: spin 0.8s linear infinite; }
+
+    .btn-xs { padding: 3px 10px; font-size: 11px; min-height: 24px; }
+
+    .toolbar {
+      gap: 10px;
+      padding: 12px 20px;
+      background: linear-gradient(180deg, var(--surface-1) 0%, #e9e3d6 100%);
+    }
+
+    .toolbar > .btn { min-height: 38px; padding: 8px 18px; font-size: 13.5px; }
+
+    /* 侧栏：卷目 */
+    .sidebar { background: linear-gradient(180deg, var(--surface-1) 0%, #e9e3d6 100%); }
+
+    .sidebar-header {
+      padding: 9px 10px 9px 16px;
+      background: transparent;
+    }
+
+    .sidebar-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+    }
+
+    .sidebar-title::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      background: var(--primary);
+    }
+
+    .sidebar-header-actions { display: inline-flex; align-items: center; gap: 6px; }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--ink-subtle);
+      cursor: pointer;
+      transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .icon-btn:hover { background: var(--canvas); color: var(--primary); border-color: var(--hairline); }
+    .icon-btn svg { width: 14px; height: 14px; }
+
+    .tree-search {
+      position: relative;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .tree-search-icon {
+      position: absolute;
+      top: 50%;
+      left: 20px;
+      width: 14px;
+      height: 14px;
+      color: var(--ink-tertiary);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .tree-search input {
+      width: 100%;
+      padding: 7px 62px 7px 30px;
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 12.5px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .tree-search input::placeholder { color: var(--ink-tertiary); }
+    .tree-search input::-webkit-search-cancel-button { display: none; }
+    .tree-search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(192,57,43,0.12); }
+
+    .tree-search-meta {
+      position: absolute;
+      top: 50%;
+      right: 18px;
+      padding: 1px 6px;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      background: var(--surface-1);
+      color: var(--ink-subtle);
+      font-size: 10.5px;
+      line-height: 1.5;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .tree-search-meta.has-result { border-color: var(--primary-muted); color: var(--primary); }
+
+    .tree-label {
+      position: relative;
+      margin: 1px 6px;
+      border-left: 0;
+      border-radius: 5px;
+      outline: none;
+      transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+    }
+
+    .tree-label.active {
+      background: linear-gradient(90deg, var(--primary-muted) 0%, rgba(245,214,208,0.35) 100%);
+      box-shadow: inset 3px 0 0 var(--primary);
+    }
+
+    .tree-label:focus-visible { box-shadow: inset 0 0 0 2px rgba(192,57,43,0.5); }
+    .tree-label.active:focus-visible { box-shadow: inset 3px 0 0 var(--primary), inset 0 0 0 2px rgba(192,57,43,0.5); }
+
+    .tree-children { position: relative; }
+
+    .tree-children::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      bottom: 6px;
+      left: var(--guide, 26px);
+      border-left: 1px dashed var(--hairline-strong);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .tree-children.open > .tree-item { animation: tree-in 0.22s var(--ease-out) both; }
+
+    @keyframes tree-in {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .tree-container.is-filtering .tree-item.filter-miss { display: none; }
+    .tree-container.is-filtering .tree-children.filter-open { display: block; }
+    .tree-name mark { padding: 0 1px; border-radius: 2px; background: rgba(212,160,23,0.36); color: inherit; }
+
+    .tree-filter-empty {
+      padding: 26px 18px;
+      color: var(--ink-subtle);
+      font-size: 12px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .resize-handle { position: relative; width: 4px; }
+    .resize-handle::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2px;
+      height: 28px;
+      border-radius: 2px;
+      background: var(--hairline-strong);
+      transform: translate(-50%, -50%);
+      transition: background-color 0.15s, height 0.2s var(--ease-out);
+    }
+    .resize-handle:hover::after, .resize-handle.dragging::after { height: 56px; background: var(--on-primary); }
+    .resize-handle.dragging { background: var(--primary); }
+
+    /* 预览区 */
+    .preview-area > * { animation: preview-in 0.28s var(--ease-out) both; }
+
+    @keyframes preview-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .preview-title { align-items: center; }
+
+    .preview-title-meta {
+      padding: 2px 9px;
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      background: var(--surface-1);
+    }
+
+    .preview-title-side { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .preview-seal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 6px;
+      background: var(--primary);
+      color: var(--seal-ink);
+      font-family: var(--seal-font);
+      font-size: 30px;
+      font-weight: 700;
+      opacity: 0.86;
+      box-shadow: inset 0 0 0 3px var(--primary), inset 0 0 0 4px rgba(255,248,236,0.72);
+      transform: rotate(-6deg);
+    }
+
+    .text-preview, .word-toc, .word-preview-container, .excel-original-view, .image-preview { box-shadow: var(--shadow-sm); }
+
+    /* 弹窗 */
+    .modal-overlay.show { animation: overlay-in 0.2s ease both; }
+    .modal-overlay.show .modal { animation: modal-in 0.28s var(--ease-out) both; }
+
+    @keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modal-in {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .modal {
+      border-radius: 8px;
+      background: linear-gradient(180deg, #faf7f0 0%, var(--canvas) 100%);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .confirm-seal {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      color: var(--seal-ink);
+      font-family: var(--seal-font);
+      font-size: 22px;
+      font-weight: 700;
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,0), inset 0 0 0 3px rgba(255,248,236,0.7);
+      transform: rotate(-5deg);
+    }
+
+    .result-item { transition: background-color 0.15s; }
+    .result-item:hover { background: #f2ede2; }
+
+    .issue-details-tools { display: flex; justify-content: flex-end; padding: 6px 0; }
+
+    .task-progress-bar { border-radius: 999px; }
+    .task-progress-bar span {
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--primary) 0%, #d9624f 50%, var(--primary) 100%);
+      background-size: 200% 100%;
+      animation: progress-sheen 1.6s linear infinite;
+    }
+
+    @keyframes progress-sheen { to { background-position: -200% 0; } }
+
+    /* 飞鸽传书 */
+    .toast-container { top: 66px; pointer-events: none; }
+
+    .toast,
+    .toast.success,
+    .toast.error,
+    .toast.info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px 9px 10px;
+      border: 1px solid var(--hairline);
+      border-left: 3px solid var(--toast-accent);
+      border-radius: 6px;
+      background: rgba(250,247,240,0.97);
+      color: var(--ink);
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      pointer-events: auto;
+      animation: toast-in 0.32s var(--ease-out);
+    }
+
+    .toast.success { --toast-accent: var(--success); }
+    .toast.error { --toast-accent: var(--danger); }
+    .toast.info { --toast-accent: #9a7209; }
+    .toast.leaving { animation: toast-out 0.26s ease forwards; }
+
+    .toast-seal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+      border-radius: 3px;
+      background: var(--toast-accent);
+      color: var(--seal-ink);
+      font-family: var(--seal-font);
+      font-size: 14px;
+      font-weight: 700;
+      transform: rotate(-5deg);
+    }
+
+    .toast-text { min-width: 0; line-height: 1.5; word-break: break-all; }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateX(28px) scale(0.98); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes toast-out { to { opacity: 0; transform: translateX(28px); } }
+
+    kbd {
+      padding: 1px 5px;
+      border: 1px solid var(--hairline-strong);
+      border-bottom-width: 2px;
+      border-radius: 3px;
+      background: var(--surface-1);
+      font-family: Consolas, monospace;
+      font-size: 11px;
+    }
+
+    ::-webkit-scrollbar { width: 9px; height: 9px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { border: 2px solid transparent; border-radius: 999px; background: var(--hairline-strong) padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--ink-tertiary) padding-box; }
+
+    /* 二次确认 */
+    .confirm-points {
+      margin: 0 0 12px;
+      padding: 10px 12px 10px 28px;
+      border-radius: 6px;
+      background: var(--surface-1);
+      color: var(--ink-muted);
+      font-size: 12.5px;
+      line-height: 1.8;
+    }
+
+    .confirm-files {
+      margin-bottom: 12px;
+      overflow: hidden;
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+      background: var(--canvas);
+    }
+
+    .confirm-files-head {
+      display: flex;
+      justify-content: space-between;
+      padding: 7px 12px;
+      background: var(--surface-2);
+      color: var(--ink-muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .confirm-files ol {
+      max-height: 170px;
+      margin: 0;
+      padding: 6px 12px 6px 36px;
+      overflow: auto;
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.75;
+      word-break: break-all;
+    }
+
+    .confirm-files-more {
+      padding: 6px 12px;
+      border-top: 1px dashed var(--hairline);
+      color: var(--ink-subtle);
+      font-size: 11.5px;
+    }
+
+    .confirm-ack {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border: 1px dashed var(--danger);
+      border-radius: 6px;
+      background: #fbeeea;
+      color: var(--ink);
+      font-size: 12.5px;
+      font-weight: 600;
+      line-height: 1.6;
+      cursor: pointer;
+    }
+
+    .confirm-ack.warning { border-color: #b8860b; background: var(--warning-bg); }
+    .confirm-ack input { width: 15px; height: 15px; margin-top: 3px; accent-color: var(--primary); cursor: pointer; }
+
+    /* 操作日志 */
+    .modal.modal-wide { width: 94%; max-width: 1040px; max-height: 88vh; }
+    .log-shell { display: flex; flex-direction: column; gap: 18px; }
+
+    .log-section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .log-section-head h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-family: 'SimSun', serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .log-section-head h4::before {
+      content: '';
+      width: 3px;
+      height: 13px;
+      border-radius: 2px;
+      background: var(--primary);
+    }
+
+    .log-section-head span { color: var(--ink-subtle); font-size: 11.5px; }
+
+    .log-tasks {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 8px;
+      max-height: 170px;
+      padding: 2px;
+      overflow: auto;
+    }
+
+    .log-task {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+      background: var(--surface-1);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .log-task:hover { border-color: var(--hairline-strong); box-shadow: var(--shadow-sm); }
+
+    .log-task-seal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      background: var(--task-color);
+      color: var(--seal-ink);
+      font-family: var(--seal-font);
+      font-size: 15px;
+      font-weight: 700;
+      transform: rotate(-4deg);
+    }
+
+    .log-task-info { min-width: 0; }
+    .log-task-info b { display: block; color: var(--ink); font-size: 12.5px; }
+    .log-task-info small { display: block; overflow: hidden; color: var(--ink-subtle); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+
+    .log-body {
+      display: grid;
+      grid-template-columns: 170px minmax(0, 1fr);
+      gap: 16px;
+      height: min(560px, 58vh);
+      min-height: 320px;
+    }
+
+    .log-dates {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-right: 10px;
+      overflow: auto;
+      border-right: 1px solid var(--hairline);
+    }
+
+    .log-date-item {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      width: 100%;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--ink-muted);
+      font-family: Consolas, 'Microsoft YaHei', monospace;
+      font-size: 12.5px;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .log-date-item:hover { background: var(--surface-1); color: var(--ink); }
+    .log-date-item.active { background: var(--primary-muted); color: var(--primary); box-shadow: inset 3px 0 0 var(--primary); font-weight: 600; }
+    .log-date-item small { color: var(--ink-subtle); font-family: 'Microsoft YaHei', sans-serif; font-size: 10.5px; font-weight: 400; }
+
+    .log-today {
+      padding: 0 6px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: var(--on-primary);
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .log-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    .log-toolbar { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .log-search { position: relative; flex: 1 1 auto; min-width: 0; }
+
+    .log-search svg {
+      position: absolute;
+      top: 50%;
+      left: 9px;
+      width: 14px;
+      height: 14px;
+      color: var(--ink-tertiary);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .log-search input {
+      width: 100%;
+      padding: 6px 10px 6px 29px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: 6px;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 12.5px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .log-search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(192,57,43,0.12); }
+    .log-search-count { color: var(--ink-subtle); font-size: 11px; white-space: nowrap; }
+
+    .log-filters { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+
+    .log-filter {
+      padding: 3px 10px;
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      background: var(--canvas);
+      color: var(--ink-muted);
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .log-filter:hover { border-color: var(--hairline-strong); color: var(--ink); }
+    .log-filter.active { border-color: var(--ink); background: var(--ink); color: var(--canvas); }
+    .log-filter em { margin-left: 4px; font-style: normal; opacity: 0.65; }
+
+    .log-content {
+      flex: 1;
+      min-height: 0;
+      padding: 4px 6px 4px 0;
+      overflow: auto;
+    }
+
+    .log-entry {
+      position: relative;
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr);
+      gap: 14px;
+      padding-bottom: 12px;
+    }
+
+    .log-entry::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      bottom: 0;
+      left: 68px;
+      width: 1px;
+      background: var(--hairline-strong);
+    }
+
+    .log-entry:last-of-type::before { display: none; }
+
+    .log-entry-time {
+      padding-top: 9px;
+      color: var(--ink-subtle);
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .log-entry-card {
+      position: relative;
+      min-width: 0;
+      padding: 9px 12px;
+      border: 1px solid var(--hairline);
+      border-left: 3px solid var(--log-color);
+      border-radius: 0 6px 6px 0;
+      background: var(--surface-1);
+    }
+
+    .log-entry-card::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: -17px;
+      width: 9px;
+      height: 9px;
+      border: 2px solid var(--log-color);
+      border-radius: 50%;
+      background: var(--canvas);
+    }
+
+    .log-entry-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .log-entry-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 1px 9px 1px 2px;
+      border-radius: 999px;
+      background: var(--log-soft);
+      color: var(--log-color);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .log-entry-tag i {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--log-color);
+      color: var(--seal-ink);
+      font-family: var(--seal-font);
+      font-size: 11px;
+      font-style: normal;
+    }
+
+    .log-entry-summary { margin-top: 5px; color: var(--ink); font-size: 12.5px; line-height: 1.6; word-break: break-all; }
+    .log-files { margin-top: 6px; }
+    .log-files summary { color: var(--ink-subtle); font-size: 11.5px; cursor: pointer; }
+    .log-files summary:hover { color: var(--primary); }
+    .log-file-list { margin-top: 6px; padding: 3px 10px; border-radius: 4px; background: rgba(44,24,16,0.035); }
+
+    .log-file {
+      padding: 3px 0;
+      border-top: 1px dashed var(--hairline);
+      color: var(--ink-muted);
+      font-size: 11.5px;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    .log-file:first-child { border-top: 0; }
+    .log-file-arrow { font-weight: 700; }
+    .log-plain { padding: 4px 8px; color: var(--ink-muted); font-size: 12px; }
+
+    .log-empty {
+      padding: 36px 16px;
+      color: var(--ink-subtle);
+      font-size: 12.5px;
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    .log-empty strong { display: block; color: var(--ink-muted); font-family: 'SimSun', serif; font-size: 16px; }
+
+    .log-timeline[data-filter="move"] .log-entry:not([data-kind="move"]),
+    .log-timeline[data-filter="delete"] .log-entry:not([data-kind="delete"]),
+    .log-timeline[data-filter="restore"] .log-entry:not([data-kind="restore"]),
+    .log-timeline[data-filter="issue"] .log-entry:not([data-issue]) { display: none; }
+
+    @media (max-width: 760px) {
+      .log-body { grid-template-columns: 1fr; height: auto; }
+      .log-dates { flex-direction: row; padding: 0 0 8px; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--hairline); }
+      .log-date-item { width: auto; }
+      .log-content { max-height: 55vh; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .toast, .toast.leaving, .modal-overlay.show, .modal-overlay.show .modal,
+      .preview-area > *, .tree-children.open > .tree-item, .task-progress-bar span,
+      .btn.is-busy > svg:first-child { animation: none !important; }
+      .btn, .tree-label, .brand-seal, .icon-btn { transition: none; }
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>
       <button type="button" class="brand-trigger" id="brandMottoButton" onclick="openMottoOverlay()" aria-controls="mottoOverlay" aria-expanded="false" title="大明帝国">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span class="brand-seal" aria-hidden="true">明</span>
         <span>大明帝国<span class="brand-section"> · 文件管理</span></span>
       </button>
     </h1>
@@ -2110,7 +2949,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V7"/><path d="M17 16v-3"/></svg>
         <span class="header-action-text">统计</span>
       </button>
-      <button class="btn btn-outline btn-icon" onclick="refreshCurrentView()" title="刷新目录" aria-label="刷新目录">
+      <button class="btn btn-outline btn-icon" id="refreshButton" onclick="refreshCurrentView()" title="刷新目录" aria-label="刷新目录">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         <span class="header-action-text">刷新</span>
       </button>
@@ -2136,10 +2975,20 @@
   <div class="main">
     <div class="sidebar">
       <div class="sidebar-header">
-        <span>卷 目</span>
-        <span class="badge" id="fileCount">0 册</span>
+        <span class="sidebar-title">卷 目</span>
+        <span class="sidebar-header-actions">
+          <span class="badge" id="fileCount">0 册</span>
+          <button type="button" class="icon-btn" onclick="collapseTree()" title="折叠全部文件夹" aria-label="折叠全部文件夹">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="7 20 12 15 17 20"/><polyline points="7 4 12 9 17 4"/></svg>
+          </button>
+        </span>
       </div>
-      <div class="tree-container" id="treeContainer">
+      <div class="tree-search">
+        <svg class="tree-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="treeFilterInput" placeholder="筛选已加载的文件" aria-label="筛选已加载的文件" autocomplete="off">
+        <span class="tree-search-meta" id="treeFilterMeta">Ctrl K</span>
+      </div>
+      <div class="tree-container" id="treeContainer" role="tree" aria-label="目录树">
         <div class="preview-placeholder">
           <div class="loading" style="width:24px;height:24px;border-width:2px;"></div>
           <span style="font-size:13px;">正在翻阅目录...</span>
@@ -2153,14 +3002,14 @@
       <div class="toolbar">
         <button class="btn btn-primary" id="btnMoveRevoked" onclick="moveRevokedFiles()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          整理撤回音频
+          删除需要撤回的返场故事录音
           <span class="btn-tip" data-tip="扫描文件名包含“撤回”的音频，确认后移动到撤回文件夹">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
           </span>
         </button>
         <button class="btn btn-danger" id="btnProcessDocuments" onclick="processRevokedDocuments()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          处理撤回文档
+          删除需要撤回的返场故事段落
           <span class="btn-tip" data-tip="扫描 Word 文档，选择后删除命中段落及其后内容，并自动备份">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.01" stroke-linecap="round"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
           </span>
@@ -2173,7 +3022,7 @@
           <div class="welcome-copy">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             <span style="font-size:15px; font-family:'SimSun',serif;">点击左侧卷目，翻阅典籍</span>
-            <span style="font-size:12px;">支持 Word · 文本 · 图片；Excel 请用本地软件打开</span>
+            <span style="font-size:12px;">支持 Word · Excel · 音频 · 文本 · 图片；<kbd>Ctrl</kbd> + <kbd>K</kbd> 筛选文件</span>
           </div>
         </div>
       </div>
@@ -2195,14 +3044,15 @@
   <div class="modal-overlay" id="confirmOverlay">
     <div class="modal" style="max-width:440px;">
       <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
-        <div id="confirmIcon" style="flex-shrink:0;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;"></div>
+        <div id="confirmIcon" class="confirm-seal" aria-hidden="true"></div>
         <div>
           <h3 id="confirmTitle" style="margin-bottom:6px;font-size:15px;"></h3>
           <div id="confirmMessage" style="font-size:13px;color:var(--ink);line-height:1.7;white-space:pre-wrap;"></div>
         </div>
       </div>
+      <div id="confirmExtra"></div>
       <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid var(--hairline);">
-        <button class="btn" id="confirmCancel" style="background:var(--surface-2);color:var(--ink-muted);border:1px solid var(--hairline);min-width:72px;" onmouseenter="this.style.background='var(--surface-3)'" onmouseleave="this.style.background='var(--surface-2)'" >取消</button>
+        <button class="btn btn-outline" id="confirmCancel" style="min-width:72px;justify-content:center;">取消</button>
         <button class="btn" id="confirmOk" style="min-width:72px;"></button>
       </div>
     </div>
@@ -2274,6 +3124,7 @@
     let dashboardData = null;
     let dashboardActiveModule = 'normal';
     let currentContentView = 'placeholder';
+    let currentPreviewPath = '';
     let wordScrollListeners = [];
 
     function clearWordPreviewListeners() {
@@ -2334,17 +3185,59 @@
     })();
 
     // ===== Toast =====
+    const TOAST_SEALS = { success: '成', error: '误', info: '讯' };
+
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
+      while (container.children.length >= 4) container.firstElementChild.remove();
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-      toast.textContent = message;
+      toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+      toast.title = '点击关闭';
+      const seal = document.createElement('span');
+      seal.className = 'toast-seal';
+      seal.setAttribute('aria-hidden', 'true');
+      seal.textContent = TOAST_SEALS[type] || TOAST_SEALS.info;
+      const text = document.createElement('span');
+      text.className = 'toast-text';
+      text.textContent = message;
+      toast.append(seal, text);
       container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
+      let timer = null;
+      const dismiss = () => {
+        clearTimeout(timer);
+        if (toast.classList.contains('leaving')) return;
+        toast.classList.add('leaving');
+        setTimeout(() => toast.remove(), 260);
+      };
+      const arm = () => { timer = setTimeout(dismiss, type === 'error' ? 5000 : 3000); };
+      toast.addEventListener('click', dismiss);
+      toast.addEventListener('mouseenter', () => clearTimeout(timer));
+      toast.addEventListener('mouseleave', arm);
+      arm();
+    }
+
+    function copyText(text, successMessage = '已复制') {
+      const done = () => showToast(successMessage, 'success');
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text).then(done, () => showToast('复制失败，请手动选择文字复制', 'error'));
+      }
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+      document.body.appendChild(area);
+      area.select();
+      const ok = document.execCommand('copy');
+      area.remove();
+      if (ok) done();
+      else showToast('复制失败，请手动选择文字复制', 'error');
+      return Promise.resolve();
+    }
+
+    function copyIssueDetails(button) {
+      const rows = button.closest('.issue-details')?.querySelectorAll('.issue-row') || [];
+      const text = [...rows].map(row => row.innerText.replace(/\s*\n\s*/g, ' — ')).join('\n');
+      copyText(text, `已复制 ${rows.length} 条异常信息`);
     }
 
     function showRootSettings() {
@@ -2465,7 +3358,7 @@
           <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid #2563a8;">
             <strong style="color:#2563a8;">统计概览</strong><br>
             <span style="color:var(--ink-muted);">
-              只读扫描当前管理目录；正常、备份、撤回分为三个独立视图，点击标签查看对应模块的文件、剧集和音频统计。<br>
+              只读扫描当前管理目录；顶部三张卡片同时对比正常、备份、撤回三个模块，点击卡片查看该模块的剧集记录和音频构成。<br>
               扫描过程中可以取消；无法读取的路径会单独提示，不会修改任何文件。
             </span>
           </div>
@@ -2473,7 +3366,7 @@
           <div style="margin-bottom:10px;padding:10px 12px;background:var(--surface-1);border-radius:4px;border-left:3px solid var(--ink-subtle);">
             <strong>📄 文件预览</strong><br>
             <span style="color:var(--ink-muted);">
-              支持 Word（.docx，原样+阅读双视图）、文本/日志和图片预览；Excel 文件请使用本地表格软件打开。<br>
+              支持 Word（.docx，原样+阅读双视图）、Excel（原样+阅读双视图，可筛选）、音频（可倍速）、文本/日志和图片预览；预览标题右侧可复制文件完整路径。<br>
               Word 预览支持目录导航和 <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Ctrl+F</kbd> 内容搜索定位。
             </span>
           </div>
@@ -2483,7 +3376,12 @@
             <span style="color:var(--ink-muted);">
               <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Esc</kbd> 关闭弹窗 / 取消确认 &nbsp;&nbsp;
               <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Ctrl+F</kbd> 聚焦 Word 搜索框 &nbsp;&nbsp;
-              <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Enter</kbd> 执行搜索
+              <kbd style="background:var(--surface-2);padding:1px 5px;border:1px solid var(--hairline);border-radius:2px;font-size:11px;">Enter</kbd> 执行搜索<br>
+              <kbd>Ctrl+K</kbd> / <kbd>/</kbd> 筛选左侧已加载的文件 &nbsp;&nbsp;
+              <kbd>↑</kbd> <kbd>↓</kbd> 在目录树中移动 &nbsp;&nbsp;
+              <kbd>←</kbd> <kbd>→</kbd> 折叠 / 展开文件夹 &nbsp;&nbsp;
+              <kbd>Enter</kbd> 打开所选项<br>
+              侧栏边缘可拖动调整宽度（自动记忆），双击恢复默认；卷目右上角按钮可折叠全部文件夹。
             </span>
           </div>
         </div>
@@ -2492,7 +3390,8 @@
     }
 
     // ===== Modal =====
-    function showModal(title, content) {
+    function showModal(title, content, { wide = false } = {}) {
+      document.getElementById('modal').classList.toggle('modal-wide', wide);
       document.getElementById('modalTitle').innerHTML = title;
       document.getElementById('modalContent').innerHTML = content;
       document.getElementById('modalOverlay').classList.add('show');
@@ -2510,12 +3409,23 @@
       }
     }
 
-    function showConfirm({ title, message, type, okText }) {
+    function renderConfirmExtra({ items, points, acknowledge, itemLabel, type }) {
+      const limit = 200;
+      let html = '';
+      if (points.length) html += `<ul class="confirm-points">${points.map(point => `<li>${escapeHtml(point)}</li>`).join('')}</ul>`;
+      if (items.length) {
+        html += `<div class="confirm-files"><div class="confirm-files-head"><span>将处理的${escapeHtml(itemLabel)}</span><span>${items.length} 个</span></div><ol>${items.slice(0, limit).map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ol>${items.length > limit ? `<div class="confirm-files-more">还有 ${items.length - limit} 个未列出</div>` : ''}</div>`;
+      }
+      if (acknowledge) html += `<label class="confirm-ack ${type === 'danger' ? '' : 'warning'}"><input type="checkbox" id="confirmAck"><span>${escapeHtml(acknowledge)}</span></label>`;
+      return html;
+    }
+
+    function showConfirm({ title, message, type, okText, items = [], points = [], acknowledge = '', itemLabel = '文件' }) {
       return new Promise(resolve => {
         const colors = {
-          danger:  { bg: '#fef2f2', icon: '⚠️', iconBg: '#fee2e2', btnBg: 'var(--danger, #dc2626)', btnColor: '#fff' },
-          warning: { bg: '#fffbeb', icon: '⚠️', iconBg: '#fef3c7', btnBg: '#d97706', btnColor: '#fff' },
-          info:    { bg: '#eff6ff', icon: 'ℹ️', iconBg: '#dbeafe', btnBg: 'var(--primary)', btnColor: 'var(--on-primary)' },
+          danger:  { icon: '慎', iconBg: 'var(--danger)', btnBg: 'var(--danger)', btnColor: '#fff' },
+          warning: { icon: '慎', iconBg: '#b8860b', btnBg: '#b8860b', btnColor: '#fff' },
+          info:    { icon: '询', iconBg: 'var(--primary)', btnBg: 'var(--primary)', btnColor: 'var(--on-primary)' },
         };
         const c = colors[type] || colors.info;
         const overlay = document.getElementById('confirmOverlay');
@@ -2533,11 +3443,22 @@
         okBtn.style.background = c.btnBg;
         okBtn.style.color = c.btnColor;
         okBtn.style.border = 'none';
+        const extraEl = document.getElementById('confirmExtra');
+        const hasExtra = items.length > 0 || points.length > 0 || Boolean(acknowledge);
+        overlay.querySelector('.modal').style.maxWidth = hasExtra ? '580px' : '440px';
+        extraEl.innerHTML = renderConfirmExtra({ items, points, acknowledge, itemLabel, type });
+        const ackInput = document.getElementById('confirmAck');
+        okBtn.disabled = Boolean(ackInput);
+        const onAck = () => { okBtn.disabled = !ackInput.checked; };
+        if (ackInput) ackInput.addEventListener('change', onAck);
 
         overlay.classList.add('show');
+        requestAnimationFrame(() => cancelBtn.focus());
 
         function cleanup() {
           overlay.classList.remove('show');
+          okBtn.disabled = false;
+          if (ackInput) ackInput.removeEventListener('change', onAck);
           okBtn.removeEventListener('click', onOk);
           cancelBtn.removeEventListener('click', onCancel);
           overlay.removeEventListener('click', onOverlay);
@@ -2603,6 +3524,10 @@
       const label = document.createElement('div');
       label.className = 'tree-label';
       label.style.paddingLeft = (12 + depth * 16) + 'px';
+      label.tabIndex = depth === 0 ? 0 : -1;
+      label.setAttribute('role', 'treeitem');
+      label.dataset.type = node.type;
+      label.title = node.name;
 
       if (node.type === 'directory') {
         const toggle = document.createElement('span');
@@ -2620,6 +3545,7 @@
         const name = document.createElement('span');
         name.className = 'tree-name';
         name.textContent = node.name;
+        name.dataset.name = node.name;
         if (special) name.style.color = special.color;
 
         label.appendChild(toggle);
@@ -2635,6 +3561,8 @@
 
         const children = document.createElement('div');
         children.className = 'tree-children';
+        children.setAttribute('role', 'group');
+        children.style.setProperty('--guide', `${26 + depth * 16}px`);
         node._loaded = Array.isArray(node.children);
         node._loading = false;
         node._pagination = node.pagination || null;
@@ -2651,6 +3579,7 @@
         function appendChildNodes(items) {
           removeStatusRows();
           items.forEach(child => children.appendChild(renderTree(child, depth + 1)));
+          if (treeFilterQuery) scheduleTreeFilter();
         }
 
         function renderPagination() {
@@ -2720,6 +3649,7 @@
           children.classList.toggle('open', isOpen);
           toggle.classList.toggle('expanded', isOpen);
           icon.innerHTML = isOpen ? fOpenIcon : fIcon;
+          label.setAttribute('aria-expanded', String(isOpen));
         }
 
         label.addEventListener('click', async () => {
@@ -2779,14 +3709,19 @@
         const name = document.createElement('span');
         name.className = 'tree-name';
         name.textContent = node.name;
+        name.dataset.name = node.name;
 
         label.appendChild(toggle);
         label.appendChild(icon);
         label.appendChild(name);
 
         label.addEventListener('click', () => {
-          if (activeLabel) activeLabel.classList.remove('active');
+          if (activeLabel) {
+            activeLabel.classList.remove('active');
+            activeLabel.removeAttribute('aria-selected');
+          }
           label.classList.add('active');
+          label.setAttribute('aria-selected', 'true');
           activeLabel = label;
           previewFile(node.fullPath, node.name);
         });
@@ -2830,6 +3765,7 @@
       container.innerHTML = '';
       container.appendChild(renderTree(data.data));
       updateLoadedFileCount();
+      if (treeFilterQuery) applyTreeFilter();
       if (Array.isArray(data.skipped) && data.skipped.length > 0) {
         showToast(`目录已加载，但有 ${data.skipped.length} 个项目无法读取`, 'info');
       }
@@ -2871,9 +3807,161 @@
 
     async function refreshCurrentView() {
       const dashboardWasVisible = currentContentView === 'dashboard';
-      const loaded = await loadTree();
-      if (loaded && dashboardWasVisible) showDashboard();
+      const button = document.getElementById('refreshButton');
+      button.classList.add('is-busy');
+      try {
+        const loaded = await loadTree();
+        if (loaded && dashboardWasVisible) showDashboard();
+      } finally {
+        button.classList.remove('is-busy');
+      }
     }
+
+    // ===== Tree filter & keyboard =====
+    let treeFilterQuery = '';
+    let treeFilterTimer = null;
+
+    function scheduleTreeFilter() {
+      clearTimeout(treeFilterTimer);
+      treeFilterTimer = setTimeout(applyTreeFilter, 120);
+    }
+
+    function renderTreeName(nameEl, query) {
+      const name = nameEl.dataset.name || '';
+      const index = query ? name.toLowerCase().indexOf(query) : -1;
+      if (index < 0) {
+        if (nameEl.firstElementChild) nameEl.textContent = name;
+        return false;
+      }
+      nameEl.innerHTML = `${escapeHtml(name.slice(0, index))}<mark>${escapeHtml(name.slice(index, index + query.length))}</mark>${escapeHtml(name.slice(index + query.length))}`;
+      return true;
+    }
+
+    function applyTreeFilter() {
+      clearTimeout(treeFilterTimer);
+      const container = document.getElementById('treeContainer');
+      const meta = document.getElementById('treeFilterMeta');
+      const query = treeFilterQuery;
+      const rootItem = container.querySelector(':scope > .tree-item');
+      container.querySelector(':scope > .tree-filter-empty')?.remove();
+      container.classList.toggle('is-filtering', Boolean(query));
+      let hits = 0;
+
+      const visit = (item, ancestorHit) => {
+        const nameEl = item.querySelector(':scope > .tree-label .tree-name');
+        const selfHit = nameEl ? renderTreeName(nameEl, query) : false;
+        if (selfHit) hits++;
+        let childHit = false;
+        const children = item.querySelector(':scope > .tree-children');
+        if (children) {
+          for (const child of children.querySelectorAll(':scope > .tree-item')) {
+            if (visit(child, ancestorHit || selfHit)) childHit = true;
+          }
+          children.classList.toggle('filter-open', Boolean(query) && childHit);
+        }
+        item.classList.toggle('filter-miss', Boolean(query) && !(selfHit || childHit || ancestorHit));
+        return selfHit || childHit;
+      };
+
+      if (rootItem) {
+        const rootChildren = rootItem.querySelector(':scope > .tree-children');
+        rootChildren?.querySelectorAll(':scope > .tree-item').forEach(child => visit(child, false));
+        rootChildren?.classList.toggle('filter-open', Boolean(query));
+      }
+
+      meta.textContent = query ? (hits ? `${hits} 项` : '无匹配') : 'Ctrl K';
+      meta.classList.toggle('has-result', Boolean(query && hits));
+      if (query && hits === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'tree-filter-empty';
+        empty.textContent = `已加载的目录中没有“${query}”。展开更多文件夹后会继续匹配。`;
+        container.appendChild(empty);
+      }
+    }
+
+    function visibleTreeLabels() {
+      return [...document.querySelectorAll('#treeContainer .tree-label')].filter(label => label.offsetParent !== null);
+    }
+
+    function focusTreeLabel(label) {
+      if (!label) return;
+      document.querySelectorAll('#treeContainer .tree-label[tabindex="0"]').forEach(el => { el.tabIndex = -1; });
+      label.tabIndex = 0;
+      label.focus();
+      label.scrollIntoView({ block: 'nearest' });
+    }
+
+    function collapseTree() {
+      const rootLabel = document.querySelector('#treeContainer .tree-label');
+      [...document.querySelectorAll('#treeContainer .tree-children.open')].reverse().forEach(children => {
+        const label = children.previousElementSibling;
+        if (label && label !== rootLabel) label.click();
+      });
+      if (rootLabel) focusTreeLabel(rootLabel);
+    }
+
+    (function() {
+      const input = document.getElementById('treeFilterInput');
+      const container = document.getElementById('treeContainer');
+
+      input.addEventListener('input', () => {
+        treeFilterQuery = input.value.trim().toLowerCase();
+        scheduleTreeFilter();
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          if (input.value) {
+            input.value = '';
+            treeFilterQuery = '';
+            applyTreeFilter();
+          } else {
+            input.blur();
+          }
+        } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+          e.preventDefault();
+          const labels = visibleTreeLabels();
+          focusTreeLabel(labels.find(label => label.querySelector('mark')) || labels[1] || labels[0]);
+        }
+      });
+
+      container.addEventListener('click', (e) => {
+        const label = e.target.closest && e.target.closest('.tree-label');
+        if (label) focusTreeLabel(label);
+      });
+
+      container.addEventListener('keydown', (e) => {
+        const label = e.target.closest && e.target.closest('.tree-label');
+        if (!label) return;
+        const labels = visibleTreeLabels();
+        const index = labels.indexOf(label);
+        const isDirectory = label.dataset.type === 'directory';
+        const isOpen = isDirectory && label.nextElementSibling && label.nextElementSibling.offsetParent !== null;
+        const userOpen = isDirectory && label.nextElementSibling && label.nextElementSibling.classList.contains('open');
+        let handled = true;
+        switch (e.key) {
+          case 'ArrowDown': focusTreeLabel(labels[index + 1]); break;
+          case 'ArrowUp': focusTreeLabel(labels[index - 1]); break;
+          case 'Home': focusTreeLabel(labels[0]); break;
+          case 'End': focusTreeLabel(labels[labels.length - 1]); break;
+          case 'ArrowRight':
+            if (isDirectory && !isOpen) label.click();
+            else if (isOpen) focusTreeLabel(labels[index + 1]);
+            break;
+          case 'ArrowLeft':
+            if (userOpen) label.click();
+            else focusTreeLabel(label.parentElement.parentElement.closest('.tree-item')?.querySelector(':scope > .tree-label'));
+            break;
+          case 'Enter':
+          case ' ':
+            label.click();
+            break;
+          default: handled = false;
+        }
+        if (handled) e.preventDefault();
+      });
+    })();
 
     // ===== Preview =====
     async function previewFile(fullPath, fileName) {
@@ -2882,6 +3970,7 @@
       const requestRoot = currentRoot;
       stopDashboardRequest();
       currentContentView = 'preview';
+      currentPreviewPath = fullPath;
       setDashboardButtonActive(false);
       if (activePreviewController) activePreviewController.abort();
       clearWordPreviewListeners();
@@ -3787,9 +4876,9 @@
 
     function dashboardModuleDefinitions() {
       return [
-        { key: 'normal', label: '正常记录', series: 'normal' },
-        { key: 'backup', label: '备份文件夹', series: 'backup' },
-        { key: 'revoked', label: '撤回文件夹', series: 'revoked' }
+        { key: 'normal', label: '正常记录', series: 'normal', empty: '当前目录中没有正常记录文件。' },
+        { key: 'backup', label: '备份文件夹', series: 'backup', empty: '目录中没有“备份文件夹”，或其中暂无文件。' },
+        { key: 'revoked', label: '撤回文件夹', series: 'revoked', empty: '目录中没有“撤回文件夹”，或其中暂无文件。' }
       ];
     }
 
@@ -3811,11 +4900,11 @@
       dashboardRequestId++;
     }
 
-    function renderDashboardHeader(subtitle, actions = '') {
+    function renderDashboardHeader(root, actions = '', meta = '') {
       return `<div class="dashboard-header">
         <div>
           <h2 class="dashboard-title">统计概览</h2>
-          <div class="dashboard-subtitle">${escapeHtml(subtitle)}</div>
+          <div class="dashboard-subtitle"><span class="dashboard-root" title="${escapeHtml(root).replace(/"/g, '&quot;')}">${escapeHtml(root)}</span>${meta ? `<span>${escapeHtml(meta)}</span>` : ''}</div>
         </div>
         ${actions ? `<div class="dashboard-actions">${actions}</div>` : ''}
       </div>`;
@@ -3825,19 +4914,20 @@
       const area = document.getElementById('previewArea');
       area.innerHTML = `<div class="dashboard">
         ${renderDashboardHeader(root, '<button class="btn btn-danger" type="button" onclick="cancelDashboardScan()">取消统计</button>')}
-        <div class="dashboard-loading-state">
-          <div class="dashboard-loading-line"><div class="loading"></div><span id="dashboardProgressText">正在扫描文件和文件夹...</span></div>
-          <div class="task-progress-bar indeterminate" id="dashboardProgressTrack"><span id="dashboardProgressBar"></span></div>
-          <div class="dashboard-current-file" id="dashboardCurrentFile"></div>
+        <div class="dashboard-loading-card" role="status">
+          <span class="dashboard-loading-count" id="dashboardProgressCount">0</span>
+          <span class="dashboard-loading-label">个文件已扫描 · 只读统计，不会修改文件</span>
+          <div class="task-progress-bar indeterminate"><span></span></div>
+          <div class="dashboard-current-file" id="dashboardCurrentFile">正在读取目录...</div>
         </div>
       </div>`;
       area.scrollTop = 0;
     }
 
     function updateDashboardProgress(message) {
-      const text = document.getElementById('dashboardProgressText');
+      const count = document.getElementById('dashboardProgressCount');
       const file = document.getElementById('dashboardCurrentFile');
-      if (text) text.textContent = `已扫描 ${dashboardCount(message.current)} 个文件`;
+      if (count) count.textContent = dashboardCount(message.current);
       if (file) file.textContent = message.file || '';
     }
 
@@ -3858,23 +4948,69 @@
       }
     }
 
-    function renderDashboardViewTabs(activeModule) {
-      return `<div class="dashboard-view-tabs" role="tablist" aria-label="统计模块">
-        ${dashboardModuleDefinitions().map(module => `<button class="dashboard-view-tab ${module.key === activeModule ? 'active' : ''}" id="dashboardTab-${module.key}" type="button" role="tab" aria-selected="${module.key === activeModule ? 'true' : 'false'}" aria-controls="dashboardViewPanel" onclick="switchDashboardModule('${module.key}')">${module.label}</button>`).join('')}
-      </div>`;
+    function renderDashboardModuleCards(activeModule, data) {
+      const modules = data.modules || {};
+      const audioModules = (data.audio && data.audio.modules) || {};
+      const definitions = dashboardModuleDefinitions();
+      const totalFiles = definitions.reduce((sum, module) => sum + dashboardCount((modules[module.key] || {}).files), 0);
+      const share = key => totalFiles > 0 ? dashboardCount((modules[key] || {}).files) / totalFiles * 100 : 0;
+      const distribution = definitions.map(module => `<span class="dashboard-series-${module.series}" style="width:${share(module.key).toFixed(2)}%" title="${module.label} ${share(module.key).toFixed(1)}%"></span>`).join('');
+      const cards = definitions.map(module => {
+        const summary = modules[module.key] || {};
+        const active = module.key === activeModule;
+        return `<button class="dashboard-module module-${module.key}${active ? ' active' : ''}" id="dashboardTab-${module.key}" type="button" role="tab" tabindex="${active ? 0 : -1}" aria-selected="${active}" aria-controls="dashboardViewPanel" onclick="switchDashboardModule('${module.key}')">
+          <span class="dashboard-module-head"><span>${module.label}</span><span class="dashboard-module-share">${share(module.key).toFixed(1)}%</span></span>
+          <span class="dashboard-module-value"><strong>${dashboardCount(summary.files)}</strong><span>个文件</span></span>
+          <span class="dashboard-module-meta">
+            <span><b>${dashboardCount(summary.directories)}</b><small>文件夹</small></span>
+            <span><b>${formatFileSize(Number(summary.bytes) || 0) || '0 B'}</b><small>占用空间</small></span>
+            <span><b>${dashboardCount((audioModules[module.key] || {}).total)}</b><small>音频</small></span>
+          </span>
+        </button>`;
+      }).join('');
+      return `<div class="dashboard-caption"><h3>模块分布</h3><span>共 ${totalFiles} 个文件 · 点击模块查看明细</span></div>
+        <div class="dashboard-distribution" role="img" aria-label="${escapeHtml(definitions.map(module => `${module.label} ${share(module.key).toFixed(1)}%`).join('，'))}">${distribution}</div>
+        <div class="dashboard-modules" role="tablist" aria-label="统计模块" onkeydown="dashboardTabKey(event)">${cards}</div>`;
+    }
+
+    function dashboardTabKey(event) {
+      const keys = dashboardModuleDefinitions().map(module => module.key);
+      const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+      if (!step) return;
+      event.preventDefault();
+      const next = keys[(keys.indexOf(dashboardActiveModule) + step + keys.length) % keys.length];
+      switchDashboardModule(next);
+      document.getElementById(`dashboardTab-${next}`)?.focus();
     }
 
     function switchDashboardModule(moduleKey) {
       if (!dashboardData || !dashboardModuleDefinitions().some(module => module.key === moduleKey)) return;
+      const area = document.getElementById('previewArea');
+      const scrollTop = area.scrollTop;
       dashboardActiveModule = moduleKey;
       renderDashboard(dashboardData);
+      area.scrollTop = scrollTop;
     }
 
-    function renderDashboardEpisodeItem(label, totalValue, maximum) {
-      const total = dashboardCount(totalValue);
-      return `<div class="dashboard-episode-item">
-        <div class="dashboard-episode-total"><span>${escapeHtml(label)}</span><strong>${total}</strong></div>
-        <div class="dashboard-bar-track" role="img" aria-label="${escapeHtml(`${label} ${total} 个`)}"><span class="dashboard-bar-fill dashboard-series-body" style="width:${dashboardBarWidth(total, maximum)}%"></span></div>
+    function renderDashboardEpisodes(folders, documents) {
+      const maximum = Math.max(1, folders, documents);
+      const row = (label, value) => `<div class="dashboard-episode-row">
+        <span class="dashboard-episode-label">${label}</span>
+        <div class="dashboard-bar-track" role="img" aria-label="${escapeHtml(`${label} ${value} 个`)}"><span class="dashboard-bar-fill" style="width:${dashboardBarWidth(value, maximum)}%;background:var(--module-color)"></span></div>
+        <span class="dashboard-episode-value">${value}</span>
+      </div>`;
+      let note = { cls: '', text: '没有名称含“第N集”的文件夹或 Word 文档。' };
+      if (folders > 0 || documents > 0) {
+        const diff = Math.abs(folders - documents);
+        note = diff === 0
+          ? { cls: 'is-balanced', text: `文件夹与 Word 文档数量一致，均为 ${folders} 个。` }
+          : { cls: 'is-diff', text: `Word 文档比剧集文件夹${documents < folders ? '少' : '多'} ${diff} 个。` };
+      }
+      return `<div class="dashboard-block">
+        <div class="dashboard-caption"><h3>剧集记录</h3><span>名称含“第N集”</span></div>
+        ${row('剧集文件夹', folders)}
+        ${row('Word 文档', documents)}
+        <div class="dashboard-episode-note ${note.cls}">${escapeHtml(note.text)}</div>
       </div>`;
     }
 
@@ -3901,35 +5037,26 @@
         ? `background:conic-gradient(${segments.join(',')})`
         : 'background:var(--surface-2)';
       const accessibleLabel = definitions.map(item => `${item.label} ${dashboardCount(audio[item.key])} 个`).join('，');
-      const legend = definitions.map(item => {
+      const list = definitions.map(item => {
         const count = dashboardCount(audio[item.key]);
-        const percent = total > 0 ? (count / total * 100).toFixed(1) : '0.0';
-        return `<div class="dashboard-pie-legend-row">
-          <span class="dashboard-pie-legend-label"><span class="dashboard-swatch dashboard-series-${item.series}"></span>${item.label}</span>
-          <span class="dashboard-pie-legend-count">${count} 个</span>
-          <span class="dashboard-pie-legend-percent">${percent}%</span>
+        const percent = total > 0 ? count / total * 100 : 0;
+        return `<div class="dashboard-audio-item">
+          <span class="dashboard-audio-name"><span class="dashboard-swatch dashboard-series-${item.series}"></span>${item.label}</span>
+          <span class="dashboard-audio-count"><strong>${count}</strong> 个 · ${percent.toFixed(1)}%</span>
+          <div class="dashboard-bar-track" role="img" aria-label="${escapeHtml(`${item.label}：${count} 个，占全部音频 ${percent.toFixed(1)}%`)}"><span class="dashboard-bar-fill dashboard-series-${item.series}" style="width:${count > 0 ? Math.max(2, percent).toFixed(2) : 0}%"></span></div>
+          <span class="dashboard-audio-desc">${item.description}</span>
         </div>`;
       }).join('');
-      return `<div class="dashboard-audio-overview">
-        <div class="dashboard-pie-wrap"><div class="dashboard-pie" role="img" aria-label="${escapeHtml(accessibleLabel)}" style="${style}"><div class="dashboard-pie-center"><strong>${total}</strong><span>音频</span></div></div></div>
-        <div class="dashboard-pie-legend">${legend}</div>
+      const body = total > 0
+        ? `<div class="dashboard-audio">
+            <div class="dashboard-pie" role="img" aria-label="${escapeHtml(accessibleLabel)}" style="${style}"><div class="dashboard-pie-center"><strong>${total}</strong><span>个音频</span></div></div>
+            <div class="dashboard-audio-list">${list}</div>
+          </div>`
+        : '<div class="dashboard-empty-module"><strong>暂无音频</strong>没有 mp3、wav、m4a 等音频文件。</div>';
+      return `<div class="dashboard-block">
+        <div class="dashboard-caption"><h3>音频构成</h3><span>${total > 0 ? `共 ${formatFileSize(Number(audio.bytes) || 0)}` : ''}</span></div>
+        ${body}
       </div>`;
-    }
-
-    function renderDashboardAudioRows(audio = {}) {
-      const definitions = dashboardAudioDefinitions();
-      const total = dashboardCount(audio.total);
-      const maximum = Math.max(1, ...definitions.map(item => dashboardCount(audio[item.key])));
-      return definitions.map(item => {
-        const count = dashboardCount(audio[item.key]);
-        const percent = total > 0 ? Math.round(count / total * 100) : 0;
-        const label = `${item.label}：${count} 个，占全部音频 ${percent}%`;
-        return `<div class="dashboard-bar-row">
-          <div class="dashboard-bar-label">${item.label}<span class="dashboard-bar-description">${item.description}</span></div>
-          <div class="dashboard-bar-track" role="img" aria-label="${escapeHtml(label)}"><span class="dashboard-bar-fill dashboard-series-${item.series}" style="width:${dashboardBarWidth(count, maximum)}%"></span></div>
-          <div class="dashboard-bar-value"><strong>${count}</strong> 个 · ${percent}%</div>
-        </div>`;
-      }).join('');
     }
 
     function renderDashboard(data) {
@@ -3943,44 +5070,30 @@
       const moduleSummary = modules[activeDefinition.key] || {};
       const moduleAudio = audio.modules && audio.modules[activeDefinition.key] ? audio.modules[activeDefinition.key] : {};
       const moduleFiles = dashboardCount(moduleSummary.files);
-      const moduleDirectories = dashboardCount(moduleSummary.directories);
-      const moduleBytes = Number(moduleSummary.bytes) || 0;
       const episodeFolders = episodes.folders || {};
       const episodeWordDocuments = episodes.wordDocuments || {};
       const moduleEpisodeFolders = dashboardCount(episodeFolders[activeDefinition.key]);
       const moduleEpisodeWordDocuments = dashboardCount(episodeWordDocuments[activeDefinition.key]);
-      const episodeMaximum = Math.max(1, moduleEpisodeFolders, moduleEpisodeWordDocuments);
       const skipped = Array.isArray(data.skipped) ? data.skipped : [];
       const generatedAt = formatFileTime(data.generatedAt) || '刚刚';
       const excluded = dashboardCount(data.excludedDirectories);
-      const scanMeta = `读取 ${dashboardCount(data.scannedFiles)} 个文件、${dashboardCount(data.scannedDirectories)} 个目录${excluded > 0 ? `，忽略 ${excluded} 个程序、日志或目录联接` : ''} · 更新于 ${generatedAt}`;
+      const scanMeta = `共读取 ${dashboardCount(data.scannedFiles)} 个文件、${dashboardCount(data.scannedDirectories)} 个目录${excluded > 0 ? `，忽略 ${excluded} 个程序、日志或目录联接` : ''}`;
       const actions = '<button class="btn btn-outline" type="button" onclick="showDashboard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重新统计</button>';
+      const panelBody = moduleFiles === 0
+        ? `<div class="dashboard-empty-module"><strong>${activeDefinition.label}暂无文件</strong>${escapeHtml(activeDefinition.empty)}</div>`
+        : `<div class="dashboard-panel-grid">
+            ${renderDashboardEpisodes(moduleEpisodeFolders, moduleEpisodeWordDocuments)}
+            ${renderDashboardAudioPie(moduleAudio)}
+          </div>`;
 
       const area = document.getElementById('previewArea');
       area.innerHTML = `<div class="dashboard">
-        ${renderDashboardHeader(currentRoot, actions)}
-        ${renderDashboardViewTabs(activeDefinition.key)}
-        <div id="dashboardViewPanel" role="tabpanel" aria-labelledby="dashboardTab-${activeDefinition.key}">
-          <div class="dashboard-summary-grid">
-            <div class="dashboard-stat"><span class="dashboard-stat-label">${activeDefinition.label}</span><strong class="dashboard-stat-value">${moduleFiles}</strong><span class="dashboard-stat-detail">${moduleDirectories} 个文件夹 · ${formatFileSize(moduleBytes)}</span></div>
-            <div class="dashboard-stat"><span class="dashboard-stat-label">第N集文件夹</span><strong class="dashboard-stat-value">${moduleEpisodeFolders}</strong><span class="dashboard-stat-detail">${moduleEpisodeWordDocuments} 个文件名含“第N集”的 Word 文档</span></div>
-            <div class="dashboard-stat"><span class="dashboard-stat-label">音频文件</span><strong class="dashboard-stat-value">${dashboardCount(moduleAudio.total)}</strong><span class="dashboard-stat-detail">总大小 ${formatFileSize(Number(moduleAudio.bytes) || 0)}</span></div>
-          </div>
-
-          <section class="dashboard-section" aria-labelledby="dashboardEpisodeTitle">
-            <div class="dashboard-section-heading"><h3 class="dashboard-section-title" id="dashboardEpisodeTitle">剧集记录</h3><span class="dashboard-section-note">当前视图：${activeDefinition.label}</span></div>
-            <div class="dashboard-episode-grid">
-              ${renderDashboardEpisodeItem('剧集文件夹', moduleEpisodeFolders, episodeMaximum)}
-              ${renderDashboardEpisodeItem('剧集 Word 文档', moduleEpisodeWordDocuments, episodeMaximum)}
-            </div>
-          </section>
-
-          <section class="dashboard-section" aria-labelledby="dashboardAudioTitle">
-            <div class="dashboard-section-heading"><h3 class="dashboard-section-title" id="dashboardAudioTitle">音频构成</h3><span class="dashboard-section-note">${dashboardCount(moduleAudio.total)} 个音频 · ${formatFileSize(Number(moduleAudio.bytes) || 0)}</span></div>
-            ${renderDashboardAudioPie(moduleAudio)}
-            <div class="dashboard-chart">${renderDashboardAudioRows(moduleAudio)}</div>
-          </section>
-        </div>
+        ${renderDashboardHeader(currentRoot, actions, `更新于 ${generatedAt}`)}
+        ${renderDashboardModuleCards(activeDefinition.key, data)}
+        <section class="dashboard-panel module-${activeDefinition.key}" id="dashboardViewPanel" role="tabpanel" aria-labelledby="dashboardTab-${activeDefinition.key}">
+          <div class="dashboard-panel-title"><i aria-hidden="true"></i>${activeDefinition.label} · 明细</div>
+          ${panelBody}
+        </section>
 
         <div class="dashboard-scan-meta">${escapeHtml(scanMeta)}。统计仅按文件名和路径进行只读扫描，不会修改文件。</div>
         ${skipped.length > 0 ? `<div class="dashboard-warning">有 ${skipped.length} 个路径无法读取，以上结果不包含这些项目。</div>${renderIssueDetails([], skipped)}` : ''}
@@ -4043,7 +5156,8 @@
       if (Number.isFinite(data.size)) parts.push(formatFileSize(data.size));
       const time = formatFileTime(data.mtime);
       if (time) parts.push(`修改于 ${time}`);
-      return `<div class="preview-title"><span class="preview-title-name">${escapeHtml(data.fileName || fallbackName || '')}</span><span class="preview-title-meta">${escapeHtml(parts.join(' · '))}</span></div>`;
+      const copyButton = currentPreviewPath ? '<button type="button" class="btn btn-outline btn-xs" onclick="copyText(currentPreviewPath, \'文件路径已复制\')" title="复制完整路径">复制路径</button>' : '';
+      return `<div class="preview-title"><span class="preview-title-name">${escapeHtml(data.fileName || fallbackName || '')}</span><span class="preview-title-side"><span class="preview-title-meta">${escapeHtml(parts.join(' · '))}</span>${copyButton}</span></div>`;
     }
 
     function renderResultSummary(summary = {}) {
@@ -4063,7 +5177,7 @@
       errors.forEach(item => items.push({ kind: '失败', file: item.file || item.path || '', detail: item.error || item.reason || '未知错误' }));
       if (items.length === 0) return '';
       const rows = items.map(item => `<div class="issue-row"><strong>${escapeHtml(item.kind)}</strong> · ${escapeHtml(item.file)}<br>${escapeHtml(item.detail)}</div>`).join('');
-      return `<details class="issue-details" ${errors.length > 0 ? 'open' : ''}><summary>查看异常详情（${items.length} 项）</summary><div class="issue-details-body">${rows}</div></details>`;
+      return `<details class="issue-details" ${errors.length > 0 ? 'open' : ''}><summary>查看异常详情（${items.length} 项）</summary><div class="issue-details-body"><div class="issue-details-tools"><button type="button" class="btn btn-outline btn-xs" onclick="copyIssueDetails(this)">复制异常信息</button></div>${rows}</div></details>`;
     }
 
     function renderScanSummary({ totalScanned = 0, found = 0, skipped = [], errors = [], unit = '个文件' }) {
@@ -4190,7 +5304,7 @@
       const btn = document.getElementById('btnMoveRevoked');
       const resetButton = () => {
         btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 删除需要撤回的返场故事录音';
       };
       btn.disabled = true;
       btn.innerHTML = '<div class="loading"></div> 扫描中...';
@@ -4228,10 +5342,23 @@
     }
 
     async function executeSelectedAudio() {
-      const items = selectedIndexes('.audio-select').map(index => audioCandidates[index]).filter(Boolean)
-        .map(item => ({ file: item.file, size: item.size, mtimeMs: item.mtimeMs, sha256: item.sha256 }));
+      const selected = selectedIndexes('.audio-select').map(index => audioCandidates[index]).filter(Boolean);
+      const items = selected.map(item => ({ file: item.file, size: item.size, mtimeMs: item.mtimeMs, sha256: item.sha256 }));
       if (items.length === 0) return showToast('请至少选择一个音频文件', 'info');
-      const ok = await showConfirm({ title: '确认整理撤回音频', message: `将移动 ${items.length} 个音频到“撤回文件夹”。\n\n文件位置会发生变化，但完成后可以一键撤回。`, type: 'warning', okText: '确认移动' });
+      const ok = await showConfirm({
+        title: '确认移动撤回音频',
+        message: `即将把 ${items.length} 个音频移动到“撤回文件夹”，请核对清单。`,
+        type: 'warning',
+        okText: `确认移动 ${items.length} 个音频`,
+        itemLabel: '音频',
+        items: selected.map(item => item.relativePath || item.file),
+        points: [
+          '音频会离开原位置，移动到当前目录下的“撤回文件夹”',
+          '目标位置有同名文件时自动编号，不会覆盖',
+          '完成后可在结果页或操作日志中一键撤回'
+        ],
+        acknowledge: '我已核对上面的音频清单，确认移动'
+      });
       if (!ok) return;
       closeModal();
       const btn = document.getElementById('btnMoveRevoked');
@@ -4242,7 +5369,7 @@
         onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, '移动中'); },
         onDone(data) {
           btn.disabled = false;
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 删除需要撤回的返场故事录音';
           if (!data.success) return showTaskError('整理撤回音频失败', data.error || '服务器未能完成操作');
           const skipped = Array.isArray(data.skipped) ? data.skipped : [];
           const errors = Array.isArray(data.errors) ? data.errors : [];
@@ -4259,7 +5386,7 @@
         },
         onError(e) {
           btn.disabled = false;
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 整理撤回音频';
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> 删除需要撤回的返场故事录音';
           showTaskError('整理撤回音频失败', e.message);
         }
       });
@@ -4270,7 +5397,7 @@
       const btn = document.getElementById('btnProcessDocuments');
       const resetButton = () => {
         btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 删除需要撤回的返场故事段落';
       };
       btn.disabled = true;
       btn.innerHTML = '<div class="loading"></div> 扫描中...';
@@ -4318,10 +5445,23 @@
     }
 
     async function executeSelectedDocuments() {
-      const items = selectedIndexes('.document-select').map(index => documentCandidates[index]).filter(Boolean)
-        .map(item => ({ file: item.file, size: item.size, mtimeMs: item.mtimeMs, sha256: item.sha256 }));
+      const selected = selectedIndexes('.document-select').map(index => documentCandidates[index]).filter(Boolean);
+      const items = selected.map(item => ({ file: item.file, size: item.size, mtimeMs: item.mtimeMs, sha256: item.sha256 }));
       if (items.length === 0) return showToast('请至少选择一个 Word 文档', 'info');
-      const ok = await showConfirm({ title: '确认处理撤回文档', message: `将处理 ${items.length} 个 Word 文档。\n\n每个文件都会从命中段落开始删除到文档结尾，原文件先备份。扫描后发生变化的文件会自动跳过。`, type: 'danger', okText: '确认处理' });
+      const ok = await showConfirm({
+        title: '确认删除撤回段落',
+        message: `即将修改 ${items.length} 个 Word 文档，删除后正文内容会减少，请核对清单。`,
+        type: 'danger',
+        okText: `确认删除 ${items.length} 个文档的段落`,
+        itemLabel: 'Word 文档',
+        items: selected.map(item => item.relativePath || item.file),
+        points: [
+          '从命中“返场故事 + 撤回”的段落开始，删除该段及其后的全部内容',
+          '修改前原文件会先备份到“备份文件夹”，可在结果页或操作日志中一键恢复',
+          '扫描后内容发生变化的文件会自动跳过'
+        ],
+        acknowledge: '我已了解删除范围，确认删除这些文档中的段落'
+      });
       if (!ok) return;
       closeModal();
       const btn = document.getElementById('btnProcessDocuments');
@@ -4332,7 +5472,7 @@
         onProgress(msg) { updateTaskProgress(msg.current, msg.total, msg.file, '处理第'); },
         onDone(data) {
           btn.disabled = false;
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 删除需要撤回的返场故事段落';
           if (!data.success) return showTaskError('处理撤回文档失败', data.error || '服务器未能完成操作');
           let content = renderResultSummary(data.summary);
           const warnings = Array.isArray(data.warnings) ? data.warnings : [];
@@ -4352,7 +5492,7 @@
         },
         onError(e) {
           btn.disabled = false;
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 处理撤回文档';
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 删除需要撤回的返场故事段落';
           showTaskError('处理撤回文档失败', e.message);
         }
       });
@@ -4401,53 +5541,111 @@
         const backupsData = await backupsResp.json();
         const backups = backupsData.success ? backupsData.data : [];
         if (!data.success) { showToast('获取日志列表失败: ' + data.error, 'error'); return; }
-        let backupContent = '';
+        let content = '<div class="log-shell">';
         if (backups.length > 0) {
-          backupContent = '<div style="margin-bottom:14px;"><div style="font-weight:600;margin-bottom:8px;color:var(--ink);">可恢复的历史任务</div><div style="display:flex;gap:6px;flex-wrap:wrap;">';
-          backups.forEach(task => {
-            const label = new Date(task.createdAt).toLocaleString('zh-CN');
-            const taskLabel = task.type === 'move-audio' ? '音频整理' : task.type === 'before-restore' ? '恢复前版本' : '文档修改';
-            backupContent += `<button class="btn btn-outline" onclick="restoreTask(${inlineJsString(task.taskId)}, ${inlineJsString(task.type)})">${escapeHtml(taskLabel)} · ${escapeHtml(label)} · ${task.count} 个</button>`;
+          const tasks = [...backups].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+          content += `<section><div class="log-section-head"><h4>可恢复的任务</h4><span>${tasks.length} 个任务 · 恢复前会再次确认</span></div><div class="log-tasks">`;
+          tasks.forEach(task => {
+            const meta = LOG_TASK_TYPES[task.type] || LOG_TASK_TYPES['remove-content'];
+            content += `<div class="log-task" style="--task-color:${meta.color}">
+              <span class="log-task-seal" aria-hidden="true">${meta.seal}</span>
+              <span class="log-task-info"><b>${meta.label} · ${task.count} 个文件</b><small>${escapeHtml(formatFileTime(task.createdAt))}</small></span>
+              <button class="btn btn-outline btn-xs" type="button" onclick="restoreTask(${inlineJsString(task.taskId)}, ${inlineJsString(task.type)})">${meta.action}</button>
+            </div>`;
           });
-          backupContent += '</div></div>';
+          content += '</div></section>';
         }
         if (data.files.length === 0) {
-          showModal('操作日志', backupContent + '<div class="result-item info"><div class="result-file">暂无操作日志</div></div>');
+          content += '<div class="log-empty"><strong>暂无操作日志</strong>执行“整理撤回音频”或“处理撤回文档”后，记录会按日期出现在这里。</div></div>';
+          showModal('操作日志', content, { wide: true });
           return;
         }
-        let content = backupContent + '<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
-        content += '<input type="text" id="operationLogSearchInput" placeholder="搜索日志内容..." oninput="searchLog(this.value, \'logContent\', \'operationLogSearchCount\')" style="flex:1;padding:6px 10px;border:1px solid var(--hairline-strong);border-radius:4px;font-size:12px;outline:none;font-family:\'Noto Sans SC\',sans-serif;">';
-        content += '<span id="operationLogSearchCount" style="font-size:11px;color:var(--ink-subtle);white-space:nowrap;"></span>';
-        content += '<button onclick="logSearchNav(-1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▲</button>';
-        content += '<button onclick="logSearchNav(1)" style="border:1px solid var(--hairline);background:var(--surface-2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">▼</button>';
-        content += '</div>';
-        content += '<div style="display:flex;gap:12px;max-height:55vh;">';
-        content += '<div style="min-width:140px;border-right:1px solid var(--hairline);padding-right:12px;overflow-y:auto;">';
-        data.files.forEach((f, i) => {
-          const label = f.replace('.log', '');
-          content += `<div class="log-date-item${i === 0 ? ' active' : ''}" onclick="viewLogFile(${inlineJsString(f)}, this)" style="padding:6px 10px;cursor:pointer;border-radius:4px;font-size:13px;margin-bottom:4px;${i === 0 ? 'background:var(--primary);color:var(--on-primary);' : 'color:var(--ink-muted);'}">${escapeHtml(label)}</div>`;
-        });
-        content += '</div>';
-        content += '<div id="logContent" style="flex:1;overflow:auto;font-size:12px;line-height:1.8;color:var(--ink);padding:4px 8px;background:var(--surface-1);border-radius:4px;">加载中...</div>';
-        content += '</div>';
-        showModal('操作日志', content);
+        const todayKey = new Date().toLocaleDateString('sv-SE');
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        content += `<section class="log-body">
+          <nav class="log-dates" aria-label="日志日期">
+            ${data.files.map((file, index) => {
+              const label = file.replace('.log', '');
+              const date = new Date(`${label}T00:00:00`);
+              const weekday = Number.isNaN(date.getTime()) ? '' : weekdays[date.getDay()];
+              return `<button type="button" class="log-date-item${index === 0 ? ' active' : ''}" onclick="viewLogFile(${inlineJsString(file)}, this)"><span>${escapeHtml(label)}<small> ${weekday}</small></span>${label === todayKey ? '<span class="log-today">今天</span>' : ''}</button>`;
+            }).join('')}
+          </nav>
+          <div class="log-main">
+            <div class="log-toolbar">
+              <div class="log-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="search" id="operationLogSearchInput" placeholder="搜索文件名或操作..." oninput="searchLog(this.value, 'logContent', 'operationLogSearchCount')" onkeydown="if(event.key==='Enter'){event.preventDefault();logSearchNav(event.shiftKey?-1:1)}">
+              </div>
+              <span class="log-search-count" id="operationLogSearchCount"></span>
+              <button class="icon-btn" type="button" onclick="logSearchNav(-1)" title="上一个" aria-label="上一个匹配"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg></button>
+              <button class="icon-btn" type="button" onclick="logSearchNav(1)" title="下一个" aria-label="下一个匹配"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+            </div>
+            <div class="log-filters" id="logFilters" role="group" aria-label="按操作类型筛选">
+              ${LOG_FILTERS.map(filter => `<button type="button" class="log-filter${filter.key === 'all' ? ' active' : ''}" data-filter="${filter.key}" onclick="setLogFilter('${filter.key}')">${filter.label}<em data-count="${filter.key}"></em></button>`).join('')}
+            </div>
+            <div class="log-content" id="logContent">加载中...</div>
+          </div>
+        </section></div>`;
+        logActiveFilter = 'all';
+        showModal('操作日志', content, { wide: true });
         viewLogFile(data.files[0]);
       } catch (e) {
         showToast('请求失败: ' + e.message, 'error');
       }
     }
 
-    const LOG_STYLES = {
-      '移动撤回音频':       { color: '#2563eb', bg: '#eff6ff', icon: '📁', label: '移动' },
-      '移动撤回音频-跳过':  { color: '#9a7209', bg: '#fffbeb', icon: '○', label: '移动跳过' },
-      '移动撤回音频-失败':  { color: '#c0392b', bg: '#fef2f2', icon: '×', label: '移动失败' },
-      '撤回音频整理':       { color: '#27713a', bg: '#f0fdf4', icon: '↩', label: '撤回移动' },
-      '删除返场故事内容':   { color: '#7c3aed', bg: '#f5f3ff', icon: '🗑️', label: '删除' },
-      '删除返场故事内容-跳过': { color: '#9a7209', bg: '#fffbeb', icon: '○', label: '处理跳过' },
-      '删除返场故事内容-失败': { color: '#7c3aed', bg: '#f5f3ff', icon: '❌', label: '删除失败' },
-      '恢复文档备份':       { color: '#27713a', bg: '#f0fdf4', icon: '↩', label: '恢复文档' },
+    const LOG_TASK_TYPES = {
+      'move-audio': { label: '音频整理', seal: '移', color: '#2563a8', action: '撤回整理' },
+      'remove-content': { label: '文档修改', seal: '删', color: '#6b4c8a', action: '恢复文档' },
+      'before-restore': { label: '恢复前版本', seal: '存', color: '#8b7355', action: '恢复此版本' }
     };
-    const LOG_DEFAULT_STYLE = { color: '#6b7280', bg: '#f9fafb', icon: '📋', label: '操作' };
+
+    const LOG_FILTERS = [
+      { key: 'all', label: '全部' },
+      { key: 'move', label: '移动音频' },
+      { key: 'delete', label: '删除段落' },
+      { key: 'restore', label: '撤回/恢复' },
+      { key: 'issue', label: '跳过/失败' }
+    ];
+
+    const LOG_STYLES = {
+      '移动撤回音频':          { color: '#2563a8', soft: 'rgba(37,99,168,0.1)', seal: '移', kind: 'move' },
+      '移动撤回音频-跳过':     { color: '#9a7209', soft: 'rgba(154,114,9,0.12)', seal: '跳', kind: 'move', issue: true },
+      '移动撤回音频-失败':     { color: '#c0392b', soft: 'rgba(192,57,43,0.1)', seal: '败', kind: 'move', issue: true },
+      '撤回音频整理':          { color: '#27713a', soft: 'rgba(39,113,58,0.1)', seal: '撤', kind: 'restore' },
+      '删除返场故事内容':      { color: '#6b4c8a', soft: 'rgba(107,76,138,0.1)', seal: '删', kind: 'delete' },
+      '删除返场故事内容-跳过': { color: '#9a7209', soft: 'rgba(154,114,9,0.12)', seal: '跳', kind: 'delete', issue: true },
+      '删除返场故事内容-失败': { color: '#c0392b', soft: 'rgba(192,57,43,0.1)', seal: '败', kind: 'delete', issue: true },
+      '恢复文档备份':          { color: '#27713a', soft: 'rgba(39,113,58,0.1)', seal: '恢', kind: 'restore' },
+    };
+    const LOG_DEFAULT_STYLE = { color: '#8b7355', soft: 'rgba(139,115,85,0.12)', seal: '记', kind: 'other' };
+    let logActiveFilter = 'all';
+
+    function setLogFilter(filter) {
+      logActiveFilter = filter;
+      document.querySelectorAll('#logFilters .log-filter').forEach(button => button.classList.toggle('active', button.dataset.filter === filter));
+      const timeline = document.querySelector('#logContent .log-timeline');
+      if (!timeline) return;
+      timeline.dataset.filter = filter;
+      const visible = [...timeline.querySelectorAll('.log-entry')].some(entry => entry.offsetParent !== null);
+      timeline.querySelector('.log-filter-empty').hidden = visible;
+      const keyword = document.getElementById('operationLogSearchInput')?.value || '';
+      if (keyword.trim()) searchLog(keyword, 'logContent', 'operationLogSearchCount');
+    }
+
+    function updateLogFilterCounts() {
+      const timeline = document.querySelector('#logContent .log-timeline');
+      const entries = timeline ? [...timeline.querySelectorAll('.log-entry')] : [];
+      const counts = {
+        all: entries.length,
+        move: entries.filter(entry => entry.dataset.kind === 'move').length,
+        delete: entries.filter(entry => entry.dataset.kind === 'delete').length,
+        restore: entries.filter(entry => entry.dataset.kind === 'restore').length,
+        issue: entries.filter(entry => entry.hasAttribute('data-issue')).length
+      };
+      document.querySelectorAll('#logFilters [data-count]').forEach(el => { el.textContent = counts[el.dataset.count] ?? 0; });
+    }
 
     function formatLogContent(raw) {
       const lines = raw.split('\n');
@@ -4463,29 +5661,30 @@
           entries.push({ time: '', action: '', details: [line] });
         }
       }
-      return entries.map(e => {
-        if (!e.time) return `<div class="log-line" style="padding:4px 8px;font-size:12px;color:var(--ink-muted);">${escapeHtml(e.details.join('\n'))}</div>`;
+      const renderFile = (line, color) => {
+        const trimmed = line.replace(/^\s+/, '');
+        if (!trimmed.includes('→')) return `<div class="log-file">${escapeHtml(trimmed)}</div>`;
+        const parts = trimmed.split('→');
+        return `<div class="log-file"><span>${escapeHtml(parts[0].trim())} <span class="log-file-arrow" style="color:${color}">→</span> ${escapeHtml(parts.slice(1).join('→').trim())}</span></div>`;
+      };
+      const html = entries.slice().reverse().map(e => {
+        if (!e.time) return `<div class="log-plain">${escapeHtml(e.details.join('\n'))}</div>`;
         const s = LOG_STYLES[e.action] || LOG_DEFAULT_STYLE;
-        const detailHtml = e.details.filter(d => d.trim()).map(d => {
-          const trimmed = d.replace(/^\s+/, '');
-          const arrow = trimmed.includes('→');
-          if (arrow) {
-            const parts = trimmed.split('→');
-            return `<div style="display:flex;align-items:flex-start;gap:4px;padding:3px 0;"><span style="color:#9ca3af;">•</span><span style="word-break:break-all;">${escapeHtml(parts[0].trim())} <span style="color:${s.color};font-weight:600;">→</span> ${escapeHtml(parts.slice(1).join('→').trim())}</span></div>`;
-          }
-          return `<div style="padding:2px 0;"><span style="color:#9ca3af;">•</span> ${escapeHtml(trimmed)}</div>`;
-        }).join('');
-        const summaryLine = e.details[0] ? escapeHtml(e.details[0]) : '';
-        const fileList = e.details.length > 1 ? `<div style="margin-top:4px;padding:6px 8px;background:rgba(0,0,0,0.03);border-radius:4px;font-size:11px;line-height:1.6;">${detailHtml}</div>` : (summaryLine ? `<div style="margin-top:2px;font-size:12px;color:#374151;">${summaryLine}</div>` : '');
-        return `<div class="log-line" style="margin-bottom:8px;border-left:3px solid ${s.color};background:${s.bg};border-radius:0 4px 4px 0;padding:8px 12px;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-            <span style="font-weight:700;color:#111;font-size:12px;font-family:monospace;">${e.time}</span>
-            <span>${s.icon}</span>
-            <span style="font-weight:600;color:${s.color};font-size:12px;">${escapeHtml(e.action)}</span>
+        const files = e.details.slice(1).filter(d => d.trim());
+        const fileHtml = files.map(line => renderFile(line, s.color)).join('');
+        const fileBlock = files.length === 0 ? ''
+          : files.length <= 4 ? `<div class="log-file-list">${fileHtml}</div>`
+          : `<details class="log-files"><summary>查看 ${files.length} 条明细</summary><div class="log-file-list">${fileHtml}</div></details>`;
+        return `<div class="log-entry" data-kind="${s.kind}"${s.issue ? ' data-issue' : ''} style="--log-color:${s.color};--log-soft:${s.soft}">
+          <span class="log-entry-time">${escapeHtml(e.time)}</span>
+          <div class="log-entry-card">
+            <div class="log-entry-head"><span class="log-entry-tag"><i aria-hidden="true">${s.seal}</i>${escapeHtml(e.action)}</span></div>
+            ${e.details[0] && e.details[0].trim() ? `<div class="log-entry-summary">${escapeHtml(e.details[0])}</div>` : ''}
+            ${fileBlock}
           </div>
-          ${fileList}
         </div>`;
       }).join('');
+      return `<div class="log-timeline" data-filter="all">${html}<p class="log-filter-empty log-empty" hidden><strong>没有符合条件的记录</strong>换一个类型或日期试试。</p></div>`;
     }
 
     let logLoadId = 0;
@@ -4493,14 +5692,8 @@
     async function viewLogFile(filename, el) {
       const loadId = ++logLoadId;
       if (el) {
-        el.parentElement.querySelectorAll('.log-date-item').forEach(d => {
-          d.classList.remove('active');
-          d.style.background = '';
-          d.style.color = 'var(--ink-muted)';
-        });
+        el.parentElement.querySelectorAll('.log-date-item').forEach(d => d.classList.remove('active'));
         el.classList.add('active');
-        el.style.background = 'var(--primary)';
-        el.style.color = 'var(--on-primary)';
       }
       const logDiv = document.getElementById('logContent');
       if (!logDiv) return;
@@ -4508,20 +5701,21 @@
       _logSearchIdx = -1;
       _logSearchCountEl = document.getElementById('operationLogSearchCount');
       if (_logSearchCountEl) _logSearchCountEl.textContent = '';
-      logDiv.innerHTML = '<span style="color:var(--ink-subtle);">加载中...</span>';
+      logDiv.innerHTML = '<div class="log-empty"><div class="loading"></div></div>';
       try {
         const root = currentRoot || document.getElementById('rootPath').value.trim();
         const resp = await fetch(`/api/logs/${encodeURIComponent(filename)}?root=${encodeURIComponent(root)}`);
         const data = await resp.json();
         if (loadId !== logLoadId) return;
         if (data.success) {
-          if (!data.content) { logDiv.innerHTML = '<span style="color:var(--ink-subtle);">（空日志）</span>'; return; }
+          if (!data.content) { logDiv.innerHTML = '<div class="log-empty"><strong>当天没有记录</strong>这份日志文件是空的。</div>'; updateLogFilterCounts(); return; }
           const truncatedNotice = data.truncated
             ? `<div class="result-item info" style="margin-bottom:10px;"><div class="result-file">日志较大，仅显示最近 ${formatFileSize(data.loadedSize || data.limit)}</div><div class="result-detail">最多显示最近 ${data.lineLimit || 10000} 行；日志总大小 ${formatFileSize(data.totalSize)}，较早内容仍保留在原日志文件中。</div></div>`
             : '';
           logDiv.innerHTML = truncatedNotice + formatLogContent(data.content);
-          const keyword = document.getElementById('operationLogSearchInput')?.value || '';
-          if (keyword.trim()) searchLog(keyword, 'logContent', 'operationLogSearchCount');
+          logDiv.scrollTop = 0;
+          updateLogFilterCounts();
+          setLogFilter(logActiveFilter);
         } else {
           logDiv.innerHTML = '<span style="color:var(--danger);">读取失败: ' + escapeHtml(data.error) + '</span>';
         }
@@ -4575,7 +5769,8 @@
         if (lastIdx < text.length) frag.appendChild(document.createTextNode(text.substring(lastIdx)));
         node.parentNode.replaceChild(frag, node);
       });
-      _logSearchMatches = Array.from(container.querySelectorAll('.log-highlight'));
+      container.querySelectorAll('.log-highlight').forEach(mark => mark.closest('details')?.setAttribute('open', ''));
+      _logSearchMatches = Array.from(container.querySelectorAll('.log-highlight')).filter(mark => mark.offsetParent !== null);
       if (countEl) countEl.textContent = _logSearchMatches.length > 0 ? `共 ${_logSearchMatches.length} 次出现 | 1 / ${_logSearchMatches.length}` : '无匹配';
       if (_logSearchMatches.length > 0) { _logSearchIdx = 0; scrollToLogMatch(0); }
     }
@@ -4602,12 +5797,22 @@
     (function() {
       const handle = document.getElementById('resizeHandle');
       const sidebar = document.querySelector('.sidebar');
+      const widthKey = 'fileManager_sidebarWidth';
       let isResizing = false;
+      const savedWidth = Number(localStorage.getItem(widthKey));
+      if (savedWidth >= 200 && savedWidth <= 600) sidebar.style.width = savedWidth + 'px';
+      handle.title = '拖动调整宽度，双击恢复默认';
 
       handle.addEventListener('mousedown', (e) => {
         isResizing = true;
+        handle.classList.add('dragging');
         document.body.style.cursor = 'col-resize';
         document.body.style.userSelect = 'none';
+      });
+
+      handle.addEventListener('dblclick', () => {
+        sidebar.style.width = '';
+        localStorage.removeItem(widthKey);
       });
 
       document.addEventListener('mousemove', (e) => {
@@ -4617,9 +5822,12 @@
       });
 
       document.addEventListener('mouseup', () => {
+        if (!isResizing) return;
         isResizing = false;
+        handle.classList.remove('dragging');
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+        localStorage.setItem(widthKey, String(parseInt(sidebar.style.width, 10) || ''));
       });
     })();
 
@@ -4659,6 +5867,16 @@
           closeModal();
           return;
         }
+      }
+      // Ctrl+K or /: focus tree filter
+      const typing = e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]');
+      const overlayOpen = document.querySelector('.modal-overlay.show, .motto-overlay.show');
+      if (!overlayOpen && (((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k') || (e.key === '/' && !typing))) {
+        e.preventDefault();
+        const filterInput = document.getElementById('treeFilterInput');
+        filterInput.focus();
+        filterInput.select();
+        return;
       }
       // Ctrl+F: focus Word search input if Word preview is visible
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
